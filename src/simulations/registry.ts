@@ -2682,6 +2682,211 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#0369a1",
   },
+  {
+    slug: "gravity-difference-on-several-planet",
+    title: "Gravity Difference On Several Planet",
+    category: "physics",
+    description: "Compare gravitational acceleration and weight across all 8 planets of our solar system.",
+    longDescription:
+      "Surface gravity varies dramatically across the planets due to differences in mass and radius. An object's weight W = mg changes on each planet while its mass stays constant. This simulation drops a ball simultaneously on all 8 planets, showing how Mercury (3.7 m/s²) and Mars (3.71 m/s²) have weak gravity while Jupiter (24.79 m/s²) has the strongest.",
+    parameters: [
+      { key: "mass", label: "Object Mass", min: 1, max: 100, step: 1, defaultValue: 10, unit: "kg" },
+      { key: "dropHeight", label: "Drop Height", min: 10, max: 200, step: 10, defaultValue: 100, unit: "m" },
+    ],
+    thumbnailColor: "#6366f1",
+  },
+  {
+    slug: "gravity-train",
+    title: "Gravity Train",
+    category: "physics",
+    description: "A ball falling through a frictionless tunnel drilled through Earth oscillates in simple harmonic motion.",
+    longDescription:
+      "The gravity train is a thought experiment: drill a frictionless tunnel through Earth and drop an object in. By Newton's shell theorem, only the mass interior to the object's position exerts net gravity, producing a restoring force proportional to displacement — simple harmonic motion with period T ≈ 84.3 minutes regardless of tunnel angle.",
+    parameters: [
+      { key: "tunnelAngle", label: "Tunnel Angle", min: 0, max: 80, step: 5, defaultValue: 0, unit: "°" },
+      { key: "chordFraction", label: "Chord Fraction", min: 0.3, max: 1, step: 0.05, defaultValue: 1 },
+    ],
+    thumbnailColor: "#2563eb",
+  },
+  {
+    slug: "half-life-period",
+    title: "Half Life Period",
+    category: "physics",
+    description: "Visualize radioactive decay with atoms that each have a 50% chance of decaying per half-life period.",
+    longDescription:
+      "Radioactive decay is a random process where unstable nuclei emit radiation. The half-life t½ is the time for half the atoms to decay. This simulation starts with 64 atoms; each period, every surviving atom has a 50% chance of decaying. The result follows the exponential decay law N(t) = N₀·(1/2)^(t/t½), with random fluctuations around the theoretical curve.",
+    parameters: [
+      { key: "halfLife", label: "Half-Life", min: 1, max: 15, step: 1, defaultValue: 5, unit: "s" },
+      { key: "totalAtoms", label: "Total Atoms", min: 16, max: 144, step: 16, defaultValue: 64 },
+    ],
+    thumbnailColor: "#16a34a",
+  },
+  {
+    slug: "heart-rate-counter",
+    title: "Heart Rate Counter",
+    category: "biology",
+    description: "Simulated photoplethysmography (PPG) waveform with peak detection for heart rate measurement.",
+    longDescription:
+      "Photoplethysmography detects blood volume changes using light absorption. During systole, blood fills capillaries and absorbs more light; during diastole, less blood means less absorption. This simulation generates a realistic PPG waveform with systolic peak, dicrotic notch, and diastolic decay, then uses peak detection to calculate heart rate in BPM.",
+    parameters: [
+      { key: "bpm", label: "Heart Rate", min: 40, max: 180, step: 1, defaultValue: 72, unit: "BPM" },
+      { key: "amplitude", label: "Signal Amplitude", min: 0.3, max: 2, step: 0.1, defaultValue: 1.0 },
+      { key: "noiseLevel", label: "Noise Level", min: 0, max: 0.5, step: 0.05, defaultValue: 0.1 },
+    ],
+    thumbnailColor: "#dc2626",
+  },
+  {
+    slug: "heat-capacity",
+    title: "Heat Capacity",
+    category: "physics",
+    description: "Compare how objects with different heat capacities respond to the same heat source.",
+    longDescription:
+      "Heat capacity C determines how much energy is needed to raise an object's temperature. When the same heat Q is applied, ΔT = Q/C — lower heat capacity means faster temperature rise. This simulation heats two containers side-by-side with different heat capacities, showing particle motion increasing with temperature.",
+    parameters: [
+      { key: "heatRate", label: "Heat Rate", min: 10, max: 200, step: 10, defaultValue: 50, unit: "W" },
+      { key: "smallCapacity", label: "Small Heat Capacity", min: 50, max: 300, step: 25, defaultValue: 100, unit: "J/K" },
+      { key: "largeCapacity", label: "Large Heat Capacity", min: 200, max: 1000, step: 50, defaultValue: 500, unit: "J/K" },
+    ],
+    thumbnailColor: "#ea580c",
+  },
+  {
+    slug: "hilbert-curve",
+    title: "Hilbert Curve",
+    category: "physics",
+    description: "Animated drawing of the Hilbert space-filling curve at adjustable fractal order.",
+    longDescription:
+      "The Hilbert curve, described by David Hilbert in 1891, is a continuous fractal space-filling curve. At each iteration order, it recursively subdivides a square into quadrants, connecting them with a path that visits every cell. As order increases, the curve fills more of the 2D plane. This demonstrates fractal geometry and self-similarity.",
+    parameters: [
+      { key: "order", label: "Curve Order", min: 1, max: 7, step: 1, defaultValue: 4 },
+      { key: "drawSpeed", label: "Draw Speed", min: 10, max: 500, step: 10, defaultValue: 50, unit: "pts/s" },
+      { key: "colorMode", label: "Color (0=Rainbow, 1=Blue)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#7c3aed",
+  },
+  {
+    slug: "homopolar-motor",
+    title: "Homopolar Motor",
+    category: "physics",
+    description: "The simplest electric motor — current in a magnetic field creates the Lorentz force causing rotation.",
+    longDescription:
+      "A homopolar motor uses a battery, a neodymium magnet, and a wire. Current flows through the wire in the magnetic field, and the Lorentz force F = I(L × B) creates a tangential force causing the wire to spin. This is the simplest form of electric motor, demonstrating the direct relationship between electricity and magnetism.",
+    parameters: [
+      { key: "voltage", label: "Battery Voltage", min: 1, max: 9, step: 0.5, defaultValue: 3, unit: "V" },
+      { key: "rpm", label: "Rotation Speed", min: 10, max: 300, step: 10, defaultValue: 100, unit: "RPM" },
+      { key: "showVectors", label: "Show Vectors (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#d97706",
+  },
+  {
+    slug: "horizontal-coordinate-system",
+    title: "Horizontal Coordinate System",
+    category: "physics",
+    description: "Visualize the alt-azimuth system used to locate objects in the sky from an observer's location.",
+    longDescription:
+      "The horizontal coordinate system describes a celestial object's position using two angles relative to the observer's local horizon: altitude (0-90° above the horizon) and azimuth (0-360° measured clockwise from North). This interactive 3D visualization shows how these coordinates define a unique direction in the sky.",
+    parameters: [
+      { key: "azimuth", label: "Azimuth", min: 0, max: 360, step: 5, defaultValue: 45, unit: "°" },
+      { key: "altitude", label: "Altitude", min: 0, max: 90, step: 5, defaultValue: 30, unit: "°" },
+    ],
+    thumbnailColor: "#1d4ed8",
+  },
+  {
+    slug: "human-gene-transfer",
+    title: "Human Gene Transfer",
+    category: "physics",
+    description: "Visualize how 23 chromosome pairs are inherited from parents, creating unique genetic combinations.",
+    longDescription:
+      "Each human inherits 23 chromosomes from each parent. For each pair, the child randomly receives one chromosome from the father and one from the mother. This independent assortment creates 2²³ × 2²³ ≈ 70.4 trillion possible unique combinations, explaining why siblings (except identical twins) are genetically distinct.",
+    parameters: [
+      { key: "displayPairs", label: "Display Pairs", min: 5, max: 23, step: 1, defaultValue: 23 },
+      { key: "animSpeed", label: "Animation Speed", min: 0.5, max: 5, step: 0.5, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#059669",
+  },
+  {
+    slug: "hydrocarbon",
+    title: "Hydrocarbon",
+    category: "physics",
+    description: "Build and visualize hydrocarbon molecules with covalent bonds and electron sharing.",
+    longDescription:
+      "Hydrocarbons are molecules made of carbon and hydrogen. Carbon has 4 valence electrons and forms 4 covalent bonds; hydrogen has 1 valence electron and forms 1 bond. This simulation builds alkane (single bond), alkene (double bond), and alkyne (triple bond) chains, showing how the octet rule governs molecular structure.",
+    parameters: [
+      { key: "carbonCount", label: "Carbon Atoms", min: 1, max: 8, step: 1, defaultValue: 3 },
+      { key: "bondType", label: "Bond Type (0=Single,1=Double,2=Triple)", min: 0, max: 2, step: 1, defaultValue: 0 },
+      { key: "showElectrons", label: "Show Electrons (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#4b5563",
+  },
+  {
+    slug: "igneous-rock",
+    title: "Igneous Rock",
+    category: "physics",
+    description: "Classify igneous rocks by silica content (felsic vs mafic) and cooling rate (intrusive vs extrusive).",
+    longDescription:
+      "Igneous rocks form from cooled magma or lava. Two key factors determine rock type: mineral composition (silica content) and cooling rate. Slow cooling underground (intrusive) produces large crystals like granite; fast cooling at the surface (extrusive) produces fine-grained rocks like basalt. This simulation generates realistic crystal textures.",
+    parameters: [
+      { key: "silicaContent", label: "SiO₂ Content", min: 40, max: 80, step: 1, defaultValue: 70, unit: "%" },
+      { key: "coolingRate", label: "Cooling Rate", min: 0, max: 1, step: 0.05, defaultValue: 0.3 },
+    ],
+    thumbnailColor: "#78716c",
+  },
+  {
+    slug: "impulse",
+    title: "Impulse",
+    category: "physics",
+    description: "Drop a ball onto surfaces of varying hardness to explore the impulse-momentum theorem.",
+    longDescription:
+      "The impulse-momentum theorem states J = F·Δt = Δp. When a ball hits the ground, its momentum change is fixed by its mass and impact velocity. A soft surface extends the collision time Δt, reducing peak force F; a hard surface produces a brief, intense force. This explains why airbags and padding protect against impacts.",
+    parameters: [
+      { key: "dropHeight", label: "Drop Height", min: 1, max: 10, step: 0.5, defaultValue: 3, unit: "m" },
+      { key: "ballMass", label: "Ball Mass", min: 0.1, max: 5, step: 0.1, defaultValue: 0.5, unit: "kg" },
+      { key: "surfaceHardness", label: "Surface Hardness", min: 1, max: 9, step: 1, defaultValue: 5 },
+    ],
+    thumbnailColor: "#b91c1c",
+  },
+  {
+    slug: "incandescence",
+    title: "Incandescence",
+    category: "physics",
+    description: "See how an incandescent light bulb converts electrical energy to heat to visible light.",
+    longDescription:
+      "In an incandescent bulb, current flows through a tungsten filament with high resistance. Joule heating (P = I²R) raises the filament to ~2800°C, causing it to glow — this is incandescence. The simulation shows electron flow, filament heating, and photon emission with wavelengths governed by Wien's displacement law λ_peak = b/T.",
+    parameters: [
+      { key: "voltage", label: "Voltage", min: 1, max: 24, step: 1, defaultValue: 12, unit: "V" },
+      { key: "resistance", label: "Resistance", min: 5, max: 50, step: 1, defaultValue: 10, unit: "Ω" },
+      { key: "isOn", label: "Switch (0=Off, 1=On)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+  },
+  {
+    slug: "indoor-wiring",
+    title: "Indoor Wiring",
+    category: "physics",
+    description: "Build a household parallel circuit with appliances and learn about overcurrent protection.",
+    longDescription:
+      "Household appliances are wired in parallel so each receives the full supply voltage. Total current increases as devices are added: 1/R_total = Σ(1/Rᵢ). If total current exceeds the circuit breaker limit, the breaker trips to prevent fire. This simulation shows current flow, power consumption, and the dangers of overloading circuits.",
+    parameters: [
+      { key: "supplyVoltage", label: "Supply Voltage", min: 110, max: 240, step: 10, defaultValue: 220, unit: "V" },
+      { key: "numDevices", label: "Number of Devices", min: 1, max: 8, step: 1, defaultValue: 3 },
+      { key: "breakerLimit", label: "Breaker Limit", min: 5, max: 40, step: 5, defaultValue: 20, unit: "A" },
+    ],
+    thumbnailColor: "#ca8a04",
+  },
+  {
+    slug: "inductor",
+    title: "Inductor",
+    category: "physics",
+    description: "Explore how an inductor opposes current changes in an RL circuit with transient behavior.",
+    longDescription:
+      "An inductor stores energy in a magnetic field and opposes changes in current (Lenz's law). In an RL circuit, the time constant τ = L/R determines how fast current rises or falls. When the switch closes, I(t) = (V/R)(1 - e^(-t/τ)); when it opens, back-EMF briefly sustains current. Watch the LED brightness track the current.",
+    parameters: [
+      { key: "voltage", label: "Supply Voltage", min: 1, max: 12, step: 0.5, defaultValue: 3, unit: "V" },
+      { key: "inductance", label: "Inductance", min: 100, max: 1000, step: 50, defaultValue: 330, unit: "μH" },
+      { key: "resistance", label: "Resistance", min: 10, max: 500, step: 10, defaultValue: 100, unit: "Ω" },
+      { key: "switchOn", label: "Switch (0=Off, 1=On)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#7e22ce",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -2865,6 +3070,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "fourier-series": () => import("./math/fourier-series").then((m) => m.default),
   "fourier-series-2": () => import("./math/fourier-series-2").then((m) => m.default),
   "free-fall": () => import("./physics/free-fall").then((m) => m.default),
+  "gravity-difference-on-several-planet": () => import("./physics/gravity-difference-on-several-planet").then((m) => m.default),
+  "gravity-train": () => import("./physics/gravity-train").then((m) => m.default),
+  "half-life-period": () => import("./physics/half-life-period").then((m) => m.default),
+  "heart-rate-counter": () => import("./biology/heart-rate-counter").then((m) => m.default),
+  "heat-capacity": () => import("./physics/heat-capacity").then((m) => m.default),
+  "hilbert-curve": () => import("./physics/hilbert-curve").then((m) => m.default),
+  "homopolar-motor": () => import("./physics/homopolar-motor").then((m) => m.default),
+  "horizontal-coordinate-system": () => import("./physics/horizontal-coordinate-system").then((m) => m.default),
+  "human-gene-transfer": () => import("./physics/human-gene-transfer").then((m) => m.default),
+  "hydrocarbon": () => import("./physics/hydrocarbon").then((m) => m.default),
+  "igneous-rock": () => import("./physics/igneous-rock").then((m) => m.default),
+  "impulse": () => import("./physics/impulse").then((m) => m.default),
+  "incandescence": () => import("./physics/incandescence").then((m) => m.default),
+  "indoor-wiring": () => import("./physics/indoor-wiring").then((m) => m.default),
+  "inductor": () => import("./physics/inductor").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
