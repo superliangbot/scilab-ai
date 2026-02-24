@@ -2262,6 +2262,8 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "trailLength", label: "Trail Length", min: 10, max: 100, step: 5, defaultValue: 50 },
     ],
     thumbnailColor: "#fbbf24",
+  },
+  {
     slug: "electroscope",
     title: "Electroscope",
     category: "physics",
@@ -2287,6 +2289,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "rodDistance", label: "Rod Distance", min: 0, max: 100, step: 1, defaultValue: 50, unit: "%" },
       { key: "separation", label: "Conductor Separation", min: 0, max: 100, step: 1, defaultValue: 0, unit: "%" },
       { key: "polarity", label: "Polarity (+1/−1)", min: -1, max: 1, step: 2, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "faradays-law-2",
     title: "Faraday's Law 2",
     category: "physics",
@@ -2365,6 +2371,10 @@ export const simulationConfigs: SimulationConfig[] = [
     parameters: [
       { key: "moleculeCount", label: "Molecule Count", min: 10, max: 200, step: 10, defaultValue: 100 },
       { key: "initialAngle", label: "Initial Angle", min: 10, max: 80, step: 5, defaultValue: 60, unit: "°" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "filedrop-cmy",
     title: "CMY Color Separation",
     category: "electricity",
@@ -2432,6 +2442,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "forwardRate", label: "Forward Rate (k_f)", min: 1, max: 10, step: 0.5, defaultValue: 5 },
       { key: "reverseRate", label: "Reverse Rate (k_r)", min: 1, max: 10, step: 0.5, defaultValue: 3 },
       { key: "temperature", label: "Temperature", min: 200, max: 500, step: 10, defaultValue: 300, unit: "K" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "filedrop-cmyk",
     title: "CMYK Color Separation",
     category: "electricity",
@@ -2528,6 +2542,8 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "magnetStrength", label: "Magnet Strength", min: 1, max: 10, step: 1, defaultValue: 5 },
     ],
     thumbnailColor: "#0284c7",
+  },
+  {
     slug: "flame-test",
     title: "Flame Test",
     category: "physics",
