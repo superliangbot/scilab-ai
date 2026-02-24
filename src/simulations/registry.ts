@@ -1441,6 +1441,236 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#1e6091",
     icon: "🌍",
   },
+  {
+    slug: "dc-motor",
+    title: "DC Motor",
+    category: "physics",
+    description: "Electromagnetic motor with rotating coil, commutator, and force vectors.",
+    longDescription:
+      "A DC motor converts electrical energy into mechanical rotation using electromagnetic force. When current flows through a coil placed in a magnetic field, the Lorentz force (F = IL×B) acts on each side of the coil, creating torque. A commutator reverses the current direction every half-rotation to maintain continuous unidirectional torque. This simulation shows the rotating coil, magnetic field, current direction, and resulting forces.",
+    parameters: [
+      { key: "voltage", label: "Voltage", min: 1, max: 24, step: 1, defaultValue: 12, unit: "V" },
+      { key: "fieldStrength", label: "Magnetic Field", min: 0.1, max: 2, step: 0.1, defaultValue: 0.5, unit: "T" },
+      { key: "coilTurns", label: "Coil Turns", min: 1, max: 50, step: 1, defaultValue: 10 },
+      { key: "showVectors", label: "Show Vectors (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "🔄",
+  },
+  {
+    slug: "dc-motor-2",
+    title: "DC Motor 2",
+    category: "physics",
+    description: "Cross-section view of a DC motor showing conductor forces and torque graph.",
+    longDescription:
+      "This simulation provides a cross-sectional view of a DC motor, showing the rotor coil conductors inside the magnetic field between North and South poles. Current direction is indicated by ⊗ (into page) and ⊙ (out of page) symbols. The Lorentz force on each conductor creates torque that spins the rotor. A real-time torque graph shows the |sin(θ)| variation as the rotor turns, illustrating why DC motors have torque ripple.",
+    parameters: [
+      { key: "voltage", label: "Voltage", min: 1, max: 24, step: 1, defaultValue: 12, unit: "V" },
+      { key: "resistance", label: "Resistance", min: 1, max: 20, step: 0.5, defaultValue: 5, unit: "Ω" },
+      { key: "fieldStrength", label: "Field Strength", min: 0.1, max: 2, step: 0.1, defaultValue: 0.5, unit: "T" },
+      { key: "numLoops", label: "Number of Loops", min: 1, max: 10, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#6366f1",
+    icon: "⚙️",
+  },
+  {
+    slug: "dew",
+    title: "Dew",
+    category: "physics",
+    description: "Water vapor condensation on cold surfaces — molecular view of dew formation.",
+    longDescription:
+      "Dew forms when a surface temperature drops below the dew point — the temperature at which air becomes saturated with water vapor. This simulation shows water molecules (H₂O) in their vapor state bouncing around in the air. When they encounter a cold surface (like a glass of cold water), their kinetic energy decreases and they condense into liquid droplets. The dew point is calculated using the Magnus formula from air temperature and humidity.",
+    parameters: [
+      { key: "surfaceTemp", label: "Surface Temperature", min: -10, max: 30, step: 1, defaultValue: 5, unit: "°C" },
+      { key: "airTemp", label: "Air Temperature", min: 10, max: 40, step: 1, defaultValue: 25, unit: "°C" },
+      { key: "humidity", label: "Relative Humidity", min: 20, max: 100, step: 5, defaultValue: 80, unit: "%" },
+    ],
+    thumbnailColor: "#06b6d4",
+    icon: "💧",
+  },
+  {
+    slug: "dielectric-in-capacitor",
+    title: "Dielectric In Capacitor",
+    category: "electricity",
+    description: "How dielectric materials increase capacitance by polarizing in the electric field.",
+    longDescription:
+      "A capacitor stores charge on two parallel plates. Inserting a dielectric material between the plates increases capacitance by a factor κ (the dielectric constant). The dielectric polarizes in response to the electric field — positive charges shift slightly toward the negative plate and vice versa — creating an internal field that partially cancels the external field. This allows more charge to accumulate at the same voltage. C = κε₀A/d.",
+    parameters: [
+      { key: "voltage", label: "Voltage", min: 1, max: 50, step: 1, defaultValue: 12, unit: "V" },
+      { key: "distance", label: "Plate Distance", min: 10, max: 100, step: 5, defaultValue: 50, unit: "mm" },
+      { key: "dielectricK", label: "Dielectric Constant (κ)", min: 1, max: 10, step: 0.5, defaultValue: 1 },
+      { key: "showField", label: "Show E-Field (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🔋",
+  },
+  {
+    slug: "differentiation",
+    title: "Differentiation",
+    category: "chemistry",
+    description: "Visualize functions and their derivatives side by side with tangent lines.",
+    longDescription:
+      "Differentiation is the mathematical operation for finding the instantaneous rate of change of a function. This simulation displays a function and its derivative on side-by-side graphs. A movable marker shows the tangent line at any point, whose slope equals the derivative value. Choose from linear, quadratic, logarithmic, exponential, and trigonometric functions. In physics, differentiation connects position→velocity→acceleration.",
+    parameters: [
+      { key: "funcType", label: "Function (0-5)", min: 0, max: 5, step: 1, defaultValue: 1 },
+      { key: "amplitude", label: "Amplitude (a)", min: 0.5, max: 3, step: 0.1, defaultValue: 1 },
+      { key: "markerX", label: "Marker X", min: -4, max: 4, step: 0.1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "📈",
+  },
+  {
+    slug: "differentiation-2",
+    title: "Differentiation 2",
+    category: "chemistry",
+    description: "Tangent line approach to derivatives — see secant converge to tangent as Δx→0.",
+    longDescription:
+      "This simulation demonstrates the fundamental definition of a derivative: lim(Δx→0) [f(x+Δx)−f(x)]/Δx. A secant line connects two points on the curve separated by Δx. As Δx shrinks, the secant line approaches the tangent line, and the difference quotient Δy/Δx approaches the true derivative dy/dx. The green secant line and red tangent line visually show this convergence. This is the core concept behind differential calculus.",
+    parameters: [
+      { key: "funcType", label: "Function (0-5)", min: 0, max: 5, step: 1, defaultValue: 1 },
+      { key: "amplitude", label: "Amplitude (a)", min: 0.5, max: 3, step: 0.1, defaultValue: 1 },
+      { key: "markerX", label: "Marker X", min: -4, max: 4, step: 0.1, defaultValue: 2 },
+      { key: "deltaX", label: "Δx", min: 0.01, max: 3, step: 0.01, defaultValue: 1 },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "📐",
+  },
+  {
+    slug: "diffraction-grating",
+    title: "Diffraction Grating",
+    category: "physics",
+    description: "Light passing through multiple slits creating interference patterns on a screen.",
+    longDescription:
+      "A diffraction grating consists of many equally-spaced slits. When light passes through, each slit acts as a source of circular waves. These waves interfere — constructive interference at angles where d·sin(θ) = mλ produces bright maxima, while destructive interference creates dark regions. More slits produce sharper, brighter peaks. Different wavelengths diffract at different angles, which is the basis for spectroscopy and separating light into its component colors.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 380, max: 700, step: 10, defaultValue: 550, unit: "nm" },
+      { key: "slitCount", label: "Number of Slits", min: 2, max: 20, step: 1, defaultValue: 5 },
+      { key: "slitSpacing", label: "Slit Spacing", min: 0.5, max: 5, step: 0.1, defaultValue: 2, unit: "μm" },
+      { key: "showOrders", label: "Show Orders (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#a855f7",
+    icon: "🌈",
+  },
+  {
+    slug: "dihybrid-cross",
+    title: "Dihybrid Cross",
+    category: "physics",
+    description: "Mendel's two-trait cross with Punnett square showing 9:3:3:1 ratios.",
+    longDescription:
+      "A dihybrid cross examines the inheritance of two independent traits simultaneously, demonstrating Mendel's Law of Independent Assortment. Using pea plant traits (seed shape: round R vs wrinkled r, and seed color: yellow Y vs green y), a cross of RrYy × RrYy produces offspring in a 9:3:3:1 phenotype ratio. The Punnett square shows all possible gamete combinations and resulting genotypes/phenotypes.",
+    parameters: [
+      { key: "shapeAllele", label: "Shape (0=RR, 1=Rr, 2=rr)", min: 0, max: 2, step: 1, defaultValue: 1 },
+      { key: "colorAllele", label: "Color (0=YY, 1=Yy, 2=yy)", min: 0, max: 2, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#22c55e",
+    icon: "🧬",
+  },
+  {
+    slug: "diode",
+    title: "Diode",
+    category: "electricity",
+    description: "P-N junction semiconductor with charge carriers under forward, reverse, and no bias.",
+    longDescription:
+      "A semiconductor diode is a P-N junction that allows current to flow in only one direction. The P-type region (doped with trivalent atoms like boron) has holes as majority carriers, while the N-type region (doped with pentavalent atoms like phosphorus) has electrons. In forward bias, carriers are pushed toward the junction, narrowing the depletion zone and allowing current. In reverse bias, carriers are pulled away, widening the depletion zone and blocking current.",
+    parameters: [
+      { key: "biasMode", label: "Bias (0=Fwd, 1=None, 2=Rev)", min: 0, max: 2, step: 1, defaultValue: 0 },
+      { key: "zoom", label: "Zoom", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🔌",
+  },
+  {
+    slug: "diode-making",
+    title: "Diode Making",
+    category: "electricity",
+    description: "Build a diode from silicon — see how gallium and arsenic doping creates P-N junction.",
+    longDescription:
+      "This simulation shows how a semiconductor diode is constructed at the atomic level. Pure silicon has 4 valence electrons. Doping the left side with gallium (3 valence electrons, trivalent) creates P-type semiconductor with holes as majority carriers. Doping the right side with arsenic (5 valence electrons, pentavalent) creates N-type with free electrons. Joining them forms a P-N junction — the fundamental building block of all semiconductor electronics.",
+    parameters: [
+      { key: "dopingLevel", label: "Doping Level", min: 1, max: 4, step: 1, defaultValue: 2 },
+      { key: "showBonds", label: "Show Bonds (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🏭",
+  },
+  {
+    slug: "dipole-antenna",
+    title: "Dipole Antenna",
+    category: "physics",
+    description: "Oscillating charges radiate electromagnetic waves — see the dipole radiation pattern.",
+    longDescription:
+      "A dipole antenna works by oscillating electric charges along two conductors. The alternating current causes charges to accumulate and reverse at the antenna tips, creating changing electric fields that propagate outward as electromagnetic radiation. The radiation pattern is toroidal — maximum intensity perpendicular to the antenna, zero along its axis. Optimal efficiency occurs when the antenna length equals half the wavelength (λ/2 resonance).",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 0.5, max: 5, step: 0.1, defaultValue: 1, unit: "MHz" },
+      { key: "antennaLength", label: "Antenna Length", min: 20, max: 100, step: 5, defaultValue: 50, unit: "%" },
+      { key: "showEField", label: "Show E-Field (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showRadiation", label: "Show Radiation (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "📡",
+  },
+  {
+    slug: "dissolution-process",
+    title: "Dissolution Process",
+    category: "chemistry",
+    description: "Watch solutes dissolve in water at the molecular level — ink, NaCl, CuSO₄, KMnO₄.",
+    longDescription:
+      "Dissolution is the process where a solute disperses into a solvent at the molecular level. Water molecules interact with solute particles through electrostatic forces, gradually breaking apart the solid crystal structure. Ionic compounds (NaCl, CuSO₄, KMnO₄) dissociate into individual ions surrounded by hydration shells. Temperature increases kinetic energy, speeding dissolution. Stirring brings fresh solvent to the solid surface, further accelerating the process.",
+    parameters: [
+      { key: "soluteType", label: "Solute (0=Ink, 1=NaCl, 2=CuSO₄, 3=KMnO₄)", min: 0, max: 3, step: 1, defaultValue: 1 },
+      { key: "temperature", label: "Temperature", min: 5, max: 90, step: 5, defaultValue: 25, unit: "°C" },
+      { key: "stirring", label: "Stirring", min: 0, max: 5, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "🧪",
+  },
+  {
+    slug: "distance-of-1-pc",
+    title: "Distance Of 1 Pc",
+    category: "physics",
+    description: "Stellar parallax and the parsec — measuring cosmic distances by angular shift.",
+    longDescription:
+      "Stellar parallax is the apparent shift in a star's position as Earth orbits the Sun. Over 6 months, Earth moves 2 AU (astronomical units), providing a baseline for cosmic triangulation. A parsec (pc) is defined as the distance at which a star shows exactly 1 arcsecond of parallax: d(pc) = 1/p(arcsec). One parsec equals 3.26 light-years or 3.09 × 10¹³ km. This is the fundamental rung of the cosmic distance ladder.",
+    parameters: [
+      { key: "parallaxAngle", label: "Parallax Angle", min: 0.1, max: 2, step: 0.01, defaultValue: 1, unit: "arcsec" },
+      { key: "showAngles", label: "Show Angles (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "animateOrbit", label: "Animate Orbit (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "⭐",
+  },
+  {
+    slug: "diurnal-motion",
+    title: "Diurnal Motion",
+    category: "physics",
+    description: "Stars wheeling across the sky as Earth rotates — view from any latitude.",
+    longDescription:
+      "Diurnal motion is the apparent daily circular movement of stars and other celestial objects across the sky, caused by Earth's rotation. Stars appear to rotate around the celestial pole (near Polaris in the Northern Hemisphere). The altitude of the pole equals the observer's latitude. Stars near the pole are circumpolar (never set), while equatorial stars rise in the east and set in the west. The ecliptic (Sun's path) is tilted 23.5° to the celestial equator.",
+    parameters: [
+      { key: "latitude", label: "Latitude", min: -90, max: 90, step: 1, defaultValue: 40, unit: "°" },
+      { key: "speed", label: "Speed", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "showGrid", label: "Show Grid (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showZodiac", label: "Show Zodiac (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#1e3a5f",
+    icon: "🌌",
+  },
+  {
+    slug: "diurnal-motion-3d",
+    title: "Diurnal Motion 3D",
+    category: "physics",
+    description: "3D view of Earth rotating within the celestial sphere showing star trails.",
+    longDescription:
+      "This 3D simulation shows Earth rotating inside the celestial sphere of fixed stars. The observer's position on Earth's surface determines which stars are visible and how they appear to move. At the poles, all visible stars are circumpolar, tracing horizontal circles. At the equator, stars rise vertically and all stars are visible over a year. Earth's 23.5° axial tilt causes the seasons by changing which hemisphere receives more direct sunlight.",
+    parameters: [
+      { key: "latitude", label: "Latitude", min: -90, max: 90, step: 1, defaultValue: 40, unit: "°" },
+      { key: "speed", label: "Speed", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "tilt", label: "Axial Tilt", min: 0, max: 45, step: 0.5, defaultValue: 23.5, unit: "°" },
+      { key: "showEarth", label: "Show Earth (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#1e3a5f",
+    icon: "🌍",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -1539,6 +1769,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "conductor-and-insulator": () => import("./electricity/conductor-and-insulator").then((m) => m.default),
   "constant-velocity": () => import("./physics/constant-velocity").then((m) => m.default),
   "coriolis-effect": () => import("./earth/coriolis-effect").then((m) => m.default),
+  "dc-motor": () => import("./physics/dc-motor").then((m) => m.default),
+  "dc-motor-2": () => import("./physics/dc-motor-2").then((m) => m.default),
+  "dew": () => import("./physics/dew").then((m) => m.default),
+  "dielectric-in-capacitor": () => import("./electricity/dielectric-in-capacitor").then((m) => m.default),
+  "differentiation": () => import("./chemistry/differentiation").then((m) => m.default),
+  "differentiation-2": () => import("./chemistry/differentiation-2").then((m) => m.default),
+  "diffraction-grating": () => import("./physics/diffraction-grating").then((m) => m.default),
+  "dihybrid-cross": () => import("./physics/dihybrid-cross").then((m) => m.default),
+  "diode": () => import("./electricity/diode").then((m) => m.default),
+  "diode-making": () => import("./electricity/diode-making").then((m) => m.default),
+  "dipole-antenna": () => import("./physics/dipole-antenna").then((m) => m.default),
+  "dissolution-process": () => import("./chemistry/dissolution-process").then((m) => m.default),
+  "distance-of-1-pc": () => import("./physics/distance-of-1-pc").then((m) => m.default),
+  "diurnal-motion": () => import("./physics/diurnal-motion").then((m) => m.default),
+  "diurnal-motion-3d": () => import("./physics/diurnal-motion-3d").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
