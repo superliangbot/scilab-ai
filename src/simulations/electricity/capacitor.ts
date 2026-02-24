@@ -31,6 +31,8 @@ const CapacitorFactory: SimulationFactory = (): SimulationEngine => {
   let tau = 0; // time constant
   let energyStored = 0;
   let chargeStored = 0;
+  let lastSampleTime = 0;
+  const SAMPLE_INTERVAL = 0.02; // Sample every 20ms for consistent graph density
 
   // Animated charges
   let charges: ChargeParticle[] = [];
@@ -438,11 +440,7 @@ const CapacitorFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   function drawGraphs(): void {
-    // Record history
-    voltageHistory.push({ t: time, v: capVoltage });
-    currentHistory.push({ t: time, i: Math.abs(currentAmps) * 1000 }); // mA
-    if (voltageHistory.length > MAX_HISTORY) voltageHistory.shift();
-    if (currentHistory.length > MAX_HISTORY) currentHistory.shift();
+    // Data sampling now handled in update() at fixed intervals
 
     const graphW = width * 0.35;
     const graphH = height * 0.15;
@@ -600,6 +598,7 @@ const CapacitorFactory: SimulationFactory = (): SimulationEngine => {
     // Reset time when mode changes
     if (newMode !== prevMode) {
       time = 0;
+      lastSampleTime = 0;
       voltageHistory = [];
       currentHistory = [];
       if (newMode === 1) {
@@ -614,6 +613,16 @@ const CapacitorFactory: SimulationFactory = (): SimulationEngine => {
 
     time += dt;
     computePhysics();
+    
+    // Sample data for graphs at fixed intervals (not every render frame)
+    if (time - lastSampleTime >= SAMPLE_INTERVAL) {
+      voltageHistory.push({ t: time, v: capVoltage });
+      currentHistory.push({ t: time, i: Math.abs(currentAmps) * 1000 }); // mA
+      if (voltageHistory.length > MAX_HISTORY) voltageHistory.shift();
+      if (currentHistory.length > MAX_HISTORY) currentHistory.shift();
+      lastSampleTime = time;
+    }
+    
     updateCharges(dt);
   }
 
@@ -638,6 +647,7 @@ const CapacitorFactory: SimulationFactory = (): SimulationEngine => {
 
   function reset(): void {
     time = 0;
+    lastSampleTime = 0;
     capVoltage = mode === 1 ? voltage : 0;
     currentAmps = 0;
     voltageHistory = [];
