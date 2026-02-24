@@ -156,12 +156,12 @@ const AtmosphereFactory: SimulationFactory = (): SimulationEngine => {
       const tempK = temperatureAtAltitude(p.y) + 273.15;
       const speedFactor = Math.sqrt(Math.max(tempK, 50) / T_SEA);
 
-      p.x += p.vx * speedFactor;
-      p.y += p.vy * speedFactor;
+      p.x += p.vx * speedFactor * dt * 60; // Scale by dt for frame-rate independence  
+      p.y += p.vy * speedFactor * dt * 60;
 
-      // Random jitter
-      p.vx += (Math.random() - 0.5) * 0.01;
-      p.vy += (Math.random() - 0.5) * 0.005;
+      // Random jitter (scaled by dt)
+      p.vx += (Math.random() - 0.5) * 0.01 * dt * 60;
+      p.vy += (Math.random() - 0.5) * 0.005 * dt * 60;
 
       // Damping
       p.vx *= 0.98;
