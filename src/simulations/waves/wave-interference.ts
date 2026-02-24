@@ -23,6 +23,8 @@ const WaveInterference: SimulationFactory = () => {
   let gridH = 0;
   let waveField: Float32Array = new Float32Array(0);
   let imageData: ImageData | null = null;
+  let tmpCanvas: HTMLCanvasElement | null = null;
+  let tmpCtx: CanvasRenderingContext2D | null = null;
 
   // Colors
   const BG_COLOR = "#0a0a0f";
@@ -36,6 +38,12 @@ const WaveInterference: SimulationFactory = () => {
     gridH = Math.ceil(height / SCALE);
     waveField = new Float32Array(gridW * gridH);
     imageData = ctx.createImageData(gridW, gridH);
+    
+    // Cache temporary canvas to avoid creating it every frame
+    tmpCanvas = document.createElement("canvas");
+    tmpCanvas.width = gridW;
+    tmpCanvas.height = gridH;
+    tmpCtx = tmpCanvas.getContext("2d")!;
   }
 
   /** Map a displacement value in [-2, 2] to an RGB color using a blue-black-red palette */
@@ -147,12 +155,9 @@ const WaveInterference: SimulationFactory = () => {
     }
 
     // Draw the low-res imageData scaled up to the canvas
-    // Use a temporary off-screen canvas for nearest-neighbor-ish scaling
+    // Use cached temporary canvas for nearest-neighbor-ish scaling
     // For performance, use ctx.putImageData on a small canvas then drawImage scaled
-    const tmpCanvas = document.createElement("canvas");
-    tmpCanvas.width = gridW;
-    tmpCanvas.height = gridH;
-    const tmpCtx = tmpCanvas.getContext("2d")!;
+    if (!tmpCanvas || !tmpCtx) return;
     tmpCtx.putImageData(imageData, 0, 0);
 
     // Scale up with smooth interpolation
