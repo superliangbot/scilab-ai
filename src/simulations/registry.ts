@@ -1588,7 +1588,8 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "showWaveform", label: "Show Waveform (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
     ],
     thumbnailColor: "#b45309",
-    icon: "\u26A1",
+  },
+  {
     slug: "dc-motor",
     title: "DC Motor",
     category: "physics",
@@ -1647,6 +1648,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "distance", label: "Plate Distance", min: 10, max: 100, step: 5, defaultValue: 50, unit: "mm" },
       { key: "dielectricK", label: "Dielectric Constant (κ)", min: 1, max: 10, step: 0.5, defaultValue: 1 },
       { key: "showField", label: "Show E-Field (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#4488cc",
+  },
+  {
     slug: "diurnal-motion-of-sun",
     title: "Diurnal Motion Of Sun",
     category: "physics",
@@ -1891,6 +1896,10 @@ export const simulationConfigs: SimulationConfig[] = [
     parameters: [
       { key: "biasMode", label: "Bias (0=Fwd, 1=None, 2=Rev)", min: 0, max: 2, step: 1, defaultValue: 0 },
       { key: "zoom", label: "Zoom", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#cc6644",
+  },
+  {
     slug: "electric-circuits-ac",
     title: "Electric Circuits Ac",
     category: "electricity",
@@ -2010,6 +2019,8 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#1e3a5f",
     icon: "🌍",
+  },
+  {
     slug: "electric-field-line",
     title: "Electric Field Line",
     category: "electricity",

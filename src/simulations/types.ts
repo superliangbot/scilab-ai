@@ -29,7 +29,7 @@ export interface SimulationConfig {
   /** Hex color for thumbnail background */
   thumbnailColor: string;
   /** Icon emoji for display */
-  icon: string;
+  icon?: string;
 }
 
 export interface SimulationState {
