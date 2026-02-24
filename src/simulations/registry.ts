@@ -12,7 +12,7 @@ export const simulationConfigs: SimulationConfig[] = [
     parameters: [
       { key: "numPendulums", label: "Number of Pendulums", min: 5, max: 30, step: 1, defaultValue: 15 },
       { key: "gravity", label: "Gravity", min: 1, max: 20, step: 0.1, defaultValue: 9.81, unit: "m/s²" },
-      { key: "amplitude", label: "Amplitude", min: 10, max: 60, step: 1, defaultValue: 30, unit: "°" },
+      { key: "amplitude", label: "Amplitude", min: 10, max: 30, step: 1, defaultValue: 30, unit: "°" },
       { key: "lengthDelta", label: "Length Delta", min: 0.01, max: 0.1, step: 0.005, defaultValue: 0.04, unit: "m" },
     ],
     thumbnailColor: "#3b82f6",
