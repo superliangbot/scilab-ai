@@ -2035,6 +2035,218 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#f59e0b",
     icon: "🧲",
   },
+  {
+    slug: "electroscope",
+    title: "Electroscope",
+    category: "physics",
+    description: "Detect electric charge using gold leaf deflection via electrostatic induction.",
+    longDescription:
+      "An electroscope is an instrument that detects electric charge. It consists of a metal plate connected through a conducting stem to two thin gold leaves inside a glass jar. When a charged rod is brought near the plate, electrostatic induction causes charge redistribution: opposite charges accumulate on the plate while like charges move to the leaves. Since both leaves carry the same charge, they repel each other and diverge. The deflection angle indicates the strength of the charge.",
+    parameters: [
+      { key: "rodCharge", label: "Rod Charge", min: 0, max: 10, step: 0.5, defaultValue: 5 },
+      { key: "rodDistance", label: "Rod Distance", min: 0, max: 100, step: 1, defaultValue: 50, unit: "%" },
+      { key: "polarity", label: "Polarity (+1/−1)", min: -1, max: 1, step: 2, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+  },
+  {
+    slug: "electrostatic-induction",
+    title: "Electrostatic Induction",
+    category: "physics",
+    description: "Watch charges redistribute in conductors when a charged rod approaches.",
+    longDescription:
+      "Electrostatic induction is the redistribution of electric charge in a conductor caused by the influence of a nearby charged object, without physical contact. When a charged rod approaches two touching conductors, electrons migrate toward or away from the rod. If the conductors are separated while the rod is near, each retains a net charge — demonstrating that charge can be induced without transfer.",
+    parameters: [
+      { key: "chargeStrength", label: "Charge Strength", min: 1, max: 10, step: 0.5, defaultValue: 5 },
+      { key: "rodDistance", label: "Rod Distance", min: 0, max: 100, step: 1, defaultValue: 50, unit: "%" },
+      { key: "separation", label: "Conductor Separation", min: 0, max: 100, step: 1, defaultValue: 0, unit: "%" },
+      { key: "polarity", label: "Polarity (+1/−1)", min: -1, max: 1, step: 2, defaultValue: 1 },
+    ],
+    thumbnailColor: "#6366f1",
+  },
+  {
+    slug: "electrostatic-induction-metal-bonding",
+    title: "Electrostatic Induction Metal Bonding",
+    category: "physics",
+    description: "Visualize metallic bonding and electron sea response to external fields.",
+    longDescription:
+      "This simulation shows the metallic bonding model at the atomic level: a lattice of fixed positive ion cores surrounded by a 'sea' of delocalized electrons. When an external charged rod approaches, the free electron cloud shifts within the lattice, demonstrating electrostatic induction at the microscopic level. This explains why metals are good conductors — their electrons are free to move in response to electric fields.",
+    parameters: [
+      { key: "chargeStrength", label: "Charge Strength", min: 1, max: 10, step: 0.5, defaultValue: 5 },
+      { key: "rodDistance", label: "Rod Distance", min: 0, max: 100, step: 1, defaultValue: 50, unit: "%" },
+      { key: "polarity", label: "Polarity (+1/−1)", min: -1, max: 1, step: 2, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+  },
+  {
+    slug: "elevator",
+    title: "Elevator",
+    category: "physics",
+    description: "Experience apparent weight changes in an accelerating elevator.",
+    longDescription:
+      "This simulation demonstrates Newton's second law in a non-inertial reference frame. A person stands on a scale inside an elevator. When the elevator accelerates upward, the apparent weight (N = m(g + a)) exceeds true weight. At constant velocity, apparent weight equals true weight. During downward acceleration, apparent weight decreases. In free fall, apparent weight would be zero — the weightlessness experienced by astronauts.",
+    parameters: [
+      { key: "mass", label: "Person Mass", min: 30, max: 120, step: 1, defaultValue: 70, unit: "kg" },
+      { key: "acceleration", label: "Acceleration", min: 0.5, max: 5, step: 0.5, defaultValue: 2, unit: "m/s²" },
+      { key: "direction", label: "Direction (−1/0/1)", min: -1, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#64748b",
+  },
+  {
+    slug: "ellipse",
+    title: "Ellipse",
+    category: "math",
+    description: "Explore the geometry of ellipses with foci, eccentricity, and the constant sum property.",
+    longDescription:
+      "An ellipse is the locus of all points where the sum of distances to two fixed points (foci) is constant: d₁ + d₂ = 2a. This simulation lets you adjust the semi-major axis and eccentricity, and trace a point along the ellipse to see the constant-sum property in action. The equation x²/a² + y²/b² = 1 defines the shape, where c² = a² − b² gives the focal distance. Kepler's first law states that planets orbit in ellipses with the Sun at one focus.",
+    parameters: [
+      { key: "semiMajor", label: "Semi-Major Axis (a)", min: 80, max: 300, step: 10, defaultValue: 200, unit: "px" },
+      { key: "eccentricity", label: "Eccentricity (e)", min: 0, max: 0.95, step: 0.05, defaultValue: 0.6 },
+      { key: "traceAngle", label: "Trace Point Angle", min: 0, max: 360, step: 5, defaultValue: 45, unit: "°" },
+    ],
+    thumbnailColor: "#a855f7",
+  },
+  {
+    slug: "energy-band",
+    title: "Energy Band",
+    category: "physics",
+    description: "See how discrete atomic energy levels merge into bands in solids.",
+    longDescription:
+      "Band theory explains the electronic properties of solids. Isolated atoms have discrete energy levels. When atoms are brought together in a solid, their energy levels split and broaden into quasi-continuous bands. The valence band (filled with electrons) and conduction band (empty or partially filled) determine a material's electrical properties. Conductors have overlapping bands, semiconductors have a small gap (~1 eV), and insulators have a large gap (>5 eV).",
+    parameters: [
+      { key: "atomCount", label: "Number of Atom Groups", min: 1, max: 6, step: 1, defaultValue: 4 },
+      { key: "bandGap", label: "Band Gap", min: 0, max: 8, step: 0.5, defaultValue: 3, unit: "eV" },
+      { key: "materialType", label: "Material (0/1/2)", min: 0, max: 2, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#ec4899",
+  },
+  {
+    slug: "entropy",
+    title: "Entropy",
+    category: "physics",
+    description: "Watch a pendulum lose energy to gas molecules — the second law of thermodynamics.",
+    longDescription:
+      "This simulation demonstrates the second law of thermodynamics: entropy always increases in an isolated system. A pendulum swings inside a chamber filled with gas molecules. Through collisions, the pendulum's ordered mechanical energy gradually converts into disordered thermal motion of the gas. The process is irreversible — you never see molecules spontaneously coordinate to push the pendulum back to its full amplitude.",
+    parameters: [
+      { key: "moleculeCount", label: "Molecule Count", min: 10, max: 200, step: 10, defaultValue: 100 },
+      { key: "initialAngle", label: "Initial Angle", min: 10, max: 80, step: 5, defaultValue: 60, unit: "°" },
+    ],
+    thumbnailColor: "#06b6d4",
+  },
+  {
+    slug: "epeirogeny",
+    title: "Epeirogeny",
+    category: "physics",
+    description: "Simulate isostatic adjustment of crustal columns floating on the mantle.",
+    longDescription:
+      "Epeirogeny refers to large-scale vertical movements of Earth's crust. This simulation demonstrates isostasy — the principle that the crust 'floats' on the denser mantle, similar to icebergs in water. Adding material to a crustal column (simulating deposition or glaciation) causes it to sink deeper. Removing material (erosion or glacial melting) causes it to rise. The equilibrium depth depends on the density ratio between crust and mantle.",
+    parameters: [
+      { key: "crustDensity", label: "Crust Density", min: 2.0, max: 3.0, step: 0.1, defaultValue: 2.7, unit: "g/cm³" },
+      { key: "mantleDensity", label: "Mantle Density", min: 3.0, max: 4.0, step: 0.1, defaultValue: 3.3, unit: "g/cm³" },
+      { key: "columnToModify", label: "Selected Column", min: 0, max: 9, step: 1, defaultValue: 5 },
+    ],
+    thumbnailColor: "#92400e",
+  },
+  {
+    slug: "equatorial-coordinate-system",
+    title: "Equatorial Coordinate System",
+    category: "physics",
+    description: "Explore the celestial sphere with right ascension, declination, and the ecliptic.",
+    longDescription:
+      "The equatorial coordinate system is the primary system for locating celestial objects. It uses Right Ascension (RA, measured in hours 0–24) and Declination (Dec, measured in degrees −90° to +90°) analogous to longitude and latitude on Earth. This simulation shows the celestial sphere with zodiac constellations, the celestial equator, and the ecliptic (the Sun's apparent path tilted 23.44° to the equator).",
+    parameters: [
+      { key: "month", label: "Month", min: 1, max: 12, step: 1, defaultValue: 3 },
+      { key: "rightAscension", label: "Right Ascension", min: 0, max: 24, step: 0.5, defaultValue: 6, unit: "h" },
+      { key: "declination", label: "Declination", min: -90, max: 90, step: 5, defaultValue: 0, unit: "°" },
+      { key: "showLabels", label: "Show Labels (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#7c3aed",
+  },
+  {
+    slug: "equilibrium",
+    title: "Equilibrium",
+    category: "physics",
+    description: "Visualize Earth's radiative equilibrium and the greenhouse effect.",
+    longDescription:
+      "Earth's temperature is stable when absorbed solar radiation equals emitted thermal radiation (radiative equilibrium). This simulation models the energy balance: solar input, reflection (albedo), absorption, and infrared emission. Increasing greenhouse gases traps more outgoing IR radiation, reducing energy loss and raising the equilibrium temperature. The Stefan-Boltzmann law (emitted power ∝ T⁴) ensures a new equilibrium is eventually reached.",
+    parameters: [
+      { key: "solarInput", label: "Solar Input", min: 0, max: 10, step: 0.5, defaultValue: 5 },
+      { key: "greenhouseLevel", label: "Greenhouse Level", min: 0, max: 10, step: 0.5, defaultValue: 3 },
+      { key: "albedo", label: "Albedo (Reflectivity)", min: 0, max: 10, step: 0.5, defaultValue: 3 },
+    ],
+    thumbnailColor: "#dc2626",
+  },
+  {
+    slug: "equilibrium-constants",
+    title: "Equilibrium Constants",
+    category: "physics",
+    description: "Watch particles react to reach chemical equilibrium with constant K.",
+    longDescription:
+      "Chemical equilibrium is a dynamic state where the forward and reverse reaction rates are equal. In the reaction A + B ⇌ C, particles collide and react. Over time, the concentrations stabilize and the equilibrium constant K = [C]/([A][B]) reaches a steady value. Changing reaction rates shifts the equilibrium position (Le Chatelier's principle), but K remains constant at a given temperature.",
+    parameters: [
+      { key: "forwardRate", label: "Forward Rate (k_f)", min: 1, max: 10, step: 0.5, defaultValue: 5 },
+      { key: "reverseRate", label: "Reverse Rate (k_r)", min: 1, max: 10, step: 0.5, defaultValue: 3 },
+      { key: "temperature", label: "Temperature", min: 200, max: 500, step: 10, defaultValue: 300, unit: "K" },
+    ],
+    thumbnailColor: "#059669",
+  },
+  {
+    slug: "equilibrium-of-radiation",
+    title: "Equilibrium Of Radiation",
+    category: "chemistry",
+    description: "Animated diagram of Earth's radiation energy budget and heat flows.",
+    longDescription:
+      "This simulation shows the complete radiation budget of Earth. Incoming solar radiation (100%) is split among reflection by clouds (22%), atmospheric absorption (20%), ground absorption (49%), and ground reflection (9%). The ground emits infrared radiation, most of which is absorbed by the atmosphere and re-radiated. Convection (7%) and latent heat from evaporation (23%) also transfer energy upward. The system is in equilibrium when total energy in equals total energy out.",
+    parameters: [
+      { key: "solarIntensity", label: "Solar Intensity", min: 50, max: 150, step: 5, defaultValue: 100, unit: "%" },
+      { key: "greenhouseEffect", label: "Greenhouse Effect", min: 0, max: 100, step: 5, defaultValue: 50, unit: "%" },
+      { key: "showDetails", label: "Show Details (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#ea580c",
+  },
+  {
+    slug: "ester",
+    title: "Ester",
+    category: "physics",
+    description: "Explore 3D molecular structures of esters — the molecules behind fruit fragrances.",
+    longDescription:
+      "Esters are organic compounds formed by the reaction of a carboxylic acid with an alcohol (esterification: R-COOH + R'-OH → R-COO-R' + H₂O). They are characterized by the -COO- functional group and are responsible for many fruit fragrances. This simulation displays 3D ball-and-stick models of various esters (ethyl acetate, isoamyl acetate, etc.) that can be rotated to examine their molecular structure.",
+    parameters: [
+      { key: "moleculeIndex", label: "Molecule (0-4)", min: 0, max: 4, step: 1, defaultValue: 0 },
+      { key: "rotationSpeed", label: "Rotation Speed", min: 0, max: 3, step: 0.1, defaultValue: 1 },
+      { key: "zoom", label: "Zoom", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#16a34a",
+  },
+  {
+    slug: "evolution-of-the-eye",
+    title: "Evolution Of The Eye",
+    category: "physics",
+    description: "Four evolutionary stages of the eye from photoreceptor to camera eye.",
+    longDescription:
+      "Eyes evolved incrementally through natural selection, each stage providing a survival advantage. Stage 1: Simple photoreceptor (Euglena) detects light vs dark. Stage 2: Eye cup (Planarian) provides crude directional sensing. Stage 3: Pinhole eye (Nautilus) forms a real but dim image without a lens. Stage 4: Camera eye (Vertebrate/Octopus) uses a lens to focus light onto a retina for sharp, bright images. This simulation shows all four stages with adjustable light angle.",
+    parameters: [
+      { key: "lightAngle", label: "Light Angle", min: 0, max: 80, step: 5, defaultValue: 30, unit: "°" },
+      { key: "stage", label: "Stage (0=all, 1-4)", min: 0, max: 4, step: 1, defaultValue: 0 },
+      { key: "showRays", label: "Show Light Rays (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#be185d",
+  },
+  {
+    slug: "faradays-law",
+    title: "Faradays Law",
+    category: "physics",
+    description: "Move a magnet near a coil to induce EMF — electromagnetic induction in action.",
+    longDescription:
+      "Faraday's law of electromagnetic induction states that a changing magnetic flux through a circuit induces an electromotive force: EMF = −N × dΦ/dt. This simulation shows a bar magnet oscillating near a coil. As the magnet moves, the changing flux induces a current visible on the galvanometer. Faster movement, more coil turns, or a stronger magnet all increase the induced EMF. Lenz's law ensures the induced current opposes the flux change that created it.",
+    parameters: [
+      { key: "magnetSpeed", label: "Magnet Speed", min: 0.5, max: 8, step: 0.5, defaultValue: 3 },
+      { key: "coilTurns", label: "Coil Turns", min: 1, max: 12, step: 1, defaultValue: 5 },
+      { key: "showFieldLines", label: "Show Field Lines (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "magnetStrength", label: "Magnet Strength", min: 1, max: 10, step: 1, defaultValue: 5 },
+    ],
+    thumbnailColor: "#0284c7",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -2173,6 +2385,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "electric-circuits-ac": () => import("./electricity/electric-circuits-ac").then((m) => m.default),
   "electric-current": () => import("./electricity/electric-current").then((m) => m.default),
   "electric-field-line": () => import("./electricity/electric-field-line").then((m) => m.default),
+  "electroscope": () => import("./physics/electroscope").then((m) => m.default),
+  "electrostatic-induction": () => import("./physics/electrostatic-induction").then((m) => m.default),
+  "electrostatic-induction-metal-bonding": () => import("./physics/electrostatic-induction-metal-bonding").then((m) => m.default),
+  "elevator": () => import("./physics/elevator").then((m) => m.default),
+  "ellipse": () => import("./math/ellipse").then((m) => m.default),
+  "energy-band": () => import("./physics/energy-band").then((m) => m.default),
+  "entropy": () => import("./physics/entropy").then((m) => m.default),
+  "epeirogeny": () => import("./physics/epeirogeny").then((m) => m.default),
+  "equatorial-coordinate-system": () => import("./physics/equatorial-coordinate-system").then((m) => m.default),
+  "equilibrium": () => import("./physics/equilibrium").then((m) => m.default),
+  "equilibrium-constants": () => import("./physics/equilibrium-constants").then((m) => m.default),
+  "equilibrium-of-radiation": () => import("./chemistry/equilibrium-of-radiation").then((m) => m.default),
+  "ester": () => import("./physics/ester").then((m) => m.default),
+  "evolution-of-the-eye": () => import("./physics/evolution-of-the-eye").then((m) => m.default),
+  "faradays-law": () => import("./physics/faradays-law").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
