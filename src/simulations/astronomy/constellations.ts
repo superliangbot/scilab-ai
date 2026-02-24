@@ -374,7 +374,9 @@ const ConstellationsFactory: SimulationFactory = (): SimulationEngine => {
         } else if (cs.star.name === "Pollux" || cs.star.name === "Albireo") {
           hue = 40; // yellowish
         } else if (cs.star.mag < 1.5) {
-          hue = 200 + Math.random() * 30;
+          // Deterministic hue based on star position to avoid flickering
+          const hash = Math.abs(Math.sin(cs.star.x * 12.9898 + cs.star.y * 78.233) * 43758.5453);
+          hue = 200 + (hash % 1) * 30;
         }
 
         drawStarGlow(cs.px, cs.py, radius, alpha, hue);
