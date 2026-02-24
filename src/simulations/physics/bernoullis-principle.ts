@@ -78,7 +78,19 @@ const BernoullisPrincipleFactory: SimulationFactory = (): SimulationEngine => {
     const vt = velocityAt(t);
     // P1 = atmospheric = 101325 Pa
     const P1 = 101325;
-    return P1 + 0.5 * fluidDensity * (v1 * v1 - vt * vt);
+    const unclamped = P1 + 0.5 * fluidDensity * (v1 * v1 - vt * vt);
+    
+    // Clamp negative pressures at 0 (cavitation limit)
+    return Math.max(0, unclamped);
+  }
+  
+  /** Check if cavitation is occurring (pressure would be negative) */
+  function isCavitating(): boolean {
+    const v1 = flowSpeed;
+    const vt = velocityAt(0.5); // Check at the narrowest point
+    const P1 = 101325;
+    const unclamped = P1 + 0.5 * fluidDensity * (v1 * v1 - vt * vt);
+    return unclamped < 0;
   }
 
   // Pipe pixel coordinates
@@ -460,6 +472,16 @@ const BernoullisPrincipleFactory: SimulationFactory = (): SimulationEngine => {
       16, panelY + lineH * row
     );
     row++;
+    
+    // Cavitation warning
+    if (isCavitating()) {
+      ctx.fillStyle = "#ef4444";
+      ctx.fillText(
+        "⚠️ CAVITATION: Pressure clamped at 0 (vapor bubbles would form)",
+        16, panelY + lineH * row
+      );
+      row++;
+    }
 
     // Insight text
     ctx.font = "12px 'Inter', system-ui, sans-serif";
