@@ -1,0 +1,102 @@
+[
+  {
+    "slug": "ammeter",
+    "name": "Ammeter",
+    "url": "https://javalab.org/en/ammeter_en/"
+  },
+  {
+    "slug": "capacitor_2",
+    "name": "Capacitor 2",
+    "url": "https://javalab.org/en/capacitor_2_en/"
+  },
+  {
+    "slug": "capacitor_application",
+    "name": "Capacitor Application",
+    "url": "https://javalab.org/en/capacitor_application_en/"
+  },
+  {
+    "slug": "capacitor_characteristic",
+    "name": "Capacitor Characteristic",
+    "url": "https://javalab.org/en/capacitor_characteristic_en/"
+  },
+  {
+    "slug": "capacitor",
+    "name": "Capacitor",
+    "url": "https://javalab.org/en/capacitor_en/"
+  },
+  {
+    "slug": "categoryelectric_circuit",
+    "name": "Categoryelectric Circuit",
+    "url": "https://javalab.org/en/category/electric_circuit_en/"
+  },
+  {
+    "slug": "categoryelectricity",
+    "name": "Categoryelectricity",
+    "url": "https://javalab.org/en/category/electricity_en/"
+  },
+  {
+    "slug": "categoryelectricityac_rlc",
+    "name": "Categoryelectricityac Rlc",
+    "url": "https://javalab.org/en/category/electricity_en/ac_rlc_en/"
+  },
+  {
+    "slug": "categoryelectricityelectric_circuit",
+    "name": "Categoryelectricityelectric Circuit",
+    "url": "https://javalab.org/en/category/electricity_en/electric_circuit_en/"
+  },
+  {
+    "slug": "categoryelectricityelectromagnetism",
+    "name": "Categoryelectricityelectromagnetism",
+    "url": "https://javalab.org/en/category/electricity_en/electromagnetism_en/"
+  },
+  {
+    "slug": "categoryelectricitymagnetism",
+    "name": "Categoryelectricitymagnetism",
+    "url": "https://javalab.org/en/category/electricity_en/magnetism_en/"
+  },
+  {
+    "slug": "categoryelectricityohms_law",
+    "name": "Categoryelectricityohms Law",
+    "url": "https://javalab.org/en/category/electricity_en/ohms_law_en/"
+  },
+  {
+    "slug": "categoryelectricitysemiconductor",
+    "name": "Categoryelectricitysemiconductor",
+    "url": "https://javalab.org/en/category/electricity_en/semiconductor_en/"
+  },
+  {
+    "slug": "categoryelectricitystatic_electricity",
+    "name": "Categoryelectricitystatic Electricity",
+    "url": "https://javalab.org/en/category/electricity_en/static_electricity_en/"
+  },
+  {
+    "slug": "countercurrent_exchange",
+    "name": "Countercurrent Exchange",
+    "url": "https://javalab.org/en/countercurrent_exchange_en/"
+  },
+  {
+    "slug": "crt",
+    "name": "Crt",
+    "url": "https://javalab.org/en/crt_en/"
+  },
+  {
+    "slug": "crt_tv",
+    "name": "Crt Tv",
+    "url": "https://javalab.org/en/crt_tv_en/"
+  },
+  {
+    "slug": "dielectric_in_capacitor",
+    "name": "Dielectric In Capacitor",
+    "url": "https://javalab.org/en/dielectric_in_capacitor_en/"
+  },
+  {
+    "slug": "diode",
+    "name": "Diode",
+    "url": "https://javalab.org/en/diode_en/"
+  },
+  {
+    "slug": "diode_making",
+    "name": "Diode Making",
+    "url": "https://javalab.org/en/diode_making_en/"
+  }
+]

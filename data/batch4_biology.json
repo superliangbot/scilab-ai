@@ -1,0 +1,102 @@
+[
+  {
+    "slug": "abo_blood_type",
+    "name": "Abo Blood Type",
+    "url": "https://javalab.org/en/abo_blood_type_en/"
+  },
+  {
+    "slug": "area_of_lung",
+    "name": "Area Of Lung",
+    "url": "https://javalab.org/en/area_of_lung_en/"
+  },
+  {
+    "slug": "cell_size",
+    "name": "Cell Size",
+    "url": "https://javalab.org/en/cell_size_en/"
+  },
+  {
+    "slug": "ecosystem",
+    "name": "Ecosystem",
+    "url": "https://javalab.org/en/ecosystem_en/"
+  },
+  {
+    "slug": "ecosystem_v2",
+    "name": "Ecosystem V2",
+    "url": "https://javalab.org/en/ecosystem_v2_en/"
+  },
+  {
+    "slug": "fuel_cell",
+    "name": "Fuel Cell",
+    "url": "https://javalab.org/en/fuel_cell_en/"
+  },
+  {
+    "slug": "heart_rate_counter",
+    "name": "Heart Rate Counter",
+    "url": "https://javalab.org/en/heart_rate_counter_en/"
+  },
+  {
+    "slug": "iris_and_ciliary_body",
+    "name": "Iris And Ciliary Body",
+    "url": "https://javalab.org/en/iris_and_ciliary_body_en/"
+  },
+  {
+    "slug": "meiosis",
+    "name": "Meiosis",
+    "url": "https://javalab.org/en/meiosis_en/"
+  },
+  {
+    "slug": "nephron",
+    "name": "Nephron",
+    "url": "https://javalab.org/en/nephron_en/"
+  },
+  {
+    "slug": "neuron",
+    "name": "Neuron",
+    "url": "https://javalab.org/en/neuron_en/"
+  },
+  {
+    "slug": "pcr",
+    "name": "Pcr",
+    "url": "https://javalab.org/en/pcr_en/"
+  },
+  {
+    "slug": "why_are_cells_small",
+    "name": "Why Are Cells Small",
+    "url": "https://javalab.org/en/why_are_cells_small_en/"
+  },
+  {
+    "slug": "atmosphere",
+    "name": "Atmosphere",
+    "url": "https://javalab.org/en/atmosphere_en/"
+  },
+  {
+    "slug": "categoryatmosphere",
+    "name": "Categoryatmosphere",
+    "url": "https://javalab.org/en/category/atmosphere_en/"
+  },
+  {
+    "slug": "categoryearthatmosphere",
+    "name": "Categoryearthatmosphere",
+    "url": "https://javalab.org/en/category/earth_en/atmosphere_en/"
+  },
+  {
+    "slug": "categoryearthgeology",
+    "name": "Categoryearthgeology",
+    "url": "https://javalab.org/en/category/earth_en/geology_en/"
+  },
+  {
+    "slug": "coriolis_effect",
+    "name": "Coriolis Effect",
+    "url": "https://javalab.org/en/coriolis_effect_en/"
+  },
+  {
+    "slug": "igneous_rock",
+    "name": "Igneous Rock",
+    "url": "https://javalab.org/en/igneous_rock_en/"
+  },
+  {
+    "slug": "sea_breeze",
+    "name": "Sea Breeze",
+    "url": "https://javalab.org/en/sea_breeze_en/"
+  }
+]

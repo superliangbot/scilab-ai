@@ -1,0 +1,102 @@
+[
+  {
+    "slug": "categoryastronomymoon",
+    "name": "Categoryastronomymoon",
+    "url": "https://javalab.org/en/category/astronomy_en/moon_en/"
+  },
+  {
+    "slug": "categoryastronomyplanet_earth",
+    "name": "Categoryastronomyplanet Earth",
+    "url": "https://javalab.org/en/category/astronomy_en/planet_earth_en/"
+  },
+  {
+    "slug": "categoryastronomysolar_system",
+    "name": "Categoryastronomysolar System",
+    "url": "https://javalab.org/en/category/astronomy_en/solar_system_en/"
+  },
+  {
+    "slug": "categoryastronomystar",
+    "name": "Categoryastronomystar",
+    "url": "https://javalab.org/en/category/astronomy_en/star_en/"
+  },
+  {
+    "slug": "celestial_equator_and_the_ecliptic",
+    "name": "Celestial Equator And The Ecliptic",
+    "url": "https://javalab.org/en/celestial_equator_and_the_ecliptic_en/"
+  },
+  {
+    "slug": "eclipse",
+    "name": "Eclipse",
+    "url": "https://javalab.org/en/eclipse_en/"
+  },
+  {
+    "slug": "galilean_moons",
+    "name": "Galilean Moons",
+    "url": "https://javalab.org/en/galilean_moons_en/"
+  },
+  {
+    "slug": "one_side_of_the_moon",
+    "name": "One Side Of The Moon",
+    "url": "https://javalab.org/en/one_side_of_the_moon_en/"
+  },
+  {
+    "slug": "phase_of_moon_2",
+    "name": "Phase Of Moon 2",
+    "url": "https://javalab.org/en/phase_of_moon_2_en/"
+  },
+  {
+    "slug": "phase_of_moon_3",
+    "name": "Phase Of Moon 3",
+    "url": "https://javalab.org/en/phase_of_moon_3_en/"
+  },
+  {
+    "slug": "phase_of_moon",
+    "name": "Phase Of Moon",
+    "url": "https://javalab.org/en/phase_of_moon_en/"
+  },
+  {
+    "slug": "phase_of_venus",
+    "name": "Phase Of Venus",
+    "url": "https://javalab.org/en/phase_of_venus_en/"
+  },
+  {
+    "slug": "real_orbit_of_earth_and_moon",
+    "name": "Real Orbit Of Earth And Moon",
+    "url": "https://javalab.org/en/real_orbit_of_earth_and_moon_en/"
+  },
+  {
+    "slug": "scale_of_solar_system",
+    "name": "Scale Of Solar System",
+    "url": "https://javalab.org/en/scale_of_solar_system_en/"
+  },
+  {
+    "slug": "solar_system",
+    "name": "Solar System",
+    "url": "https://javalab.org/en/solar_system_en/"
+  },
+  {
+    "slug": "solar_system_making",
+    "name": "Solar System Making",
+    "url": "https://javalab.org/en/solar_system_making_en/"
+  },
+  {
+    "slug": "solar_wind",
+    "name": "Solar Wind",
+    "url": "https://javalab.org/en/solar_wind_en/"
+  },
+  {
+    "slug": "why_does_the_moon_rise_50_minutes_later_each_day",
+    "name": "Why Does The Moon Rise 50 Minutes Later Each Day",
+    "url": "https://javalab.org/en/why_does_the_moon_rise_50_minutes_later_each_day_en/"
+  },
+  {
+    "slug": "why_does_the_moon_seem_to_follow_me",
+    "name": "Why Does The Moon Seem To Follow Me",
+    "url": "https://javalab.org/en/why_does_the_moon_seem_to_follow_me_en/"
+  },
+  {
+    "slug": "area_of_circle",
+    "name": "Area Of Circle",
+    "url": "https://javalab.org/en/area_of_circle_en/"
+  }
+]

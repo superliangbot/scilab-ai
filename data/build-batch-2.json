@@ -1,0 +1,77 @@
+[
+  {
+    "slug": "archimedes",
+    "name": "Archimedes",
+    "url": "https://javalab.org/en/archimedes_en/"
+  },
+  {
+    "slug": "area_of_circle",
+    "name": "Area Of Circle",
+    "url": "https://javalab.org/en/area_of_circle_en/"
+  },
+  {
+    "slug": "area_of_lung",
+    "name": "Area Of Lung",
+    "url": "https://javalab.org/en/area_of_lung_en/"
+  },
+  {
+    "slug": "atmosphere",
+    "name": "Atmosphere",
+    "url": "https://javalab.org/en/atmosphere_en/"
+  },
+  {
+    "slug": "atmospheric_pressure",
+    "name": "Atmospheric Pressure",
+    "url": "https://javalab.org/en/atmospheric_pressure_en/"
+  },
+  {
+    "slug": "average_velocity",
+    "name": "Average Velocity",
+    "url": "https://javalab.org/en/average_velocity_en/"
+  },
+  {
+    "slug": "avogadros_law",
+    "name": "Avogadros Law",
+    "url": "https://javalab.org/en/avogadros_law_en/"
+  },
+  {
+    "slug": "balloon",
+    "name": "Balloon",
+    "url": "https://javalab.org/en/balloon_en/"
+  },
+  {
+    "slug": "bernoullis_principle",
+    "name": "Bernoullis Principle",
+    "url": "https://javalab.org/en/bernoullis_principle_en/"
+  },
+  {
+    "slug": "bimetal",
+    "name": "Bimetal",
+    "url": "https://javalab.org/en/bimetal_en/"
+  },
+  {
+    "slug": "binary_counting",
+    "name": "Binary Counting",
+    "url": "https://javalab.org/en/binary_counting_en/"
+  },
+  {
+    "slug": "blocklab_circular",
+    "name": "Blocklab Circular",
+    "url": "https://javalab.org/en/blocklab_circular_en/"
+  },
+  {
+    "slug": "blocklab",
+    "name": "Blocklab",
+    "url": "https://javalab.org/en/blocklab_en/"
+  },
+  {
+    "slug": "blocklab_parabolic",
+    "name": "Blocklab Parabolic",
+    "url": "https://javalab.org/en/blocklab_parabolic_en/"
+  },
+  {
+    "slug": "bohrs_atomic_model",
+    "name": "Bohrs Atomic Model",
+    "url": "https://javalab.org/en/bohrs_atomic_model_en/"
+  }
+]

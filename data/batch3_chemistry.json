@@ -1,0 +1,102 @@
+[
+  {
+    "slug": "activity_series_of_metals",
+    "name": "Activity Series Of Metals",
+    "url": "https://javalab.org/en/activity_series_of_metals_en/"
+  },
+  {
+    "slug": "addition_polymerization",
+    "name": "Addition Polymerization",
+    "url": "https://javalab.org/en/addition_polymerization_en/"
+  },
+  {
+    "slug": "air_conditioner",
+    "name": "Air Conditioner",
+    "url": "https://javalab.org/en/air_conditioner_en/"
+  },
+  {
+    "slug": "alkane_compound",
+    "name": "Alkane Compound",
+    "url": "https://javalab.org/en/alkane_compound_en/"
+  },
+  {
+    "slug": "avogadros_law",
+    "name": "Avogadros Law",
+    "url": "https://javalab.org/en/avogadros_law_en/"
+  },
+  {
+    "slug": "bimetal",
+    "name": "Bimetal",
+    "url": "https://javalab.org/en/bimetal_en/"
+  },
+  {
+    "slug": "bohrs_atomic_model",
+    "name": "Bohrs Atomic Model",
+    "url": "https://javalab.org/en/bohrs_atomic_model_en/"
+  },
+  {
+    "slug": "categoryastronomycelestial_observation",
+    "name": "Categoryastronomycelestial Observation",
+    "url": "https://javalab.org/en/category/astronomy_en/celestial_observation_en/"
+  },
+  {
+    "slug": "categoryatomic_model",
+    "name": "Categoryatomic Model",
+    "url": "https://javalab.org/en/category/atomic_model_en/"
+  },
+  {
+    "slug": "categoryatoms",
+    "name": "Categoryatoms",
+    "url": "https://javalab.org/en/category/atoms_en/"
+  },
+  {
+    "slug": "categoryatomsatomic_model",
+    "name": "Categoryatomsatomic Model",
+    "url": "https://javalab.org/en/category/atoms_en/atomic_model_en/"
+  },
+  {
+    "slug": "categoryatomsradioactivity",
+    "name": "Categoryatomsradioactivity",
+    "url": "https://javalab.org/en/category/atoms_en/radioactivity_en/"
+  },
+  {
+    "slug": "categorychemical_bonds",
+    "name": "Categorychemical Bonds",
+    "url": "https://javalab.org/en/category/chemical_bonds_en/"
+  },
+  {
+    "slug": "categorychemistrychemical_bonds",
+    "name": "Categorychemistrychemical Bonds",
+    "url": "https://javalab.org/en/category/chemistry_en/chemical_bonds_en/"
+  },
+  {
+    "slug": "categorychemistrychemical_reaction",
+    "name": "Categorychemistrychemical Reaction",
+    "url": "https://javalab.org/en/category/chemistry_en/chemical_reaction_en/"
+  },
+  {
+    "slug": "categorychemistryelectrochemistry",
+    "name": "Categorychemistryelectrochemistry",
+    "url": "https://javalab.org/en/category/chemistry_en/electrochemistry_en/"
+  },
+  {
+    "slug": "categorychemistrysolution",
+    "name": "Categorychemistrysolution",
+    "url": "https://javalab.org/en/category/chemistry_en/solution_en/"
+  },
+  {
+    "slug": "categoryenergyenergy_conversion",
+    "name": "Categoryenergyenergy Conversion",
+    "url": "https://javalab.org/en/category/energy_en/energy_conversion_en/"
+  },
+  {
+    "slug": "cell_division_model",
+    "name": "Cell Division Model",
+    "url": "https://javalab.org/en/cell_division_model_en/"
+  },
+  {
+    "slug": "charge_conservation",
+    "name": "Charge Conservation",
+    "url": "https://javalab.org/en/charge_conservation_en/"
+  }
+]

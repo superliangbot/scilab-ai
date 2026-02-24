@@ -1,0 +1,77 @@
+[
+  {
+    "slug": "boiling_point",
+    "name": "Boiling Point",
+    "url": "https://javalab.org/en/boiling_point_en/"
+  },
+  {
+    "slug": "boyles_j_tube",
+    "name": "Boyles J Tube",
+    "url": "https://javalab.org/en/boyles_j_tube_en/"
+  },
+  {
+    "slug": "boyles_law_2",
+    "name": "Boyles Law 2",
+    "url": "https://javalab.org/en/boyles_law_2_en/"
+  },
+  {
+    "slug": "boyles_law",
+    "name": "Boyles Law",
+    "url": "https://javalab.org/en/boyles_law_en/"
+  },
+  {
+    "slug": "brownian_motion",
+    "name": "Brownian Motion",
+    "url": "https://javalab.org/en/brownian_motion_en/"
+  },
+  {
+    "slug": "buoyancy_comparison",
+    "name": "Buoyancy Comparison",
+    "url": "https://javalab.org/en/buoyancy_comparison_en/"
+  },
+  {
+    "slug": "c_curve",
+    "name": "C Curve",
+    "url": "https://javalab.org/en/c_curve_en/"
+  },
+  {
+    "slug": "camera_2",
+    "name": "Camera 2",
+    "url": "https://javalab.org/en/camera_2_en/"
+  },
+  {
+    "slug": "camera",
+    "name": "Camera",
+    "url": "https://javalab.org/en/camera_en/"
+  },
+  {
+    "slug": "capacitor_2",
+    "name": "Capacitor 2",
+    "url": "https://javalab.org/en/capacitor_2_en/"
+  },
+  {
+    "slug": "capacitor_application",
+    "name": "Capacitor Application",
+    "url": "https://javalab.org/en/capacitor_application_en/"
+  },
+  {
+    "slug": "capacitor_characteristic",
+    "name": "Capacitor Characteristic",
+    "url": "https://javalab.org/en/capacitor_characteristic_en/"
+  },
+  {
+    "slug": "capacitor",
+    "name": "Capacitor",
+    "url": "https://javalab.org/en/capacitor_en/"
+  },
+  {
+    "slug": "carnot_engines",
+    "name": "Carnot Engines",
+    "url": "https://javalab.org/en/carnot_engines_en/"
+  },
+  {
+    "slug": "cassegrain_reflector",
+    "name": "Cassegrain Reflector",
+    "url": "https://javalab.org/en/cassegrain_reflector_en/"
+  }
+]

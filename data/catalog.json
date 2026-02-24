@@ -1,0 +1,2577 @@
+{
+  "physics/mechanics": [
+    {
+      "slug": "addition_of_force_2",
+      "name": "Addition Of Force 2",
+      "url": "https://javalab.org/en/addition_of_force_2_en/"
+    },
+    {
+      "slug": "addition_of_force",
+      "name": "Addition Of Force",
+      "url": "https://javalab.org/en/addition_of_force_en/"
+    },
+    {
+      "slug": "air_pressure",
+      "name": "Air Pressure",
+      "url": "https://javalab.org/en/air_pressure_en/"
+    },
+    {
+      "slug": "apparent_motion_of_mars",
+      "name": "Apparent Motion Of Mars",
+      "url": "https://javalab.org/en/apparent_motion_of_mars_en/"
+    },
+    {
+      "slug": "apparent_motion_of_venus",
+      "name": "Apparent Motion Of Venus",
+      "url": "https://javalab.org/en/apparent_motion_of_venus_en/"
+    },
+    {
+      "slug": "archimedes",
+      "name": "Archimedes",
+      "url": "https://javalab.org/en/archimedes_en/"
+    },
+    {
+      "slug": "atmospheric_pressure",
+      "name": "Atmospheric Pressure",
+      "url": "https://javalab.org/en/atmospheric_pressure_en/"
+    },
+    {
+      "slug": "average_velocity",
+      "name": "Average Velocity",
+      "url": "https://javalab.org/en/average_velocity_en/"
+    },
+    {
+      "slug": "bernoullis_principle",
+      "name": "Bernoullis Principle",
+      "url": "https://javalab.org/en/bernoullis_principle_en/"
+    },
+    {
+      "slug": "brownian_motion",
+      "name": "Brownian Motion",
+      "url": "https://javalab.org/en/brownian_motion_en/"
+    },
+    {
+      "slug": "buoyancy_comparison",
+      "name": "Buoyancy Comparison",
+      "url": "https://javalab.org/en/buoyancy_comparison_en/"
+    },
+    {
+      "slug": "categorychemistrymolecules_in_motion",
+      "name": "Categorychemistrymolecules In Motion",
+      "url": "https://javalab.org/en/category/chemistry_en/molecules_in_motion_en/"
+    },
+    {
+      "slug": "categoryforce",
+      "name": "Categoryforce",
+      "url": "https://javalab.org/en/category/force_en/"
+    },
+    {
+      "slug": "categorymechanicscollision",
+      "name": "Categorymechanicscollision",
+      "url": "https://javalab.org/en/category/mechanics_en/collision_en/"
+    },
+    {
+      "slug": "categorymechanicsforce",
+      "name": "Categorymechanicsforce",
+      "url": "https://javalab.org/en/category/mechanics_en/force_en/"
+    },
+    {
+      "slug": "categorymechanicsinertia",
+      "name": "Categorymechanicsinertia",
+      "url": "https://javalab.org/en/category/mechanics_en/inertia_en/"
+    },
+    {
+      "slug": "categorymolecules_in_motion",
+      "name": "Categorymolecules In Motion",
+      "url": "https://javalab.org/en/category/molecules_in_motion_en/"
+    },
+    {
+      "slug": "collision_2",
+      "name": "Collision 2",
+      "url": "https://javalab.org/en/collision_2_en/"
+    },
+    {
+      "slug": "collision",
+      "name": "Collision",
+      "url": "https://javalab.org/en/collision_en/"
+    },
+    {
+      "slug": "conical_pendulum",
+      "name": "Conical Pendulum",
+      "url": "https://javalab.org/en/conical_pendulum_en/"
+    },
+    {
+      "slug": "constant_velocity",
+      "name": "Constant Velocity",
+      "url": "https://javalab.org/en/constant_velocity_en/"
+    },
+    {
+      "slug": "diurnal_motion_3d",
+      "name": "Diurnal Motion 3D",
+      "url": "https://javalab.org/en/diurnal_motion_3d_en/"
+    },
+    {
+      "slug": "diurnal_motion",
+      "name": "Diurnal Motion",
+      "url": "https://javalab.org/en/diurnal_motion_en/"
+    },
+    {
+      "slug": "diurnal_motion_of_sun",
+      "name": "Diurnal Motion Of Sun",
+      "url": "https://javalab.org/en/diurnal_motion_of_sun_en/"
+    },
+    {
+      "slug": "earths_gravity_2",
+      "name": "Earths Gravity 2",
+      "url": "https://javalab.org/en/earths_gravity_2_en/"
+    },
+    {
+      "slug": "earths_gravity",
+      "name": "Earths Gravity",
+      "url": "https://javalab.org/en/earths_gravity_en/"
+    },
+    {
+      "slug": "force_movement",
+      "name": "Force Movement",
+      "url": "https://javalab.org/en/force_movement_en/"
+    },
+    {
+      "slug": "force_on_inclined_plane",
+      "name": "Force On Inclined Plane",
+      "url": "https://javalab.org/en/force_on_inclined_plane_en/"
+    },
+    {
+      "slug": "foucault_pendulum",
+      "name": "Foucault Pendulum",
+      "url": "https://javalab.org/en/foucault_pendulum_en/"
+    },
+    {
+      "slug": "free_fall_2",
+      "name": "Free Fall 2",
+      "url": "https://javalab.org/en/free_fall_2_en/"
+    },
+    {
+      "slug": "free_fall",
+      "name": "Free Fall",
+      "url": "https://javalab.org/en/free_fall_en/"
+    },
+    {
+      "slug": "free_falling",
+      "name": "Free Falling",
+      "url": "https://javalab.org/en/free_falling_en/"
+    },
+    {
+      "slug": "gravity_difference_on_several_planet",
+      "name": "Gravity Difference On Several Planet",
+      "url": "https://javalab.org/en/gravity_difference_on_several_planet_en/"
+    },
+    {
+      "slug": "gravity",
+      "name": "Gravity",
+      "url": "https://javalab.org/en/gravity_en/"
+    },
+    {
+      "slug": "gravity_train",
+      "name": "Gravity Train",
+      "url": "https://javalab.org/en/gravity_train_en/"
+    },
+    {
+      "slug": "inertia",
+      "name": "Inertia",
+      "url": "https://javalab.org/en/inertia_en/"
+    },
+    {
+      "slug": "le_chateliers_principle_pressure",
+      "name": "Le Chateliers Principle Pressure",
+      "url": "https://javalab.org/en/le_chateliers_principle_pressure_en/"
+    },
+    {
+      "slug": "lorentzs_force_3d",
+      "name": "Lorentzs Force 3D",
+      "url": "https://javalab.org/en/lorentzs_force_3d_en/"
+    },
+    {
+      "slug": "lorentzs_force",
+      "name": "Lorentzs Force",
+      "url": "https://javalab.org/en/lorentzs_force_en/"
+    },
+    {
+      "slug": "magnetic_force",
+      "name": "Magnetic Force",
+      "url": "https://javalab.org/en/magnetic_force_en/"
+    },
+    {
+      "slug": "moment_of_inertia_2",
+      "name": "Moment Of Inertia 2",
+      "url": "https://javalab.org/en/moment_of_inertia_2_en/"
+    },
+    {
+      "slug": "moment_of_inertia_3d",
+      "name": "Moment Of Inertia 3D",
+      "url": "https://javalab.org/en/moment_of_inertia_3d_en/"
+    },
+    {
+      "slug": "moment_of_inertia",
+      "name": "Moment Of Inertia",
+      "url": "https://javalab.org/en/moment_of_inertia_en/"
+    },
+    {
+      "slug": "motion_analysis",
+      "name": "Motion Analysis",
+      "url": "https://javalab.org/en/motion_analysis_en/"
+    },
+    {
+      "slug": "motion_shot",
+      "name": "Motion Shot",
+      "url": "https://javalab.org/en/motion_shot_en/"
+    },
+    {
+      "slug": "newton_ring",
+      "name": "Newton Ring",
+      "url": "https://javalab.org/en/newton_ring_en/"
+    },
+    {
+      "slug": "newtonian_reflector",
+      "name": "Newtonian Reflector",
+      "url": "https://javalab.org/en/newtonian_reflector_en/"
+    },
+    {
+      "slug": "newtons_cradle",
+      "name": "Newtons Cradle",
+      "url": "https://javalab.org/en/newtons_cradle_en/"
+    },
+    {
+      "slug": "parabolic_motion",
+      "name": "Parabolic Motion",
+      "url": "https://javalab.org/en/parabolic_motion_en/"
+    },
+    {
+      "slug": "pendulum",
+      "name": "Pendulum",
+      "url": "https://javalab.org/en/pendulum_en/"
+    },
+    {
+      "slug": "pendulum_wave",
+      "name": "Pendulum Wave",
+      "url": "https://javalab.org/en/pendulum_wave_en/"
+    },
+    {
+      "slug": "period_of_pendulum",
+      "name": "Period Of Pendulum",
+      "url": "https://javalab.org/en/period_of_pendulum_en/"
+    },
+    {
+      "slug": "pressure",
+      "name": "Pressure",
+      "url": "https://javalab.org/en/pressure_en/"
+    },
+    {
+      "slug": "pressure_volume_diagram",
+      "name": "Pressure Volume Diagram",
+      "url": "https://javalab.org/en/pressure_volume_diagram_en/"
+    },
+    {
+      "slug": "projectile",
+      "name": "Projectile",
+      "url": "https://javalab.org/en/projectile_en/"
+    },
+    {
+      "slug": "projectile_motion",
+      "name": "Projectile Motion",
+      "url": "https://javalab.org/en/projectile_motion_en/"
+    },
+    {
+      "slug": "pulley_3",
+      "name": "Pulley 3",
+      "url": "https://javalab.org/en/pulley_3_en/"
+    },
+    {
+      "slug": "rocket_and_principle_of_inertia",
+      "name": "Rocket And Principle Of Inertia",
+      "url": "https://javalab.org/en/rocket_and_principle_of_inertia_en/"
+    },
+    {
+      "slug": "seismometer_and_inertia",
+      "name": "Seismometer And Inertia",
+      "url": "https://javalab.org/en/seismometer_and_inertia_en/"
+    },
+    {
+      "slug": "spring",
+      "name": "Spring",
+      "url": "https://javalab.org/en/spring_en/"
+    },
+    {
+      "slug": "spring_pendulum",
+      "name": "Spring Pendulum",
+      "url": "https://javalab.org/en/spring_pendulum_en/"
+    },
+    {
+      "slug": "spring_scales",
+      "name": "Spring Scales",
+      "url": "https://javalab.org/en/spring_scales_en/"
+    },
+    {
+      "slug": "spring_wave",
+      "name": "Spring Wave",
+      "url": "https://javalab.org/en/spring_wave_en/"
+    },
+    {
+      "slug": "springs",
+      "name": "Springs",
+      "url": "https://javalab.org/en/springs_en/"
+    },
+    {
+      "slug": "stroboscope",
+      "name": "Stroboscope",
+      "url": "https://javalab.org/en/stroboscope_en/"
+    },
+    {
+      "slug": "tidal_force",
+      "name": "Tidal Force",
+      "url": "https://javalab.org/en/tidal_force_en/"
+    },
+    {
+      "slug": "uniform_motion",
+      "name": "Uniform Motion",
+      "url": "https://javalab.org/en/uniform_motion_en/"
+    },
+    {
+      "slug": "uniformly_accelerated_motion",
+      "name": "Uniformly Accelerated Motion",
+      "url": "https://javalab.org/en/uniformly_accelerated_motion_en/"
+    },
+    {
+      "slug": "vapor_pressure_lowering",
+      "name": "Vapor Pressure Lowering",
+      "url": "https://javalab.org/en/vapor_pressure_lowering_en/"
+    }
+  ],
+  "physics/oscillation": [
+    {
+      "slug": "categoryelectricityelectromagntic_wave",
+      "name": "Categoryelectricityelectromagntic Wave",
+      "url": "https://javalab.org/en/category/electricity_en/electromagntic_wave_en/"
+    },
+    {
+      "slug": "categorylight_wave",
+      "name": "Categorylight Wave",
+      "url": "https://javalab.org/en/category/light_wave_en/"
+    },
+    {
+      "slug": "categorylight_wavecolor",
+      "name": "Categorylight Wavecolor",
+      "url": "https://javalab.org/en/category/light_wave_en/color_en/"
+    },
+    {
+      "slug": "categorylight_waveinterference",
+      "name": "Categorylight Waveinterference",
+      "url": "https://javalab.org/en/category/light_wave_en/interference_en/"
+    },
+    {
+      "slug": "categorylight_wavereflection",
+      "name": "Categorylight Wavereflection",
+      "url": "https://javalab.org/en/category/light_wave_en/reflection_en/"
+    },
+    {
+      "slug": "categorylight_waverefraction",
+      "name": "Categorylight Waverefraction",
+      "url": "https://javalab.org/en/category/light_wave_en/refraction_en/"
+    },
+    {
+      "slug": "categorylight_wavestanding_wave",
+      "name": "Categorylight Wavestanding Wave",
+      "url": "https://javalab.org/en/category/light_wave_en/standing_wave_en/"
+    },
+    {
+      "slug": "categorylight_wavewave",
+      "name": "Categorylight Wavewave",
+      "url": "https://javalab.org/en/category/light_wave_en/wave_en/"
+    },
+    {
+      "slug": "categorymechanicsoscillation",
+      "name": "Categorymechanicsoscillation",
+      "url": "https://javalab.org/en/category/mechanics_en/oscillation_en/"
+    },
+    {
+      "slug": "categorywave",
+      "name": "Categorywave",
+      "url": "https://javalab.org/en/category/wave_en/"
+    },
+    {
+      "slug": "electromagnetic_wave",
+      "name": "Electromagnetic Wave",
+      "url": "https://javalab.org/en/electromagnetic_wave_en/"
+    },
+    {
+      "slug": "electromagnetic_waves_around_of_visible_rays",
+      "name": "Electromagnetic Waves Around Of Visible Rays",
+      "url": "https://javalab.org/en/electromagnetic_waves_around_of_visible_rays_en/"
+    },
+    {
+      "slug": "electromagnetic_waves",
+      "name": "Electromagnetic Waves",
+      "url": "https://javalab.org/en/electromagnetic_waves_en/"
+    },
+    {
+      "slug": "lc_oscillator",
+      "name": "Lc Oscillator",
+      "url": "https://javalab.org/en/lc_oscillator_en/"
+    },
+    {
+      "slug": "matter_wave",
+      "name": "Matter Wave",
+      "url": "https://javalab.org/en/matter_wave_en/"
+    },
+    {
+      "slug": "radio_wave_communication",
+      "name": "Radio Wave Communication",
+      "url": "https://javalab.org/en/radio_wave_communication_en/"
+    },
+    {
+      "slug": "resonance",
+      "name": "Resonance",
+      "url": "https://javalab.org/en/resonance_en/"
+    },
+    {
+      "slug": "seismic_wave",
+      "name": "Seismic Wave",
+      "url": "https://javalab.org/en/seismic_wave_en/"
+    },
+    {
+      "slug": "sound_wave",
+      "name": "Sound Wave",
+      "url": "https://javalab.org/en/sound_wave_en/"
+    },
+    {
+      "slug": "standing_wave_synthesis",
+      "name": "Standing Wave Synthesis",
+      "url": "https://javalab.org/en/standing_wave_synthesis_en/"
+    },
+    {
+      "slug": "standing_waves",
+      "name": "Standing Waves",
+      "url": "https://javalab.org/en/standing_waves_en/"
+    },
+    {
+      "slug": "standing_waves_on_a_drum_surface",
+      "name": "Standing Waves On A Drum Surface",
+      "url": "https://javalab.org/en/standing_waves_on_a_drum_surface_en/"
+    },
+    {
+      "slug": "standing_waves_on_a_string",
+      "name": "Standing Waves On A String",
+      "url": "https://javalab.org/en/standing_waves_on_a_string_en/"
+    },
+    {
+      "slug": "tuning_fork_and_sound_wave",
+      "name": "Tuning Fork And Sound Wave",
+      "url": "https://javalab.org/en/tuning_fork_and_sound_wave_en/"
+    },
+    {
+      "slug": "water_waves",
+      "name": "Water Waves",
+      "url": "https://javalab.org/en/water_waves_en/"
+    },
+    {
+      "slug": "wave_propagation",
+      "name": "Wave Propagation",
+      "url": "https://javalab.org/en/wave_propagation_en/"
+    },
+    {
+      "slug": "waveform",
+      "name": "Waveform",
+      "url": "https://javalab.org/en/waveform_en/"
+    }
+  ],
+  "physics/waves": [
+    {
+      "slug": "diffraction_grating",
+      "name": "Diffraction Grating",
+      "url": "https://javalab.org/en/diffraction_grating_en/"
+    },
+    {
+      "slug": "doppler_effect_and_redshift",
+      "name": "Doppler Effect And Redshift",
+      "url": "https://javalab.org/en/doppler_effect_and_redshift_en/"
+    },
+    {
+      "slug": "doppler_effect",
+      "name": "Doppler Effect",
+      "url": "https://javalab.org/en/doppler_effect_en/"
+    },
+    {
+      "slug": "light_interference_on_cd_surface",
+      "name": "Light Interference On Cd Surface",
+      "url": "https://javalab.org/en/light_interference_on_cd_surface_en/"
+    },
+    {
+      "slug": "sound_analyzing",
+      "name": "Sound Analyzing",
+      "url": "https://javalab.org/en/sound_analyzing_en/"
+    },
+    {
+      "slug": "sound_fft",
+      "name": "Sound Fft",
+      "url": "https://javalab.org/en/sound_fft_en/"
+    },
+    {
+      "slug": "superposition_and_interference",
+      "name": "Superposition And Interference",
+      "url": "https://javalab.org/en/superposition_and_interference_en/"
+    },
+    {
+      "slug": "superposition",
+      "name": "Superposition",
+      "url": "https://javalab.org/en/superposition_en/"
+    },
+    {
+      "slug": "thin_film_interference",
+      "name": "Thin Film Interference",
+      "url": "https://javalab.org/en/thin_film_interference_en/"
+    }
+  ],
+  "physics/light": [
+    {
+      "slug": "absorption_and_emission_of_light",
+      "name": "Absorption And Emission Of Light",
+      "url": "https://javalab.org/en/absorption_and_emission_of_light_en/"
+    },
+    {
+      "slug": "cassegrain_reflector",
+      "name": "Cassegrain Reflector",
+      "url": "https://javalab.org/en/cassegrain_reflector_en/"
+    },
+    {
+      "slug": "categoryatomsatom_light",
+      "name": "Categoryatomsatom Light",
+      "url": "https://javalab.org/en/category/atoms_en/atom_light_en/"
+    },
+    {
+      "slug": "categorycolor",
+      "name": "Categorycolor",
+      "url": "https://javalab.org/en/category/color_en/"
+    },
+    {
+      "slug": "categoryrefraction",
+      "name": "Categoryrefraction",
+      "url": "https://javalab.org/en/category/refraction_en/"
+    },
+    {
+      "slug": "color_cube",
+      "name": "Color Cube",
+      "url": "https://javalab.org/en/color_cube_en/"
+    },
+    {
+      "slug": "color",
+      "name": "Color",
+      "url": "https://javalab.org/en/color_en/"
+    },
+    {
+      "slug": "color_panel",
+      "name": "Color Panel",
+      "url": "https://javalab.org/en/color_panel_en/"
+    },
+    {
+      "slug": "daylight",
+      "name": "Daylight",
+      "url": "https://javalab.org/en/daylight_en/"
+    },
+    {
+      "slug": "daylight_map",
+      "name": "Daylight Map",
+      "url": "https://javalab.org/en/daylight_map_en/"
+    },
+    {
+      "slug": "double_slit",
+      "name": "Double Slit",
+      "url": "https://javalab.org/en/double_slit_en/"
+    },
+    {
+      "slug": "evolution_of_the_eye",
+      "name": "Evolution Of The Eye",
+      "url": "https://javalab.org/en/evolution_of_the_eye_en/"
+    },
+    {
+      "slug": "gravitational_lensing",
+      "name": "Gravitational Lensing",
+      "url": "https://javalab.org/en/gravitational_lensing_en/"
+    },
+    {
+      "slug": "law_of_reflection",
+      "name": "Law Of Reflection",
+      "url": "https://javalab.org/en/law_of_reflection_en/"
+    },
+    {
+      "slug": "lens",
+      "name": "Lens",
+      "url": "https://javalab.org/en/lens_en/"
+    },
+    {
+      "slug": "light_refraction",
+      "name": "Light Refraction",
+      "url": "https://javalab.org/en/light_refraction_en/"
+    },
+    {
+      "slug": "mirrors",
+      "name": "Mirrors",
+      "url": "https://javalab.org/en/mirrors_en/"
+    },
+    {
+      "slug": "multiple_reflections",
+      "name": "Multiple Reflections",
+      "url": "https://javalab.org/en/multiple_reflections_en/"
+    },
+    {
+      "slug": "optics",
+      "name": "Optics",
+      "url": "https://javalab.org/en/optics_en/"
+    },
+    {
+      "slug": "parallax_of_eyes",
+      "name": "Parallax Of Eyes",
+      "url": "https://javalab.org/en/parallax_of_eyes_en/"
+    },
+    {
+      "slug": "principle_of_mirror",
+      "name": "Principle Of Mirror",
+      "url": "https://javalab.org/en/principle_of_mirror_en/"
+    },
+    {
+      "slug": "prism",
+      "name": "Prism",
+      "url": "https://javalab.org/en/prism_en/"
+    },
+    {
+      "slug": "quantum_of_light",
+      "name": "Quantum Of Light",
+      "url": "https://javalab.org/en/quantum_of_light_en/"
+    },
+    {
+      "slug": "rainbow_by_raindrops",
+      "name": "Rainbow By Raindrops",
+      "url": "https://javalab.org/en/rainbow_by_raindrops_en/"
+    },
+    {
+      "slug": "rainbow_colors",
+      "name": "Rainbow Colors",
+      "url": "https://javalab.org/en/rainbow_colors_en/"
+    },
+    {
+      "slug": "rainbow_formation",
+      "name": "Rainbow Formation",
+      "url": "https://javalab.org/en/rainbow_formation_en/"
+    },
+    {
+      "slug": "refracting_telescope",
+      "name": "Refracting Telescope",
+      "url": "https://javalab.org/en/refracting_telescope_en/"
+    },
+    {
+      "slug": "refraction_a_fish_under_water",
+      "name": "Refraction A Fish Under Water",
+      "url": "https://javalab.org/en/refraction_a_fish_under_water_en/"
+    },
+    {
+      "slug": "seeing_the_light",
+      "name": "Seeing The Light",
+      "url": "https://javalab.org/en/seeing_the_light_en/"
+    },
+    {
+      "slug": "size_of_atom_and_light",
+      "name": "Size Of Atom And Light",
+      "url": "https://javalab.org/en/size_of_atom_and_light_en/"
+    },
+    {
+      "slug": "three_primary_colors",
+      "name": "Three Primary Colors",
+      "url": "https://javalab.org/en/three_primary_colors_en/"
+    },
+    {
+      "slug": "total_internal_reflection",
+      "name": "Total Internal Reflection",
+      "url": "https://javalab.org/en/total_internal_reflection_en/"
+    },
+    {
+      "slug": "youngs_double_slit",
+      "name": "Youngs Double Slit",
+      "url": "https://javalab.org/en/youngs_double_slit_en/"
+    }
+  ],
+  "electricity": [
+    {
+      "slug": "ammeter",
+      "name": "Ammeter",
+      "url": "https://javalab.org/en/ammeter_en/"
+    },
+    {
+      "slug": "capacitor_2",
+      "name": "Capacitor 2",
+      "url": "https://javalab.org/en/capacitor_2_en/"
+    },
+    {
+      "slug": "capacitor_application",
+      "name": "Capacitor Application",
+      "url": "https://javalab.org/en/capacitor_application_en/"
+    },
+    {
+      "slug": "capacitor_characteristic",
+      "name": "Capacitor Characteristic",
+      "url": "https://javalab.org/en/capacitor_characteristic_en/"
+    },
+    {
+      "slug": "capacitor",
+      "name": "Capacitor",
+      "url": "https://javalab.org/en/capacitor_en/"
+    },
+    {
+      "slug": "categoryelectric_circuit",
+      "name": "Categoryelectric Circuit",
+      "url": "https://javalab.org/en/category/electric_circuit_en/"
+    },
+    {
+      "slug": "categoryelectricity",
+      "name": "Categoryelectricity",
+      "url": "https://javalab.org/en/category/electricity_en/"
+    },
+    {
+      "slug": "categoryelectricityac_rlc",
+      "name": "Categoryelectricityac Rlc",
+      "url": "https://javalab.org/en/category/electricity_en/ac_rlc_en/"
+    },
+    {
+      "slug": "categoryelectricityelectric_circuit",
+      "name": "Categoryelectricityelectric Circuit",
+      "url": "https://javalab.org/en/category/electricity_en/electric_circuit_en/"
+    },
+    {
+      "slug": "categoryelectricityelectromagnetism",
+      "name": "Categoryelectricityelectromagnetism",
+      "url": "https://javalab.org/en/category/electricity_en/electromagnetism_en/"
+    },
+    {
+      "slug": "categoryelectricitymagnetism",
+      "name": "Categoryelectricitymagnetism",
+      "url": "https://javalab.org/en/category/electricity_en/magnetism_en/"
+    },
+    {
+      "slug": "categoryelectricityohms_law",
+      "name": "Categoryelectricityohms Law",
+      "url": "https://javalab.org/en/category/electricity_en/ohms_law_en/"
+    },
+    {
+      "slug": "categoryelectricitysemiconductor",
+      "name": "Categoryelectricitysemiconductor",
+      "url": "https://javalab.org/en/category/electricity_en/semiconductor_en/"
+    },
+    {
+      "slug": "categoryelectricitystatic_electricity",
+      "name": "Categoryelectricitystatic Electricity",
+      "url": "https://javalab.org/en/category/electricity_en/static_electricity_en/"
+    },
+    {
+      "slug": "countercurrent_exchange",
+      "name": "Countercurrent Exchange",
+      "url": "https://javalab.org/en/countercurrent_exchange_en/"
+    },
+    {
+      "slug": "crt",
+      "name": "Crt",
+      "url": "https://javalab.org/en/crt_en/"
+    },
+    {
+      "slug": "crt_tv",
+      "name": "Crt Tv",
+      "url": "https://javalab.org/en/crt_tv_en/"
+    },
+    {
+      "slug": "dielectric_in_capacitor",
+      "name": "Dielectric In Capacitor",
+      "url": "https://javalab.org/en/dielectric_in_capacitor_en/"
+    },
+    {
+      "slug": "diode",
+      "name": "Diode",
+      "url": "https://javalab.org/en/diode_en/"
+    },
+    {
+      "slug": "diode_making",
+      "name": "Diode Making",
+      "url": "https://javalab.org/en/diode_making_en/"
+    },
+    {
+      "slug": "electric_circuit",
+      "name": "Electric Circuit",
+      "url": "https://javalab.org/en/electric_circuit_en/"
+    },
+    {
+      "slug": "electric_circuits_ac",
+      "name": "Electric Circuits Ac",
+      "url": "https://javalab.org/en/electric_circuits_ac_en/"
+    },
+    {
+      "slug": "electric_current",
+      "name": "Electric Current",
+      "url": "https://javalab.org/en/electric_current_en/"
+    },
+    {
+      "slug": "electric_field_line",
+      "name": "Electric Field Line",
+      "url": "https://javalab.org/en/electric_field_line_en/"
+    },
+    {
+      "slug": "electric_plating",
+      "name": "Electric Plating",
+      "url": "https://javalab.org/en/electric_plating_en/"
+    },
+    {
+      "slug": "electric_potential_2",
+      "name": "Electric Potential 2",
+      "url": "https://javalab.org/en/electric_potential_2_en/"
+    },
+    {
+      "slug": "electric_potential_3",
+      "name": "Electric Potential 3",
+      "url": "https://javalab.org/en/electric_potential_3_en/"
+    },
+    {
+      "slug": "electric_potential",
+      "name": "Electric Potential",
+      "url": "https://javalab.org/en/electric_potential_en/"
+    },
+    {
+      "slug": "electric_transformer",
+      "name": "Electric Transformer",
+      "url": "https://javalab.org/en/electric_transformer_en/"
+    },
+    {
+      "slug": "filedrop_cmy",
+      "name": "Filedrop Cmy",
+      "url": "https://javalab.org/en/filedrop_cmy_en/"
+    },
+    {
+      "slug": "filedrop_cmyk",
+      "name": "Filedrop Cmyk",
+      "url": "https://javalab.org/en/filedrop_cmyk_en/"
+    },
+    {
+      "slug": "inductor_and_capacitor_2",
+      "name": "Inductor And Capacitor 2",
+      "url": "https://javalab.org/en/inductor_and_capacitor_2_en/"
+    },
+    {
+      "slug": "inductor_and_capacitor_3",
+      "name": "Inductor And Capacitor 3",
+      "url": "https://javalab.org/en/inductor_and_capacitor_3_en/"
+    },
+    {
+      "slug": "inductor_and_capacitor",
+      "name": "Inductor And Capacitor",
+      "url": "https://javalab.org/en/inductor_and_capacitor_en/"
+    },
+    {
+      "slug": "led",
+      "name": "Led",
+      "url": "https://javalab.org/en/led_en/"
+    },
+    {
+      "slug": "leyden_jar",
+      "name": "Leyden Jar",
+      "url": "https://javalab.org/en/leyden_jar_en/"
+    },
+    {
+      "slug": "microbit_capacitor",
+      "name": "Microbit Capacitor",
+      "url": "https://javalab.org/en/microbit_capacitor_en/"
+    },
+    {
+      "slug": "ohms_law",
+      "name": "Ohms Law",
+      "url": "https://javalab.org/en/ohms_law_en/"
+    },
+    {
+      "slug": "parallel_circuit",
+      "name": "Parallel Circuit",
+      "url": "https://javalab.org/en/parallel_circuit_en/"
+    },
+    {
+      "slug": "photoelectric_effect_2",
+      "name": "Photoelectric Effect 2",
+      "url": "https://javalab.org/en/photoelectric_effect_2_en/"
+    },
+    {
+      "slug": "photoelectric_effect",
+      "name": "Photoelectric Effect",
+      "url": "https://javalab.org/en/photoelectric_effect_en/"
+    },
+    {
+      "slug": "potentiometer",
+      "name": "Potentiometer",
+      "url": "https://javalab.org/en/potentiometer_en/"
+    },
+    {
+      "slug": "rectifier_circuit",
+      "name": "Rectifier Circuit",
+      "url": "https://javalab.org/en/rectifier_circuit_en/"
+    },
+    {
+      "slug": "rlc_serial_circuit",
+      "name": "Rlc Serial Circuit",
+      "url": "https://javalab.org/en/rlc_serial_circuit_en/"
+    },
+    {
+      "slug": "same_circuit",
+      "name": "Same Circuit",
+      "url": "https://javalab.org/en/same_circuit_en/"
+    },
+    {
+      "slug": "serial_parallel_circuit_2",
+      "name": "Serial Parallel Circuit 2",
+      "url": "https://javalab.org/en/serial_parallel_circuit_2_en/"
+    },
+    {
+      "slug": "serial_parallel_circuit_3",
+      "name": "Serial Parallel Circuit 3",
+      "url": "https://javalab.org/en/serial_parallel_circuit_3_en/"
+    },
+    {
+      "slug": "serial_parallel_circuit",
+      "name": "Serial Parallel Circuit",
+      "url": "https://javalab.org/en/serial_parallel_circuit_en/"
+    },
+    {
+      "slug": "transistor_2",
+      "name": "Transistor 2",
+      "url": "https://javalab.org/en/transistor_2_en/"
+    },
+    {
+      "slug": "transistor",
+      "name": "Transistor",
+      "url": "https://javalab.org/en/transistor_en/"
+    },
+    {
+      "slug": "triboelectricity",
+      "name": "Triboelectricity",
+      "url": "https://javalab.org/en/triboelectricity_en/"
+    }
+  ],
+  "magnetism": [
+    {
+      "slug": "ac_generator",
+      "name": "Ac Generator",
+      "url": "https://javalab.org/en/ac_generator_en/"
+    },
+    {
+      "slug": "categoryelectromagnetism",
+      "name": "Categoryelectromagnetism",
+      "url": "https://javalab.org/en/category/electromagnetism_en/"
+    },
+    {
+      "slug": "dc_motor_2",
+      "name": "Dc Motor 2",
+      "url": "https://javalab.org/en/dc_motor_2_en/"
+    },
+    {
+      "slug": "dc_motor",
+      "name": "Dc Motor",
+      "url": "https://javalab.org/en/dc_motor_en/"
+    },
+    {
+      "slug": "electrostatic_induction",
+      "name": "Electrostatic Induction",
+      "url": "https://javalab.org/en/electrostatic_induction_en/"
+    },
+    {
+      "slug": "electrostatic_induction_metal_bonding",
+      "name": "Electrostatic Induction Metal Bonding",
+      "url": "https://javalab.org/en/electrostatic_induction_metal_bonding_en/"
+    },
+    {
+      "slug": "faradays_law_2",
+      "name": "Faradays Law 2",
+      "url": "https://javalab.org/en/faradays_law_2_en/"
+    },
+    {
+      "slug": "faradays_law",
+      "name": "Faradays Law",
+      "url": "https://javalab.org/en/faradays_law_en/"
+    },
+    {
+      "slug": "homopolar_motor",
+      "name": "Homopolar Motor",
+      "url": "https://javalab.org/en/homopolar_motor_en/"
+    },
+    {
+      "slug": "magnet_and_electromagnet",
+      "name": "Magnet And Electromagnet",
+      "url": "https://javalab.org/en/magnet_and_electromagnet_en/"
+    },
+    {
+      "slug": "magnet",
+      "name": "Magnet",
+      "url": "https://javalab.org/en/magnet_en/"
+    },
+    {
+      "slug": "magnetic_field_around_a_bar_magnet",
+      "name": "Magnetic Field Around A Bar Magnet",
+      "url": "https://javalab.org/en/magnetic_field_around_a_bar_magnet_en/"
+    },
+    {
+      "slug": "magnetic_field_around_a_circular_wire",
+      "name": "Magnetic Field Around A Circular Wire",
+      "url": "https://javalab.org/en/magnetic_field_around_a_circular_wire_en/"
+    },
+    {
+      "slug": "magnetic_field_around_a_coil",
+      "name": "Magnetic Field Around A Coil",
+      "url": "https://javalab.org/en/magnetic_field_around_a_coil_en/"
+    },
+    {
+      "slug": "magnetic_field_around_a_wire",
+      "name": "Magnetic Field Around A Wire",
+      "url": "https://javalab.org/en/magnetic_field_around_a_wire_en/"
+    },
+    {
+      "slug": "magnetic_induction",
+      "name": "Magnetic Induction",
+      "url": "https://javalab.org/en/magnetic_induction_en/"
+    },
+    {
+      "slug": "magnetization",
+      "name": "Magnetization",
+      "url": "https://javalab.org/en/magnetization_en/"
+    }
+  ],
+  "chemistry": [
+    {
+      "slug": "activity_series_of_metals",
+      "name": "Activity Series Of Metals",
+      "url": "https://javalab.org/en/activity_series_of_metals_en/"
+    },
+    {
+      "slug": "addition_polymerization",
+      "name": "Addition Polymerization",
+      "url": "https://javalab.org/en/addition_polymerization_en/"
+    },
+    {
+      "slug": "air_conditioner",
+      "name": "Air Conditioner",
+      "url": "https://javalab.org/en/air_conditioner_en/"
+    },
+    {
+      "slug": "alkane_compound",
+      "name": "Alkane Compound",
+      "url": "https://javalab.org/en/alkane_compound_en/"
+    },
+    {
+      "slug": "avogadros_law",
+      "name": "Avogadros Law",
+      "url": "https://javalab.org/en/avogadros_law_en/"
+    },
+    {
+      "slug": "bimetal",
+      "name": "Bimetal",
+      "url": "https://javalab.org/en/bimetal_en/"
+    },
+    {
+      "slug": "bohrs_atomic_model",
+      "name": "Bohrs Atomic Model",
+      "url": "https://javalab.org/en/bohrs_atomic_model_en/"
+    },
+    {
+      "slug": "categoryastronomycelestial_observation",
+      "name": "Categoryastronomycelestial Observation",
+      "url": "https://javalab.org/en/category/astronomy_en/celestial_observation_en/"
+    },
+    {
+      "slug": "categoryatomic_model",
+      "name": "Categoryatomic Model",
+      "url": "https://javalab.org/en/category/atomic_model_en/"
+    },
+    {
+      "slug": "categoryatoms",
+      "name": "Categoryatoms",
+      "url": "https://javalab.org/en/category/atoms_en/"
+    },
+    {
+      "slug": "categoryatomsatomic_model",
+      "name": "Categoryatomsatomic Model",
+      "url": "https://javalab.org/en/category/atoms_en/atomic_model_en/"
+    },
+    {
+      "slug": "categoryatomsradioactivity",
+      "name": "Categoryatomsradioactivity",
+      "url": "https://javalab.org/en/category/atoms_en/radioactivity_en/"
+    },
+    {
+      "slug": "categorychemical_bonds",
+      "name": "Categorychemical Bonds",
+      "url": "https://javalab.org/en/category/chemical_bonds_en/"
+    },
+    {
+      "slug": "categorychemistrychemical_bonds",
+      "name": "Categorychemistrychemical Bonds",
+      "url": "https://javalab.org/en/category/chemistry_en/chemical_bonds_en/"
+    },
+    {
+      "slug": "categorychemistrychemical_reaction",
+      "name": "Categorychemistrychemical Reaction",
+      "url": "https://javalab.org/en/category/chemistry_en/chemical_reaction_en/"
+    },
+    {
+      "slug": "categorychemistryelectrochemistry",
+      "name": "Categorychemistryelectrochemistry",
+      "url": "https://javalab.org/en/category/chemistry_en/electrochemistry_en/"
+    },
+    {
+      "slug": "categorychemistrysolution",
+      "name": "Categorychemistrysolution",
+      "url": "https://javalab.org/en/category/chemistry_en/solution_en/"
+    },
+    {
+      "slug": "categoryenergyenergy_conversion",
+      "name": "Categoryenergyenergy Conversion",
+      "url": "https://javalab.org/en/category/energy_en/energy_conversion_en/"
+    },
+    {
+      "slug": "cell_division_model",
+      "name": "Cell Division Model",
+      "url": "https://javalab.org/en/cell_division_model_en/"
+    },
+    {
+      "slug": "charge_conservation",
+      "name": "Charge Conservation",
+      "url": "https://javalab.org/en/charge_conservation_en/"
+    },
+    {
+      "slug": "charge_distribution_on_a_thin_conductive_plate",
+      "name": "Charge Distribution On A Thin Conductive Plate",
+      "url": "https://javalab.org/en/charge_distribution_on_a_thin_conductive_plate_en/"
+    },
+    {
+      "slug": "chemical_bonding",
+      "name": "Chemical Bonding",
+      "url": "https://javalab.org/en/chemical_bonding_en/"
+    },
+    {
+      "slug": "chemical_cell",
+      "name": "Chemical Cell",
+      "url": "https://javalab.org/en/chemical_cell_en/"
+    },
+    {
+      "slug": "chemical_change_of_candle",
+      "name": "Chemical Change Of Candle",
+      "url": "https://javalab.org/en/chemical_change_of_candle_en/"
+    },
+    {
+      "slug": "condition_of_circular_movement",
+      "name": "Condition Of Circular Movement",
+      "url": "https://javalab.org/en/condition_of_circular_movement_en/"
+    },
+    {
+      "slug": "conduction_2",
+      "name": "Conduction 2",
+      "url": "https://javalab.org/en/conduction_2_en/"
+    },
+    {
+      "slug": "conduction_3",
+      "name": "Conduction 3",
+      "url": "https://javalab.org/en/conduction_3_en/"
+    },
+    {
+      "slug": "conduction",
+      "name": "Conduction",
+      "url": "https://javalab.org/en/conduction_en/"
+    },
+    {
+      "slug": "constellations",
+      "name": "Constellations",
+      "url": "https://javalab.org/en/constellations_en/"
+    },
+    {
+      "slug": "convection",
+      "name": "Convection",
+      "url": "https://javalab.org/en/convection_en/"
+    },
+    {
+      "slug": "correction_of_near_sightedness",
+      "name": "Correction Of Near Sightedness",
+      "url": "https://javalab.org/en/correction_of_near_sightedness_en/"
+    },
+    {
+      "slug": "cosmic_expansion",
+      "name": "Cosmic Expansion",
+      "url": "https://javalab.org/en/cosmic_expansion_en/"
+    },
+    {
+      "slug": "covalent_bond",
+      "name": "Covalent Bond",
+      "url": "https://javalab.org/en/covalent_bond_en/"
+    },
+    {
+      "slug": "crystal_ball",
+      "name": "Crystal Ball",
+      "url": "https://javalab.org/en/crystal_ball_en/"
+    },
+    {
+      "slug": "differentiation_2",
+      "name": "Differentiation 2",
+      "url": "https://javalab.org/en/differentiation_2_en/"
+    },
+    {
+      "slug": "differentiation",
+      "name": "Differentiation",
+      "url": "https://javalab.org/en/differentiation_en/"
+    },
+    {
+      "slug": "dissolution_process",
+      "name": "Dissolution Process",
+      "url": "https://javalab.org/en/dissolution_process_en/"
+    },
+    {
+      "slug": "ductile_and_malleable_properties_of_pure_metal",
+      "name": "Ductile And Malleable Properties Of Pure Metal",
+      "url": "https://javalab.org/en/ductile_and_malleable_properties_of_pure_metal_en/"
+    },
+    {
+      "slug": "electrolysis_of_water",
+      "name": "Electrolysis Of Water",
+      "url": "https://javalab.org/en/electrolysis_of_water_en/"
+    },
+    {
+      "slug": "electron_configuration",
+      "name": "Electron Configuration",
+      "url": "https://javalab.org/en/electron_configuration_en/"
+    },
+    {
+      "slug": "element_game",
+      "name": "Element Game",
+      "url": "https://javalab.org/en/element_game_en/"
+    },
+    {
+      "slug": "equilibrium_of_radiation",
+      "name": "Equilibrium Of Radiation",
+      "url": "https://javalab.org/en/equilibrium_of_radiation_en/"
+    },
+    {
+      "slug": "formation_model_of_columnar_joint",
+      "name": "Formation Model Of Columnar Joint",
+      "url": "https://javalab.org/en/formation_model_of_columnar_joint_en/"
+    },
+    {
+      "slug": "gas_in_various_condition",
+      "name": "Gas In Various Condition",
+      "url": "https://javalab.org/en/gas_in_various_condition_en/"
+    },
+    {
+      "slug": "graph_of_charles_law",
+      "name": "Graph Of Charles Law",
+      "url": "https://javalab.org/en/graph_of_charles_law_en/"
+    },
+    {
+      "slug": "graph_of_saturated_vapor_2",
+      "name": "Graph Of Saturated Vapor 2",
+      "url": "https://javalab.org/en/graph_of_saturated_vapor_2_en/"
+    },
+    {
+      "slug": "ion_exchange_resin",
+      "name": "Ion Exchange Resin",
+      "url": "https://javalab.org/en/ion_exchange_resin_en/"
+    },
+    {
+      "slug": "ion_model",
+      "name": "Ion Model",
+      "url": "https://javalab.org/en/ion_model_en/"
+    },
+    {
+      "slug": "ion_movement",
+      "name": "Ion Movement",
+      "url": "https://javalab.org/en/ion_movement_en/"
+    },
+    {
+      "slug": "ionic_bond_2",
+      "name": "Ionic Bond 2",
+      "url": "https://javalab.org/en/ionic_bond_2_en/"
+    },
+    {
+      "slug": "ionic_bond",
+      "name": "Ionic Bond",
+      "url": "https://javalab.org/en/ionic_bond_en/"
+    },
+    {
+      "slug": "law_of_definite_proportions_2",
+      "name": "Law Of Definite Proportions 2",
+      "url": "https://javalab.org/en/law_of_definite_proportions_2_en/"
+    },
+    {
+      "slug": "law_of_definite_proportions",
+      "name": "Law Of Definite Proportions",
+      "url": "https://javalab.org/en/law_of_definite_proportions_en/"
+    },
+    {
+      "slug": "maximum_elongation_of_inner_planets",
+      "name": "Maximum Elongation Of Inner Planets",
+      "url": "https://javalab.org/en/maximum_elongation_of_inner_planets_en/"
+    },
+    {
+      "slug": "molecule",
+      "name": "Molecule",
+      "url": "https://javalab.org/en/molecule_en/"
+    },
+    {
+      "slug": "nacl_ionic_bond",
+      "name": "Nacl Ionic Bond",
+      "url": "https://javalab.org/en/nacl_ionic_bond_en/"
+    },
+    {
+      "slug": "neutralization_reaction",
+      "name": "Neutralization Reaction",
+      "url": "https://javalab.org/en/neutralization_reaction_en/"
+    },
+    {
+      "slug": "normal_distribution",
+      "name": "Normal Distribution",
+      "url": "https://javalab.org/en/normal_distribution_en/"
+    },
+    {
+      "slug": "nuclear_chain_reaction",
+      "name": "Nuclear Chain Reaction",
+      "url": "https://javalab.org/en/nuclear_chain_reaction_en/"
+    },
+    {
+      "slug": "plants_respiration",
+      "name": "Plants Respiration",
+      "url": "https://javalab.org/en/plants_respiration_en/"
+    },
+    {
+      "slug": "polar_molecule_and_nonpolar_molecule",
+      "name": "Polar Molecule And Nonpolar Molecule",
+      "url": "https://javalab.org/en/polar_molecule_and_nonpolar_molecule_en/"
+    },
+    {
+      "slug": "polarization",
+      "name": "Polarization",
+      "url": "https://javalab.org/en/polarization_en/"
+    },
+    {
+      "slug": "precipitation_reaction",
+      "name": "Precipitation Reaction",
+      "url": "https://javalab.org/en/precipitation_reaction_en/"
+    },
+    {
+      "slug": "reaction_rate_of_solution",
+      "name": "Reaction Rate Of Solution",
+      "url": "https://javalab.org/en/reaction_rate_of_solution_en/"
+    },
+    {
+      "slug": "reaction_time",
+      "name": "Reaction Time",
+      "url": "https://javalab.org/en/reaction_time_en/"
+    },
+    {
+      "slug": "reproduction",
+      "name": "Reproduction",
+      "url": "https://javalab.org/en/reproduction_en/"
+    },
+    {
+      "slug": "resistance_connection",
+      "name": "Resistance Connection",
+      "url": "https://javalab.org/en/resistance_connection_en/"
+    },
+    {
+      "slug": "room_convection",
+      "name": "Room Convection",
+      "url": "https://javalab.org/en/room_convection_en/"
+    },
+    {
+      "slug": "scale_of_atom",
+      "name": "Scale Of Atom",
+      "url": "https://javalab.org/en/scale_of_atom_en/"
+    },
+    {
+      "slug": "separation_of_iron_and_aluminum",
+      "name": "Separation Of Iron And Aluminum",
+      "url": "https://javalab.org/en/separation_of_iron_and_aluminum_en/"
+    },
+    {
+      "slug": "standard_reduction_potentials",
+      "name": "Standard Reduction Potentials",
+      "url": "https://javalab.org/en/standard_reduction_potentials_en/"
+    },
+    {
+      "slug": "stellar_classification",
+      "name": "Stellar Classification",
+      "url": "https://javalab.org/en/stellar_classification_en/"
+    },
+    {
+      "slug": "structure_of_an_atom",
+      "name": "Structure Of An Atom",
+      "url": "https://javalab.org/en/structure_of_an_atom_en/"
+    },
+    {
+      "slug": "surface_tension",
+      "name": "Surface Tension",
+      "url": "https://javalab.org/en/surface_tension_en/"
+    },
+    {
+      "slug": "temperature_and_reaction_rate",
+      "name": "Temperature And Reaction Rate",
+      "url": "https://javalab.org/en/temperature_and_reaction_rate_en/"
+    },
+    {
+      "slug": "trigonometric_functions",
+      "name": "Trigonometric Functions",
+      "url": "https://javalab.org/en/trigonometric_functions_en/"
+    }
+  ],
+  "chemistry/thermo": [
+    {
+      "slug": "4_stroke_engine",
+      "name": "4 Stroke Engine",
+      "url": "https://javalab.org/en/4_stroke_engine_en/"
+    },
+    {
+      "slug": "carnot_engines",
+      "name": "Carnot Engines",
+      "url": "https://javalab.org/en/carnot_engines_en/"
+    },
+    {
+      "slug": "categorychemistryheat",
+      "name": "Categorychemistryheat",
+      "url": "https://javalab.org/en/category/chemistry_en/heat_en/"
+    },
+    {
+      "slug": "categoryheat",
+      "name": "Categoryheat",
+      "url": "https://javalab.org/en/category/heat_en/"
+    },
+    {
+      "slug": "entropy",
+      "name": "Entropy",
+      "url": "https://javalab.org/en/entropy_en/"
+    },
+    {
+      "slug": "heat_capacity",
+      "name": "Heat Capacity",
+      "url": "https://javalab.org/en/heat_capacity_en/"
+    },
+    {
+      "slug": "specific_heat",
+      "name": "Specific Heat",
+      "url": "https://javalab.org/en/specific_heat_en/"
+    },
+    {
+      "slug": "wheatstone_bridge",
+      "name": "Wheatstone Bridge",
+      "url": "https://javalab.org/en/wheatstone_bridge_en/"
+    }
+  ],
+  "chemistry/gas": [
+    {
+      "slug": "balloon",
+      "name": "Balloon",
+      "url": "https://javalab.org/en/balloon_en/"
+    },
+    {
+      "slug": "boyles_j_tube",
+      "name": "Boyles J Tube",
+      "url": "https://javalab.org/en/boyles_j_tube_en/"
+    },
+    {
+      "slug": "boyles_law_2",
+      "name": "Boyles Law 2",
+      "url": "https://javalab.org/en/boyles_law_2_en/"
+    },
+    {
+      "slug": "boyles_law",
+      "name": "Boyles Law",
+      "url": "https://javalab.org/en/boyles_law_en/"
+    },
+    {
+      "slug": "categorychemistrygas",
+      "name": "Categorychemistrygas",
+      "url": "https://javalab.org/en/category/chemistry_en/gas_en/"
+    },
+    {
+      "slug": "charles_law",
+      "name": "Charles Law",
+      "url": "https://javalab.org/en/charles_law_en/"
+    },
+    {
+      "slug": "gas",
+      "name": "Gas",
+      "url": "https://javalab.org/en/gas_en/"
+    },
+    {
+      "slug": "gas_model",
+      "name": "Gas Model",
+      "url": "https://javalab.org/en/gas_model_en/"
+    },
+    {
+      "slug": "status_solid_liquid_gas",
+      "name": "Status Solid Liquid Gas",
+      "url": "https://javalab.org/en/status_solid_liquid_gas_en/"
+    },
+    {
+      "slug": "straw",
+      "name": "Straw",
+      "url": "https://javalab.org/en/straw_en/"
+    },
+    {
+      "slug": "torricellis_experiment",
+      "name": "Torricellis Experiment",
+      "url": "https://javalab.org/en/torricellis_experiment_en/"
+    }
+  ],
+  "astronomy": [
+    {
+      "slug": "categoryastronomymoon",
+      "name": "Categoryastronomymoon",
+      "url": "https://javalab.org/en/category/astronomy_en/moon_en/"
+    },
+    {
+      "slug": "categoryastronomyplanet_earth",
+      "name": "Categoryastronomyplanet Earth",
+      "url": "https://javalab.org/en/category/astronomy_en/planet_earth_en/"
+    },
+    {
+      "slug": "categoryastronomysolar_system",
+      "name": "Categoryastronomysolar System",
+      "url": "https://javalab.org/en/category/astronomy_en/solar_system_en/"
+    },
+    {
+      "slug": "categoryastronomystar",
+      "name": "Categoryastronomystar",
+      "url": "https://javalab.org/en/category/astronomy_en/star_en/"
+    },
+    {
+      "slug": "celestial_equator_and_the_ecliptic",
+      "name": "Celestial Equator And The Ecliptic",
+      "url": "https://javalab.org/en/celestial_equator_and_the_ecliptic_en/"
+    },
+    {
+      "slug": "eclipse",
+      "name": "Eclipse",
+      "url": "https://javalab.org/en/eclipse_en/"
+    },
+    {
+      "slug": "galilean_moons",
+      "name": "Galilean Moons",
+      "url": "https://javalab.org/en/galilean_moons_en/"
+    },
+    {
+      "slug": "one_side_of_the_moon",
+      "name": "One Side Of The Moon",
+      "url": "https://javalab.org/en/one_side_of_the_moon_en/"
+    },
+    {
+      "slug": "phase_of_moon_2",
+      "name": "Phase Of Moon 2",
+      "url": "https://javalab.org/en/phase_of_moon_2_en/"
+    },
+    {
+      "slug": "phase_of_moon_3",
+      "name": "Phase Of Moon 3",
+      "url": "https://javalab.org/en/phase_of_moon_3_en/"
+    },
+    {
+      "slug": "phase_of_moon",
+      "name": "Phase Of Moon",
+      "url": "https://javalab.org/en/phase_of_moon_en/"
+    },
+    {
+      "slug": "phase_of_venus",
+      "name": "Phase Of Venus",
+      "url": "https://javalab.org/en/phase_of_venus_en/"
+    },
+    {
+      "slug": "real_orbit_of_earth_and_moon",
+      "name": "Real Orbit Of Earth And Moon",
+      "url": "https://javalab.org/en/real_orbit_of_earth_and_moon_en/"
+    },
+    {
+      "slug": "scale_of_solar_system",
+      "name": "Scale Of Solar System",
+      "url": "https://javalab.org/en/scale_of_solar_system_en/"
+    },
+    {
+      "slug": "solar_system",
+      "name": "Solar System",
+      "url": "https://javalab.org/en/solar_system_en/"
+    },
+    {
+      "slug": "solar_system_making",
+      "name": "Solar System Making",
+      "url": "https://javalab.org/en/solar_system_making_en/"
+    },
+    {
+      "slug": "solar_wind",
+      "name": "Solar Wind",
+      "url": "https://javalab.org/en/solar_wind_en/"
+    },
+    {
+      "slug": "why_does_the_moon_rise_50_minutes_later_each_day",
+      "name": "Why Does The Moon Rise 50 Minutes Later Each Day",
+      "url": "https://javalab.org/en/why_does_the_moon_rise_50_minutes_later_each_day_en/"
+    },
+    {
+      "slug": "why_does_the_moon_seem_to_follow_me",
+      "name": "Why Does The Moon Seem To Follow Me",
+      "url": "https://javalab.org/en/why_does_the_moon_seem_to_follow_me_en/"
+    }
+  ],
+  "biology": [
+    {
+      "slug": "abo_blood_type",
+      "name": "Abo Blood Type",
+      "url": "https://javalab.org/en/abo_blood_type_en/"
+    },
+    {
+      "slug": "area_of_lung",
+      "name": "Area Of Lung",
+      "url": "https://javalab.org/en/area_of_lung_en/"
+    },
+    {
+      "slug": "cell_size",
+      "name": "Cell Size",
+      "url": "https://javalab.org/en/cell_size_en/"
+    },
+    {
+      "slug": "ecosystem",
+      "name": "Ecosystem",
+      "url": "https://javalab.org/en/ecosystem_en/"
+    },
+    {
+      "slug": "ecosystem_v2",
+      "name": "Ecosystem V2",
+      "url": "https://javalab.org/en/ecosystem_v2_en/"
+    },
+    {
+      "slug": "fuel_cell",
+      "name": "Fuel Cell",
+      "url": "https://javalab.org/en/fuel_cell_en/"
+    },
+    {
+      "slug": "heart_rate_counter",
+      "name": "Heart Rate Counter",
+      "url": "https://javalab.org/en/heart_rate_counter_en/"
+    },
+    {
+      "slug": "iris_and_ciliary_body",
+      "name": "Iris And Ciliary Body",
+      "url": "https://javalab.org/en/iris_and_ciliary_body_en/"
+    },
+    {
+      "slug": "meiosis",
+      "name": "Meiosis",
+      "url": "https://javalab.org/en/meiosis_en/"
+    },
+    {
+      "slug": "nephron",
+      "name": "Nephron",
+      "url": "https://javalab.org/en/nephron_en/"
+    },
+    {
+      "slug": "neuron",
+      "name": "Neuron",
+      "url": "https://javalab.org/en/neuron_en/"
+    },
+    {
+      "slug": "pcr",
+      "name": "Pcr",
+      "url": "https://javalab.org/en/pcr_en/"
+    },
+    {
+      "slug": "why_are_cells_small",
+      "name": "Why Are Cells Small",
+      "url": "https://javalab.org/en/why_are_cells_small_en/"
+    }
+  ],
+  "earth_science": [
+    {
+      "slug": "atmosphere",
+      "name": "Atmosphere",
+      "url": "https://javalab.org/en/atmosphere_en/"
+    },
+    {
+      "slug": "categoryatmosphere",
+      "name": "Categoryatmosphere",
+      "url": "https://javalab.org/en/category/atmosphere_en/"
+    },
+    {
+      "slug": "categoryearthatmosphere",
+      "name": "Categoryearthatmosphere",
+      "url": "https://javalab.org/en/category/earth_en/atmosphere_en/"
+    },
+    {
+      "slug": "categoryearthgeology",
+      "name": "Categoryearthgeology",
+      "url": "https://javalab.org/en/category/earth_en/geology_en/"
+    },
+    {
+      "slug": "coriolis_effect",
+      "name": "Coriolis Effect",
+      "url": "https://javalab.org/en/coriolis_effect_en/"
+    },
+    {
+      "slug": "igneous_rock",
+      "name": "Igneous Rock",
+      "url": "https://javalab.org/en/igneous_rock_en/"
+    },
+    {
+      "slug": "sea_breeze",
+      "name": "Sea Breeze",
+      "url": "https://javalab.org/en/sea_breeze_en/"
+    },
+    {
+      "slug": "weather_fronts",
+      "name": "Weather Fronts",
+      "url": "https://javalab.org/en/weather_fronts_en/"
+    }
+  ],
+  "math": [
+    {
+      "slug": "area_of_circle",
+      "name": "Area Of Circle",
+      "url": "https://javalab.org/en/area_of_circle_en/"
+    },
+    {
+      "slug": "binary_counting",
+      "name": "Binary Counting",
+      "url": "https://javalab.org/en/binary_counting_en/"
+    },
+    {
+      "slug": "categorymathchaos",
+      "name": "Categorymathchaos",
+      "url": "https://javalab.org/en/category/math_en/chaos_en/"
+    },
+    {
+      "slug": "categorymathfractal",
+      "name": "Categorymathfractal",
+      "url": "https://javalab.org/en/category/math_en/fractal_en/"
+    },
+    {
+      "slug": "categorymathmath_graphics",
+      "name": "Categorymathmath Graphics",
+      "url": "https://javalab.org/en/category/math_en/math_graphics_en/"
+    },
+    {
+      "slug": "circumference_of_a_circle",
+      "name": "Circumference Of A Circle",
+      "url": "https://javalab.org/en/circumference_of_a_circle_en/"
+    },
+    {
+      "slug": "ellipse",
+      "name": "Ellipse",
+      "url": "https://javalab.org/en/ellipse_en/"
+    },
+    {
+      "slug": "fourier-series_2",
+      "name": "Fourier-Series 2",
+      "url": "https://javalab.org/en/fourier-series_2_en/"
+    },
+    {
+      "slug": "fourier_analysis",
+      "name": "Fourier Analysis",
+      "url": "https://javalab.org/en/fourier_analysis_en/"
+    },
+    {
+      "slug": "fourier_series",
+      "name": "Fourier Series",
+      "url": "https://javalab.org/en/fourier_series_en/"
+    },
+    {
+      "slug": "galton_board",
+      "name": "Galton Board",
+      "url": "https://javalab.org/en/galton_board_en/"
+    },
+    {
+      "slug": "geometric_series",
+      "name": "Geometric Series",
+      "url": "https://javalab.org/en/geometric_series_en/"
+    },
+    {
+      "slug": "integral",
+      "name": "Integral",
+      "url": "https://javalab.org/en/integral_en/"
+    },
+    {
+      "slug": "mandelbrot_set",
+      "name": "Mandelbrot Set",
+      "url": "https://javalab.org/en/mandelbrot_set_en/"
+    },
+    {
+      "slug": "pascals_triangle",
+      "name": "Pascals Triangle",
+      "url": "https://javalab.org/en/pascals_triangle_en/"
+    },
+    {
+      "slug": "polygonal_wheel",
+      "name": "Polygonal Wheel",
+      "url": "https://javalab.org/en/polygonal_wheel_en/"
+    },
+    {
+      "slug": "pythagoras_tree",
+      "name": "Pythagoras Tree",
+      "url": "https://javalab.org/en/pythagoras_tree_en/"
+    },
+    {
+      "slug": "pythagorean_theorem_2",
+      "name": "Pythagorean Theorem 2",
+      "url": "https://javalab.org/en/pythagorean_theorem_2_en/"
+    },
+    {
+      "slug": "pythagorean_theorem",
+      "name": "Pythagorean Theorem",
+      "url": "https://javalab.org/en/pythagorean_theorem_en/"
+    },
+    {
+      "slug": "radians",
+      "name": "Radians",
+      "url": "https://javalab.org/en/radians_en/"
+    },
+    {
+      "slug": "sierpinski_triangle",
+      "name": "Sierpinski Triangle",
+      "url": "https://javalab.org/en/sierpinski_triangle_en/"
+    },
+    {
+      "slug": "triangle_and_tetragon",
+      "name": "Triangle And Tetragon",
+      "url": "https://javalab.org/en/triangle_and_tetragon_en/"
+    },
+    {
+      "slug": "triangle_trick",
+      "name": "Triangle Trick",
+      "url": "https://javalab.org/en/triangle_trick_en/"
+    }
+  ],
+  "technology": [
+    {
+      "slug": "blocklab_circular",
+      "name": "Blocklab Circular",
+      "url": "https://javalab.org/en/blocklab_circular_en/"
+    },
+    {
+      "slug": "blocklab",
+      "name": "Blocklab",
+      "url": "https://javalab.org/en/blocklab_en/"
+    },
+    {
+      "slug": "blocklab_parabolic",
+      "name": "Blocklab Parabolic",
+      "url": "https://javalab.org/en/blocklab_parabolic_en/"
+    },
+    {
+      "slug": "categorytech3d_printing",
+      "name": "Categorytech3D Printing",
+      "url": "https://javalab.org/en/category/tech_en/3d_printing_en/"
+    },
+    {
+      "slug": "categorytechblock_coding",
+      "name": "Categorytechblock Coding",
+      "url": "https://javalab.org/en/category/tech_en/block_coding_en/"
+    },
+    {
+      "slug": "categorytechmicrobit",
+      "name": "Categorytechmicrobit",
+      "url": "https://javalab.org/en/category/tech_en/microbit_en/"
+    },
+    {
+      "slug": "microbit_pulse",
+      "name": "Microbit Pulse",
+      "url": "https://javalab.org/en/microbit_pulse_en/"
+    }
+  ],
+  "other": [
+    {
+      "slug": "am_fm",
+      "name": "Am Fm",
+      "url": "https://javalab.org/en/am_fm_en/"
+    },
+    {
+      "slug": "boiling_point",
+      "name": "Boiling Point",
+      "url": "https://javalab.org/en/boiling_point_en/"
+    },
+    {
+      "slug": "c_curve",
+      "name": "C Curve",
+      "url": "https://javalab.org/en/c_curve_en/"
+    },
+    {
+      "slug": "camera_2",
+      "name": "Camera 2",
+      "url": "https://javalab.org/en/camera_2_en/"
+    },
+    {
+      "slug": "camera",
+      "name": "Camera",
+      "url": "https://javalab.org/en/camera_en/"
+    },
+    {
+      "slug": "category3d_vr",
+      "name": "Category3D Vr",
+      "url": "https://javalab.org/en/category/3d_vr_en/"
+    },
+    {
+      "slug": "categoryar",
+      "name": "Categoryar",
+      "url": "https://javalab.org/en/category/ar_en/"
+    },
+    {
+      "slug": "categoryastronomy",
+      "name": "Categoryastronomy",
+      "url": "https://javalab.org/en/category/astronomy_en/"
+    },
+    {
+      "slug": "categoryastronomysun",
+      "name": "Categoryastronomysun",
+      "url": "https://javalab.org/en/category/astronomy_en/sun_en/"
+    },
+    {
+      "slug": "categorybiology",
+      "name": "Categorybiology",
+      "url": "https://javalab.org/en/category/biology_en/"
+    },
+    {
+      "slug": "categorychemistry",
+      "name": "Categorychemistry",
+      "url": "https://javalab.org/en/category/chemistry_en/"
+    },
+    {
+      "slug": "categoryearth",
+      "name": "Categoryearth",
+      "url": "https://javalab.org/en/category/earth_en/"
+    },
+    {
+      "slug": "categoryenergy",
+      "name": "Categoryenergy",
+      "url": "https://javalab.org/en/category/energy_en/"
+    },
+    {
+      "slug": "categoryenergyprinciple_of_work",
+      "name": "Categoryenergyprinciple Of Work",
+      "url": "https://javalab.org/en/category/energy_en/principle_of_work_en/"
+    },
+    {
+      "slug": "categorymath",
+      "name": "Categorymath",
+      "url": "https://javalab.org/en/category/math_en/"
+    },
+    {
+      "slug": "categorymathmathematics",
+      "name": "Categorymathmathematics",
+      "url": "https://javalab.org/en/category/math_en/mathematics_en/"
+    },
+    {
+      "slug": "categorymathematics",
+      "name": "Categorymathematics",
+      "url": "https://javalab.org/en/category/mathematics_en/"
+    },
+    {
+      "slug": "categorymeasure",
+      "name": "Categorymeasure",
+      "url": "https://javalab.org/en/category/measure_en/"
+    },
+    {
+      "slug": "categorymeasuredata_science",
+      "name": "Categorymeasuredata Science",
+      "url": "https://javalab.org/en/category/measure_en/data_science_en/"
+    },
+    {
+      "slug": "categorymeasurelogger",
+      "name": "Categorymeasurelogger",
+      "url": "https://javalab.org/en/category/measure_en/logger_en/"
+    },
+    {
+      "slug": "categorymeasuremeasurement",
+      "name": "Categorymeasuremeasurement",
+      "url": "https://javalab.org/en/category/measure_en/measurement_en/"
+    },
+    {
+      "slug": "categorymeasurerelativity",
+      "name": "Categorymeasurerelativity",
+      "url": "https://javalab.org/en/category/measure_en/relativity_en/"
+    },
+    {
+      "slug": "categorymechanics",
+      "name": "Categorymechanics",
+      "url": "https://javalab.org/en/category/mechanics_en/"
+    },
+    {
+      "slug": "categorymechanicsmovements",
+      "name": "Categorymechanicsmovements",
+      "url": "https://javalab.org/en/category/mechanics_en/movements_en/"
+    },
+    {
+      "slug": "categorymovements",
+      "name": "Categorymovements",
+      "url": "https://javalab.org/en/category/movements_en/"
+    },
+    {
+      "slug": "categoryresources",
+      "name": "Categoryresources",
+      "url": "https://javalab.org/en/category/resources_en/"
+    },
+    {
+      "slug": "categorytech",
+      "name": "Categorytech",
+      "url": "https://javalab.org/en/category/tech_en/"
+    },
+    {
+      "slug": "categorytechai",
+      "name": "Categorytechai",
+      "url": "https://javalab.org/en/category/tech_en/ai_en/"
+    },
+    {
+      "slug": "categorytechpuzzle",
+      "name": "Categorytechpuzzle",
+      "url": "https://javalab.org/en/category/tech_en/puzzle_en/"
+    },
+    {
+      "slug": "chord",
+      "name": "Chord",
+      "url": "https://javalab.org/en/chord_en/"
+    },
+    {
+      "slug": "clay_shooting",
+      "name": "Clay Shooting",
+      "url": "https://javalab.org/en/clay_shooting_en/"
+    },
+    {
+      "slug": "cmyk_decomposer",
+      "name": "Cmyk Decomposer",
+      "url": "https://javalab.org/en/cmyk_decomposer_en/"
+    },
+    {
+      "slug": "cochlear",
+      "name": "Cochlear",
+      "url": "https://javalab.org/en/cochlear_en/"
+    },
+    {
+      "slug": "cold_warm_water",
+      "name": "Cold Warm Water",
+      "url": "https://javalab.org/en/cold_warm_water_en/"
+    },
+    {
+      "slug": "conductor_and_insulator",
+      "name": "Conductor And Insulator",
+      "url": "https://javalab.org/en/conductor_and_insulator_en/"
+    },
+    {
+      "slug": "continental_drift",
+      "name": "Continental Drift",
+      "url": "https://javalab.org/en/continental_drift_en/"
+    },
+    {
+      "slug": "dc_and_ac",
+      "name": "Dc And Ac",
+      "url": "https://javalab.org/en/dc_and_ac_en/"
+    },
+    {
+      "slug": "dew",
+      "name": "Dew",
+      "url": "https://javalab.org/en/dew_en/"
+    },
+    {
+      "slug": "dihybrid_cross",
+      "name": "Dihybrid Cross",
+      "url": "https://javalab.org/en/dihybrid_cross_en/"
+    },
+    {
+      "slug": "dipole_antenna",
+      "name": "Dipole Antenna",
+      "url": "https://javalab.org/en/dipole_antenna_en/"
+    },
+    {
+      "slug": "distance_of_1_pc",
+      "name": "Distance Of 1 Pc",
+      "url": "https://javalab.org/en/distance_of_1_pc_en/"
+    },
+    {
+      "slug": "dragon_curve",
+      "name": "Dragon Curve",
+      "url": "https://javalab.org/en/dragon_curve_en/"
+    },
+    {
+      "slug": "earth_movements",
+      "name": "Earth Movements",
+      "url": "https://javalab.org/en/earth_movements_en/"
+    },
+    {
+      "slug": "electroscope",
+      "name": "Electroscope",
+      "url": "https://javalab.org/en/electroscope_en/"
+    },
+    {
+      "slug": "elevator",
+      "name": "Elevator",
+      "url": "https://javalab.org/en/elevator_en/"
+    },
+    {
+      "slug": "energy_band",
+      "name": "Energy Band",
+      "url": "https://javalab.org/en/energy_band_en/"
+    },
+    {
+      "slug": "epeirogeny",
+      "name": "Epeirogeny",
+      "url": "https://javalab.org/en/epeirogeny_en/"
+    },
+    {
+      "slug": "equatorial_coordinate_system",
+      "name": "Equatorial Coordinate System",
+      "url": "https://javalab.org/en/equatorial_coordinate_system_en/"
+    },
+    {
+      "slug": "equilibrium_constants",
+      "name": "Equilibrium Constants",
+      "url": "https://javalab.org/en/equilibrium_constants_en/"
+    },
+    {
+      "slug": "equilibrium",
+      "name": "Equilibrium",
+      "url": "https://javalab.org/en/equilibrium_en/"
+    },
+    {
+      "slug": "ester",
+      "name": "Ester",
+      "url": "https://javalab.org/en/ester_en/"
+    },
+    {
+      "slug": "fireworks",
+      "name": "Fireworks",
+      "url": "https://javalab.org/en/fireworks_en/"
+    },
+    {
+      "slug": "five_kingdom",
+      "name": "Five Kingdom",
+      "url": "https://javalab.org/en/five_kingdom_en/"
+    },
+    {
+      "slug": "flame_test",
+      "name": "Flame Test",
+      "url": "https://javalab.org/en/flame_test_en/"
+    },
+    {
+      "slug": "fnd",
+      "name": "Fnd",
+      "url": "https://javalab.org/en/fnd_en/"
+    },
+    {
+      "slug": "general_relativity",
+      "name": "General Relativity",
+      "url": "https://javalab.org/en/general_relativity_en/"
+    },
+    {
+      "slug": "geocentrism_and_heliocentrism",
+      "name": "Geocentrism And Heliocentrism",
+      "url": "https://javalab.org/en/geocentrism_and_heliocentrism_en/"
+    },
+    {
+      "slug": "half_life_period",
+      "name": "Half Life Period",
+      "url": "https://javalab.org/en/half_life_period_en/"
+    },
+    {
+      "slug": "hilbert_curve",
+      "name": "Hilbert Curve",
+      "url": "https://javalab.org/en/hilbert_curve_en/"
+    },
+    {
+      "slug": "horizontal_coordinate_system",
+      "name": "Horizontal Coordinate System",
+      "url": "https://javalab.org/en/horizontal_coordinate_system_en/"
+    },
+    {
+      "slug": "human_gene_transfer",
+      "name": "Human Gene Transfer",
+      "url": "https://javalab.org/en/human_gene_transfer_en/"
+    },
+    {
+      "slug": "hydrocarbon",
+      "name": "Hydrocarbon",
+      "url": "https://javalab.org/en/hydrocarbon_en/"
+    },
+    {
+      "slug": "impulse",
+      "name": "Impulse",
+      "url": "https://javalab.org/en/impulse_en/"
+    },
+    {
+      "slug": "incandescence",
+      "name": "Incandescence",
+      "url": "https://javalab.org/en/incandescence_en/"
+    },
+    {
+      "slug": "indoor_wiring",
+      "name": "Indoor Wiring",
+      "url": "https://javalab.org/en/indoor_wiring_en/"
+    },
+    {
+      "slug": "inductor",
+      "name": "Inductor",
+      "url": "https://javalab.org/en/inductor_en/"
+    },
+    {
+      "slug": "keplers_law",
+      "name": "Keplers Law",
+      "url": "https://javalab.org/en/keplers_law_en/"
+    },
+    {
+      "slug": "kinetic_theory_model",
+      "name": "Kinetic Theory Model",
+      "url": "https://javalab.org/en/kinetic_theory_model_en/"
+    },
+    {
+      "slug": "koch_curve",
+      "name": "Koch Curve",
+      "url": "https://javalab.org/en/koch_curve_en/"
+    },
+    {
+      "slug": "latitude_of_polaris",
+      "name": "Latitude Of Polaris",
+      "url": "https://javalab.org/en/latitude_of_polaris_en/"
+    },
+    {
+      "slug": "lc_filter",
+      "name": "Lc Filter",
+      "url": "https://javalab.org/en/lc_filter_en/"
+    },
+    {
+      "slug": "lcd_display_2",
+      "name": "Lcd Display 2",
+      "url": "https://javalab.org/en/lcd_display_2_en/"
+    },
+    {
+      "slug": "lcd_display",
+      "name": "Lcd Display",
+      "url": "https://javalab.org/en/lcd_display_en/"
+    },
+    {
+      "slug": "life_game",
+      "name": "Life Game",
+      "url": "https://javalab.org/en/life_game_en/"
+    },
+    {
+      "slug": "little_princes_trampoline",
+      "name": "Little Princes Trampoline",
+      "url": "https://javalab.org/en/little_princes_trampoline_en/"
+    },
+    {
+      "slug": "logic",
+      "name": "Logic",
+      "url": "https://javalab.org/en/logic_en/"
+    },
+    {
+      "slug": "lorenzs_water_mill",
+      "name": "Lorenzs Water Mill",
+      "url": "https://javalab.org/en/lorenzs_water_mill_en/"
+    },
+    {
+      "slug": "magnitude",
+      "name": "Magnitude",
+      "url": "https://javalab.org/en/magnitude_en/"
+    },
+    {
+      "slug": "measuring_the_earth_2",
+      "name": "Measuring The Earth 2",
+      "url": "https://javalab.org/en/measuring_the_earth_2_en/"
+    },
+    {
+      "slug": "measuring_the_earth",
+      "name": "Measuring The Earth",
+      "url": "https://javalab.org/en/measuring_the_earth_en/"
+    },
+    {
+      "slug": "mendeleev",
+      "name": "Mendeleev",
+      "url": "https://javalab.org/en/mendeleev_en/"
+    },
+    {
+      "slug": "mendels_law_of_heredity",
+      "name": "Mendels Law Of Heredity",
+      "url": "https://javalab.org/en/mendels_law_of_heredity_en/"
+    },
+    {
+      "slug": "michelson_interferometer",
+      "name": "Michelson Interferometer",
+      "url": "https://javalab.org/en/michelson_interferometer_en/"
+    },
+    {
+      "slug": "microscope",
+      "name": "Microscope",
+      "url": "https://javalab.org/en/microscope_en/"
+    },
+    {
+      "slug": "microscopic_image",
+      "name": "Microscopic Image",
+      "url": "https://javalab.org/en/microscopic_image_en/"
+    },
+    {
+      "slug": "oersteds_experiment",
+      "name": "Oersteds Experiment",
+      "url": "https://javalab.org/en/oersteds_experiment_en/"
+    },
+    {
+      "slug": "on_the_table",
+      "name": "On The Table",
+      "url": "https://javalab.org/en/on_the_table_en/"
+    },
+    {
+      "slug": "osmosis",
+      "name": "Osmosis",
+      "url": "https://javalab.org/en/osmosis_en/"
+    },
+    {
+      "slug": "parallel_rays_of_sun",
+      "name": "Parallel Rays Of Sun",
+      "url": "https://javalab.org/en/parallel_rays_of_sun_en/"
+    },
+    {
+      "slug": "pascals_principle",
+      "name": "Pascals Principle",
+      "url": "https://javalab.org/en/pascals_principle_en/"
+    },
+    {
+      "slug": "path_of_satellite",
+      "name": "Path Of Satellite",
+      "url": "https://javalab.org/en/path_of_satellite_en/"
+    },
+    {
+      "slug": "phase_array",
+      "name": "Phase Array",
+      "url": "https://javalab.org/en/phase_array_en/"
+    },
+    {
+      "slug": "polarity_of_water",
+      "name": "Polarity Of Water",
+      "url": "https://javalab.org/en/polarity_of_water_en/"
+    },
+    {
+      "slug": "principle_of_least_time",
+      "name": "Principle Of Least Time",
+      "url": "https://javalab.org/en/principle_of_least_time_en/"
+    },
+    {
+      "slug": "principle_of_satellite",
+      "name": "Principle Of Satellite",
+      "url": "https://javalab.org/en/principle_of_satellite_en/"
+    },
+    {
+      "slug": "psychrometer",
+      "name": "Psychrometer",
+      "url": "https://javalab.org/en/psychrometer_en/"
+    },
+    {
+      "slug": "pump_problem",
+      "name": "Pump Problem",
+      "url": "https://javalab.org/en/pump_problem_en/"
+    },
+    {
+      "slug": "pvnrt",
+      "name": "Pvnrt",
+      "url": "https://javalab.org/en/pvnrt_en/"
+    },
+    {
+      "slug": "resistive_touch_screen",
+      "name": "Resistive Touch Screen",
+      "url": "https://javalab.org/en/resistive_touch_screen_en/"
+    },
+    {
+      "slug": "rgb_decomposer",
+      "name": "Rgb Decomposer",
+      "url": "https://javalab.org/en/rgb_decomposer_en/"
+    },
+    {
+      "slug": "rgb",
+      "name": "Rgb",
+      "url": "https://javalab.org/en/rgb_en/"
+    },
+    {
+      "slug": "rgb_filter",
+      "name": "Rgb Filter",
+      "url": "https://javalab.org/en/rgb_filter_en/"
+    },
+    {
+      "slug": "rutherford_scattering_and_size_of_nucleus",
+      "name": "Rutherford Scattering And Size Of Nucleus",
+      "url": "https://javalab.org/en/rutherford_scattering_and_size_of_nucleus_en/"
+    },
+    {
+      "slug": "rutherford_scattering",
+      "name": "Rutherford Scattering",
+      "url": "https://javalab.org/en/rutherford_scattering_en/"
+    },
+    {
+      "slug": "sierpinski_curve",
+      "name": "Sierpinski Curve",
+      "url": "https://javalab.org/en/sierpinski_curve_en/"
+    },
+    {
+      "slug": "speaker",
+      "name": "Speaker",
+      "url": "https://javalab.org/en/speaker_en/"
+    },
+    {
+      "slug": "spectrogram",
+      "name": "Spectrogram",
+      "url": "https://javalab.org/en/spectrogram_en/"
+    },
+    {
+      "slug": "spectrum",
+      "name": "Spectrum",
+      "url": "https://javalab.org/en/spectrum_en/"
+    },
+    {
+      "slug": "spectrum_of_hydrogen",
+      "name": "Spectrum Of Hydrogen",
+      "url": "https://javalab.org/en/spectrum_of_hydrogen_en/"
+    },
+    {
+      "slug": "speedgun",
+      "name": "Speedgun",
+      "url": "https://javalab.org/en/speedgun_en/"
+    },
+    {
+      "slug": "stairbulb",
+      "name": "Stairbulb",
+      "url": "https://javalab.org/en/stairbulb_en/"
+    },
+    {
+      "slug": "status_change_of_water",
+      "name": "Status Change Of Water",
+      "url": "https://javalab.org/en/status_change_of_water_en/"
+    },
+    {
+      "slug": "status_of_water_2",
+      "name": "Status Of Water 2",
+      "url": "https://javalab.org/en/status_of_water_2_en/"
+    },
+    {
+      "slug": "status_of_water",
+      "name": "Status Of Water",
+      "url": "https://javalab.org/en/status_of_water_en/"
+    },
+    {
+      "slug": "stellar_parallax_3d",
+      "name": "Stellar Parallax 3D",
+      "url": "https://javalab.org/en/stellar_parallax_3d_en/"
+    },
+    {
+      "slug": "stellar_parallax",
+      "name": "Stellar Parallax",
+      "url": "https://javalab.org/en/stellar_parallax_en/"
+    },
+    {
+      "slug": "step_response",
+      "name": "Step Response",
+      "url": "https://javalab.org/en/step_response_en/"
+    },
+    {
+      "slug": "stoichiometry_with_ammonia_synthesis",
+      "name": "Stoichiometry With Ammonia Synthesis",
+      "url": "https://javalab.org/en/stoichiometry_with_ammonia_synthesis_en/"
+    },
+    {
+      "slug": "stoichiometry_with_water_synthesis",
+      "name": "Stoichiometry With Water Synthesis",
+      "url": "https://javalab.org/en/stoichiometry_with_water_synthesis_en/"
+    },
+    {
+      "slug": "stopwatch_for_pulse_measurement",
+      "name": "Stopwatch For Pulse Measurement",
+      "url": "https://javalab.org/en/stopwatch_for_pulse_measurement_en/"
+    },
+    {
+      "slug": "stratum_making",
+      "name": "Stratum Making",
+      "url": "https://javalab.org/en/stratum_making_en/"
+    },
+    {
+      "slug": "structure_of_ice_3d",
+      "name": "Structure Of Ice 3D",
+      "url": "https://javalab.org/en/structure_of_ice_3d_en/"
+    },
+    {
+      "slug": "sum_of_exterior_angle",
+      "name": "Sum Of Exterior Angle",
+      "url": "https://javalab.org/en/sum_of_exterior_angle_en/"
+    },
+    {
+      "slug": "swingby_1",
+      "name": "Swingby 1",
+      "url": "https://javalab.org/en/swingby_1_en/"
+    },
+    {
+      "slug": "swingby_2",
+      "name": "Swingby 2",
+      "url": "https://javalab.org/en/swingby_2_en/"
+    },
+    {
+      "slug": "test_cross",
+      "name": "Test Cross",
+      "url": "https://javalab.org/en/test_cross_en/"
+    },
+    {
+      "slug": "theo_jansen",
+      "name": "Theo Jansen",
+      "url": "https://javalab.org/en/theo_jansen_en/"
+    },
+    {
+      "slug": "thermometer",
+      "name": "Thermometer",
+      "url": "https://javalab.org/en/thermometer_en/"
+    },
+    {
+      "slug": "three_body_problem",
+      "name": "Three Body Problem",
+      "url": "https://javalab.org/en/three_body_problem_en/"
+    },
+    {
+      "slug": "three_phase_equilibrium",
+      "name": "Three Phase Equilibrium",
+      "url": "https://javalab.org/en/three_phase_equilibrium_en/"
+    },
+    {
+      "slug": "ticker_timer",
+      "name": "Ticker Timer",
+      "url": "https://javalab.org/en/ticker_timer_en/"
+    },
+    {
+      "slug": "tides",
+      "name": "Tides",
+      "url": "https://javalab.org/en/tides_en/"
+    },
+    {
+      "slug": "touch_screen",
+      "name": "Touch Screen",
+      "url": "https://javalab.org/en/touch_screen_en/"
+    },
+    {
+      "slug": "ursa_minor_3d",
+      "name": "Ursa Minor 3D",
+      "url": "https://javalab.org/en/ursa_minor_3d_en/"
+    },
+    {
+      "slug": "vacuum_jar",
+      "name": "Vacuum Jar",
+      "url": "https://javalab.org/en/vacuum_jar_en/"
+    },
+    {
+      "slug": "why_is_the_sky_blue",
+      "name": "Why Is The Sky Blue",
+      "url": "https://javalab.org/en/why_is_the_sky_blue_en/"
+    },
+    {
+      "slug": "zodiac_2",
+      "name": "Zodiac 2",
+      "url": "https://javalab.org/en/zodiac_2_en/"
+    },
+    {
+      "slug": "zodiac",
+      "name": "Zodiac",
+      "url": "https://javalab.org/en/zodiac_en/"
+    }
+  ]
+}
