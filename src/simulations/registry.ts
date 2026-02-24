@@ -1378,6 +1378,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "boyles-law-2": () => import("./chemistry/boyles-law-2").then((m) => m.default),
   "buoyancy-comparison": () => import("./physics/buoyancy-comparison").then((m) => m.default),
   "c-curve": () => import("./math/c-curve").then((m) => m.default),
+  "camera-2": () => import("./physics/camera-2").then((m) => m.default),
+  "camera": () => import("./physics/camera").then((m) => m.default),
+  "capacitor-2": () => import("./electricity/capacitor-2").then((m) => m.default),
+  "capacitor-application": () => import("./electricity/capacitor-application").then((m) => m.default),
+  "capacitor-characteristic": () => import("./electricity/capacitor-characteristic").then((m) => m.default),
+  "carnot-engines": () => import("./chemistry/carnot-engines").then((m) => m.default),
+  "celestial-equator-and-the-ecliptic": () => import("./astronomy/celestial-equator-and-the-ecliptic").then((m) => m.default),
+  "cell-division-model": () => import("./biology/cell-division-model").then((m) => m.default),
+  "charge-conservation": () => import("./electricity/charge-conservation").then((m) => m.default),
+  "charge-distribution-on-a-thin-conductive-plate": () => import("./electricity/charge-distribution-on-a-thin-conductive-plate").then((m) => m.default),
+  "chemical-cell": () => import("./biology/chemical-cell").then((m) => m.default),
+  "chemical-change-of-candle": () => import("./chemistry/chemical-change-of-candle").then((m) => m.default),
+  "chord": () => import("./math/chord").then((m) => m.default),
+  "circumference-of-a-circle": () => import("./math/circumference-of-a-circle").then((m) => m.default),
+  "clay-shooting": () => import("./physics/clay-shooting").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
