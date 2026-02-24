@@ -37,7 +37,7 @@ const BoylesLawFactory: SimulationFactory = () => {
 
   // Parameters (cached)
   let pressure = 1; // atm
-  let temperature = 300; // K
+  const temperature = 300; // K (constant for Boyle's Law)
   let numParticles = 40;
 
   // Derived state
@@ -156,14 +156,7 @@ const BoylesLawFactory: SimulationFactory = () => {
 
     update(dt: number, params: Record<string, number>) {
       const newPressure = params.pressure ?? pressure;
-      const newTemp = params.temperature ?? temperature;
       const newNum = Math.round(params.numParticles ?? numParticles);
-
-      // Temperature change
-      if (newTemp !== temperature) {
-        rescaleSpeeds(temperature, newTemp);
-        temperature = newTemp;
-      }
 
       // Pressure change -> volume change (Boyle's Law)
       pressure = newPressure;
@@ -524,7 +517,6 @@ const BoylesLawFactory: SimulationFactory = () => {
 
     reset() {
       pressure = config.parameters.find((p) => p.key === "pressure")!.defaultValue;
-      temperature = config.parameters.find((p) => p.key === "temperature")!.defaultValue;
       numParticles = config.parameters.find((p) => p.key === "numParticles")!.defaultValue;
       currentVolume = computeVolume(pressure);
       pvPoints = [];

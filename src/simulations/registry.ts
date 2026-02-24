@@ -422,7 +422,6 @@ export const simulationConfigs: SimulationConfig[] = [
       "Boyle's Law (1662) states that at constant temperature, the pressure and volume of a gas are inversely proportional: P₁V₁ = P₂V₂. This simulation shows gas particles with a movable piston and a PV diagram showing the theoretical hyperbola.",
     parameters: [
       { key: "pressure", label: "Pressure", min: 0.5, max: 4, step: 0.1, defaultValue: 1, unit: "atm" },
-      { key: "temperature", label: "Temperature", min: 200, max: 500, step: 10, defaultValue: 300, unit: "K" },
       { key: "numParticles", label: "Particles", min: 10, max: 100, step: 5, defaultValue: 40 },
     ],
     thumbnailColor: "#14b8a6",
