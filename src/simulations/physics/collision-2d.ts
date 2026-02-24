@@ -430,7 +430,7 @@ const Collision2DFactory: SimulationFactory = (): SimulationEngine => {
   function drawInfoPanel(): void {
     ctx.save();
     const panelW = 280;
-    const panelH = 140;
+    const panelH = 155;
     const panelX = 10;
     const panelY = 10;
 
@@ -476,6 +476,11 @@ const Collision2DFactory: SimulationFactory = (): SimulationEngine => {
       ctx.fillText("Awaiting collision...", panelX + 10, panelY + 106);
       ctx.fillText(`m\u2081v\u2081 + m\u2082v\u2082 = m\u2081v\u2081' + m\u2082v\u2082'`, panelX + 10, panelY + 124);
     }
+    
+    // Note about wall momentum
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.font = "10px system-ui, sans-serif";
+    ctx.fillText("Note: Wall bounces involve external forces", panelX + 10, panelY + 138);
 
     ctx.restore();
   }
