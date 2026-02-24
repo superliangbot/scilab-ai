@@ -95,7 +95,7 @@ const GasLawsFactory: SimulationFactory = () => {
   function mbSpeedComponent(): number {
     // Box-Muller transform for normal distribution with sigma = sqrt(kT/m)
     const sigma = Math.sqrt((kB * temperature) / PARTICLE_MASS_KG);
-    const u1 = Math.random();
+    const u1 = Math.random() || Number.MIN_VALUE; // Guard against log(0)
     const u2 = Math.random();
     return sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
   }

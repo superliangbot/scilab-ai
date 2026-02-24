@@ -70,7 +70,7 @@ const BrownianMotionFactory: SimulationFactory = (): SimulationEngine => {
       // Random speed from Maxwell-Boltzmann-like distribution (Box-Muller approximation)
       const u1 = Math.random();
       const u2 = Math.random();
-      const gaussFactor = Math.sqrt(-2 * Math.log(u1 || 0.001)) * Math.cos(2 * Math.PI * u2);
+      const gaussFactor = Math.sqrt(-2 * Math.log(u1 || Number.MIN_VALUE)) * Math.cos(2 * Math.PI * u2);
       const s = speed * (0.5 + 0.5 * Math.abs(gaussFactor));
 
       molecules.push({

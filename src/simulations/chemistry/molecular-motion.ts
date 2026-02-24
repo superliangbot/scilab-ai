@@ -154,7 +154,7 @@ const MolecularMotionFactory: SimulationFactory = () => {
   /** Box-Muller: one component of velocity drawn from Maxwell-Boltzmann */
   function mbSpeedComponent(mass: number): number {
     const sigma = Math.sqrt((kB * temperature) / mass);
-    const u1 = Math.random();
+    const u1 = Math.random() || Number.MIN_VALUE; // Guard against log(0)
     const u2 = Math.random();
     return sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
   }
