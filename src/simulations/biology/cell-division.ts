@@ -330,8 +330,8 @@ const CellDivisionFactory: SimulationFactory = (): SimulationEngine => {
         }
       }
 
-      // Smooth lerp to target positions
-      const lerpSpeed = 0.08;
+      // Smooth lerp to target positions (frame-rate independent)
+      const lerpSpeed = 1 - Math.pow(1 - 0.08, dt * 60);
       ch.x = lerp(ch.x, ch.targetX, lerpSpeed);
       ch.y = lerp(ch.y, ch.targetY, lerpSpeed);
       ch.angle = lerp(ch.angle, ch.targetAngle, lerpSpeed);
