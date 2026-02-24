@@ -2887,6 +2887,175 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#7e22ce",
   },
+  // NEW BATCH: Physics and Chemistry Simulations
+  {
+    slug: "spring-mass-system",
+    title: "Spring-Mass System", 
+    category: "physics",
+    description: "Harmonic oscillation with spring-mass system.",
+    longDescription: "Spring-mass system demonstrating simple harmonic motion with Hooke's law.",
+    parameters: [
+      { key: "springConstant", label: "Spring Constant", min: 5, max: 50, step: 2.5, defaultValue: 10, unit: "N/m" },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "🌊",
+  },
+  {
+    slug: "moment-of-inertia",
+    title: "Moment of Inertia",
+    category: "physics", 
+    description: "Different shapes rotating showing mass distribution effects.",
+    longDescription: "How moment of inertia affects rotational motion for different object shapes.",
+    parameters: [
+      { key: "shapeType", label: "Shape Type", min: 0, max: 5, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "🌀",
+  },
+  {
+    slug: "hookes-law",
+    title: "Hooke's Law",
+    category: "physics",
+    description: "Spring force demonstration with linear relationships.", 
+    longDescription: "Hooke's Law: F = kx showing force proportional to displacement.",
+    parameters: [
+      { key: "force", label: "Applied Force", min: 0, max: 50, step: 1, defaultValue: 10, unit: "N" },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "📏",
+  },
+  {
+    slug: "double-slit-experiment",
+    title: "Double-Slit Experiment",
+    category: "physics",
+    description: "Wave-particle duality and quantum interference.",
+    longDescription: "Young's double-slit experiment showing quantum interference patterns.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 400, max: 700, step: 10, defaultValue: 550, unit: "nm" },
+    ],
+    thumbnailColor: "#8b5cf6", 
+    icon: "〰️",
+  },
+  {
+    slug: "photoelectric-effect",
+    title: "Photoelectric Effect",
+    category: "physics",
+    description: "Einstein's photoelectric effect showing quantum nature of light.",
+    longDescription: "Demonstrates photon energy quantization and electron emission thresholds.",
+    parameters: [
+      { key: "frequency", label: "Light Frequency", min: 400, max: 1000, step: 10, defaultValue: 600, unit: "THz" },
+    ],
+    thumbnailColor: "#ef4444",
+    icon: "☀️",
+  },
+  {
+    slug: "rolling-motion-dynamics",
+    title: "Rolling Motion Dynamics", 
+    category: "physics",
+    description: "Objects rolling down inclines with rotational motion.",
+    longDescription: "Rolling motion combining translation and rotation with different object shapes.",
+    parameters: [
+      { key: "inclineAngle", label: "Incline Angle", min: 5, max: 45, step: 2, defaultValue: 15, unit: "°" },
+    ],
+    thumbnailColor: "#22d3ee",
+    icon: "⚽",
+  },
+  {
+    slug: "simple-harmonic-motion",
+    title: "Simple Harmonic Motion",
+    category: "physics",
+    description: "Complete SHM analysis with oscillations.", 
+    longDescription: "Simple harmonic motion with free, damped, and driven oscillations.",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 0.1, max: 2, step: 0.05, defaultValue: 0.5, unit: "Hz" },
+    ],
+    thumbnailColor: "#a855f7",
+    icon: "📊",
+  },
+  {
+    slug: "heat-transfer-radiation",
+    title: "Heat Transfer by Radiation",
+    category: "physics", 
+    description: "Stefan-Boltzmann law and blackbody radiation.",
+    longDescription: "Thermal radiation demonstrating Stefan-Boltzmann law and blackbody spectra.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 300, max: 800, step: 10, defaultValue: 500, unit: "K" },
+    ],
+    thumbnailColor: "#dc2626",
+    icon: "🔥",
+  },
+  {
+    slug: "titration-curves", 
+    title: "Titration Curves",
+    category: "chemistry",
+    description: "Acid-base titrations with pH curves and indicators.",
+    longDescription: "Demonstrates pH changes during acid-base neutralization with equivalence points.",
+    parameters: [
+      { key: "concentration", label: "Acid Concentration", min: 0.01, max: 1, step: 0.01, defaultValue: 0.1, unit: "M" },
+    ],
+    thumbnailColor: "#06b6d4",
+    icon: "🧪",
+  },
+  {
+    slug: "galvanic-cell-electrochemistry",
+    title: "Galvanic Cell Electrochemistry", 
+    category: "chemistry",
+    description: "Electrochemical cells with redox reactions.",
+    longDescription: "Galvanic cells showing electron flow and electrochemical potentials.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 250, max: 350, step: 5, defaultValue: 298, unit: "K" },
+    ],
+    thumbnailColor: "#eab308",
+    icon: "🔋",
+  },
+  {
+    slug: "crystal-lattice-structures",
+    title: "Crystal Lattice Structures",
+    category: "chemistry",
+    description: "3D visualization of crystalline solids.", 
+    longDescription: "Different crystal structures showing atomic arrangements and unit cells.",
+    parameters: [
+      { key: "latticeType", label: "Lattice Type", min: 0, max: 5, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#7c3aed",
+    icon: "💎",
+  },
+  {
+    slug: "nuclear-decay-simulation",
+    title: "Nuclear Decay Simulation",
+    category: "chemistry",
+    description: "Radioactive decay with exponential laws.",
+    longDescription: "Nuclear decay demonstrating exponential decay laws and half-life concepts.",
+    parameters: [
+      { key: "halfLife", label: "Half Life", min: 1, max: 100, step: 1, defaultValue: 10, unit: "s" },
+    ],
+    thumbnailColor: "#f97316", 
+    icon: "☢️",
+  },
+  {
+    slug: "reaction-kinetics",
+    title: "Reaction Kinetics",
+    category: "chemistry",
+    description: "Chemical reaction rates with molecular collisions.",
+    longDescription: "Reaction kinetics showing how temperature and concentration affect reaction rates.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 250, max: 500, step: 10, defaultValue: 300, unit: "K" },
+    ],
+    thumbnailColor: "#84cc16",
+    icon: "⚗️", 
+  },
+  {
+    slug: "phase-diagram",
+    title: "Phase Diagrams",
+    category: "chemistry", 
+    description: "States of matter with phase transitions.",
+    longDescription: "Phase diagrams showing solid, liquid, and gas phases with critical and triple points.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 50, max: 800, step: 5, defaultValue: 273, unit: "K" },
+    ],
+    thumbnailColor: "#0ea5e9",
+    icon: "🧊",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -3085,6 +3254,22 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "incandescence": () => import("./physics/incandescence").then((m) => m.default),
   "indoor-wiring": () => import("./physics/indoor-wiring").then((m) => m.default),
   "inductor": () => import("./physics/inductor").then((m) => m.default),
+  
+  // NEW BATCH: Physics and Chemistry Simulations
+  "spring-mass-system": () => import("./physics/spring-mass-system").then((m) => m.default),
+  "moment-of-inertia": () => import("./physics/moment-of-inertia").then((m) => m.default),
+  "hookes-law": () => import("./physics/hookes-law").then((m) => m.default),
+  "double-slit-experiment": () => import("./physics/double-slit-experiment").then((m) => m.default),
+  "photoelectric-effect": () => import("./physics/photoelectric-effect").then((m) => m.default),
+  "rolling-motion-dynamics": () => import("./physics/rolling-motion-dynamics").then((m) => m.default),
+  "simple-harmonic-motion": () => import("./physics/simple-harmonic-motion").then((m) => m.default),
+  "heat-transfer-radiation": () => import("./physics/heat-transfer-radiation").then((m) => m.default),
+  "titration-curves": () => import("./chemistry/titration-curves").then((m) => m.default),
+  "galvanic-cell-electrochemistry": () => import("./chemistry/galvanic-cell-electrochemistry").then((m) => m.default),
+  "crystal-lattice-structures": () => import("./chemistry/crystal-lattice-structures").then((m) => m.default),
+  "nuclear-decay-simulation": () => import("./chemistry/nuclear-decay-simulation").then((m) => m.default),
+  "reaction-kinetics": () => import("./chemistry/reaction-kinetics").then((m) => m.default),
+  "phase-diagram": () => import("./chemistry/phase-diagram").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
