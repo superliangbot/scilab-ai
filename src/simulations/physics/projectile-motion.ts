@@ -490,6 +490,10 @@ const ProjectileMotionFactory: SimulationFactory = (): SimulationEngine => {
       getVelocity(time).vx ** 2 + getVelocity(time).vy ** 2
     );
     ctx.fillText(`Speed: ${currentSpeed.toFixed(1)} m/s`, panelX + 10, panelY + 88);
+    
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = "10px system-ui, sans-serif";
+    ctx.fillText(`Mass: ${mass} kg (no effect in vacuum)`, panelX + 10, panelY + 104);
 
     ctx.restore();
 
