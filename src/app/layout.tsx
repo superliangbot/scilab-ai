@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SciLab AI — Interactive Science Simulations",
     description:
-      "Explore 10+ interactive science simulations with AI tutoring.",
+      "Explore 100+ interactive science simulations with AI tutoring.",
     type: "website",
   },
 };
