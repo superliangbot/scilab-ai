@@ -619,6 +619,241 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#0d9488",
     icon: "🌀",
   },
+  // ── Batch 2 simulations (15 new) ──────────────────────────────────
+  {
+    slug: "archimedes",
+    title: "Archimedes' Principle",
+    category: "physics",
+    description: "Buoyancy simulation with a balance scale comparing a crown and gold reference in fluid.",
+    longDescription:
+      "Archimedes' principle states that the upward buoyant force on a submerged object equals the weight of the displaced fluid: F_b = \u03C1_fluid \u00D7 V_displaced \u00D7 g. This simulation recreates the legendary test of King Hiero's crown. A crown (potentially alloyed with silver) and a pure gold reference of equal mass hang from a balance beam. When submerged, the less dense crown displaces more fluid, experiences greater buoyancy, and appears lighter. Gold density = 19,300 kg/m\u00B3, Silver density = 10,490 kg/m\u00B3.",
+    parameters: [
+      { key: "silverRatio", label: "Silver Content in Crown", min: 0, max: 100, step: 1, defaultValue: 0, unit: "%" },
+      { key: "waterLevel", label: "Submersion Level", min: 0, max: 100, step: 1, defaultValue: 50, unit: "%" },
+      { key: "fluidDensity", label: "Fluid Density", min: 500, max: 13600, step: 100, defaultValue: 1000, unit: "kg/m\u00B3" },
+    ],
+    thumbnailColor: "#2563eb",
+    icon: "\u2696\uFE0F",
+  },
+  {
+    slug: "area-of-circle",
+    title: "Area of a Circle",
+    category: "math",
+    description: "Prove Area = \u03C0r\u00B2 by cutting a circle into sectors and rearranging into a rectangle.",
+    longDescription:
+      "A circle is cut into N equal sectors, then rearranged alternating up/down to approximate a rectangle. As N increases, the shape approaches a perfect rectangle with width = \u03C0r and height = r, giving Area = \u03C0r\u00B2. This elegant geometric proof connects the circle\u2019s circumference to its area without calculus.",
+    parameters: [
+      { key: "numSectors", label: "Number of Sectors", min: 2, max: 64, step: 2, defaultValue: 8 },
+      { key: "radius", label: "Radius", min: 50, max: 200, step: 5, defaultValue: 120, unit: "px" },
+      { key: "animationPhase", label: "Animation Phase", min: 0, max: 100, step: 1, defaultValue: 0, unit: "%" },
+    ],
+    thumbnailColor: "#c026d3",
+    icon: "\u25EF",
+  },
+  {
+    slug: "area-of-lung",
+    title: "Lung Surface Area",
+    category: "biology",
+    description: "Branching bronchial tree showing how alveoli maximize surface area in a small volume.",
+    longDescription:
+      "Human lungs use a fractal-like branching structure to pack ~70 m\u00B2 of surface area into the chest cavity. The trachea branches into bronchi, then bronchioles, ending in ~480 million alveoli. This simulation visualizes the bronchial tree and demonstrates biological folding to maximize the surface-area-to-volume ratio essential for O\u2082/CO\u2082 exchange.",
+    parameters: [
+      { key: "branchDepth", label: "Branch Generations", min: 1, max: 8, step: 1, defaultValue: 5 },
+      { key: "unfoldAmount", label: "Unfold Amount", min: 0, max: 100, step: 1, defaultValue: 0, unit: "%" },
+      { key: "alveoliSize", label: "Alveoli Size", min: 2, max: 10, step: 1, defaultValue: 4, unit: "px" },
+    ],
+    thumbnailColor: "#e11d48",
+    icon: "\uD83E\uDEC1",
+  },
+  {
+    slug: "atmosphere",
+    title: "Atmosphere",
+    category: "earth",
+    description: "Interactive visualization of Earth's atmospheric layers with animated gas molecules.",
+    longDescription:
+      "Explore Earth's atmosphere from troposphere to thermosphere. Air density decreases following the barometric formula n(h) = n\u2080 \u00D7 exp(-Mgh/RT). The troposphere cools at -6.5\u00B0C/km, the stratosphere warms due to ozone, the mesosphere cools again, and the thermosphere heats from solar radiation.",
+    parameters: [
+      { key: "altitude", label: "Altitude", min: 0, max: 120, step: 1, defaultValue: 0, unit: "km" },
+      { key: "numParticles", label: "Particles", min: 20, max: 200, step: 10, defaultValue: 100 },
+      { key: "showTemperature", label: "Show Temperature (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#1e6091",
+    icon: "\uD83C\uDF0D",
+  },
+  {
+    slug: "atmospheric-pressure",
+    title: "Atmospheric Pressure",
+    category: "physics",
+    description: "Air molecules in a vertical column with gravity creating pressure gradient.",
+    longDescription:
+      "Atmospheric pressure follows P(h) = P\u2080 \u00D7 exp(-Mgh/RT) where P\u2080 = 101,325 Pa, M = 0.029 kg/mol, R = 8.314 J/(mol\u00B7K). About 99% of atmospheric mass is within 32 km. This simulation visualizes gas molecules distributed according to the barometric formula with a pressure gradient display.",
+    parameters: [
+      { key: "gravity", label: "Gravity", min: 1, max: 20, step: 0.1, defaultValue: 9.81, unit: "m/s\u00B2" },
+      { key: "temperature", label: "Temperature", min: 200, max: 400, step: 10, defaultValue: 288, unit: "K" },
+      { key: "numParticles", label: "Particles", min: 30, max: 200, step: 10, defaultValue: 100 },
+    ],
+    thumbnailColor: "#0369a1",
+    icon: "\uD83C\uDF2C\uFE0F",
+  },
+  {
+    slug: "average-velocity",
+    title: "Average Velocity",
+    category: "physics",
+    description: "Position-time graph with moving object showing average and instantaneous velocity.",
+    longDescription:
+      "Average velocity = \u0394x/\u0394t while instantaneous velocity is the slope of the tangent to the position-time curve. Split screen shows a moving object on a road and the x-t graph below with both average velocity (secant) and instantaneous velocity (tangent) lines.",
+    parameters: [
+      { key: "totalDistance", label: "Total Distance", min: 10, max: 100, step: 5, defaultValue: 50, unit: "m" },
+      { key: "totalTime", label: "Total Time", min: 2, max: 20, step: 1, defaultValue: 10, unit: "s" },
+      { key: "speedVariation", label: "Speed Variation", min: 0, max: 100, step: 5, defaultValue: 50 },
+      { key: "showTangent", label: "Show Tangent (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#ea580c",
+    icon: "\uD83C\uDFC3",
+  },
+  {
+    slug: "avogadros-law",
+    title: "Avogadro's Law",
+    category: "chemistry",
+    description: "Two balloons showing V/n = constant with colored gas molecules at constant T and P.",
+    longDescription:
+      "Avogadro's Law: V/n = constant (V\u2081/n\u2081 = V\u2082/n\u2082). Two side-by-side balloons scale with molecule count. Different gas types (H\u2082, O\u2082, N\u2082, CO\u2082) are colored particles moving at speeds proportional to \u221A(T/M), illustrating heavier molecules move slower at the same temperature.",
+    parameters: [
+      { key: "molecules1", label: "Molecules (Balloon 1)", min: 5, max: 50, step: 1, defaultValue: 20 },
+      { key: "molecules2", label: "Molecules (Balloon 2)", min: 5, max: 50, step: 1, defaultValue: 10 },
+      { key: "temperature", label: "Temperature", min: 200, max: 500, step: 10, defaultValue: 300, unit: "K" },
+      { key: "gasType", label: "Gas Type (0=H\u2082,1=O\u2082,2=N\u2082,3=CO\u2082)", min: 0, max: 3, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "\uD83C\uDF88",
+  },
+  {
+    slug: "balloon-pressure",
+    title: "Balloon Pressure",
+    category: "physics",
+    description: "Balloon buoyancy with gas molecules, force arrows, and Young-Laplace pressure.",
+    longDescription:
+      "A gas-filled balloon subject to buoyancy (F_b = \u03C1_air \u00D7 V \u00D7 g), gravity (W = \u03C1_gas \u00D7 V \u00D7 g + m_membrane), and Young-Laplace pressure \u0394P = 2\u03B3/r. Different gases (He, Air, CO\u2082, H\u2082, Ar) float or sink based on \u03C1 = PM/(RT).",
+    parameters: [
+      { key: "gasType", label: "Gas (0=He,1=Air,2=CO\u2082,3=H\u2082,4=Ar)", min: 0, max: 4, step: 1, defaultValue: 0 },
+      { key: "temperature", label: "Temperature", min: 200, max: 400, step: 10, defaultValue: 300, unit: "K" },
+      { key: "balloonRadius", label: "Balloon Radius", min: 10, max: 50, step: 1, defaultValue: 25, unit: "cm" },
+      { key: "numParticles", label: "Visible Particles", min: 10, max: 100, step: 5, defaultValue: 40 },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "\uD83C\uDF88",
+  },
+  {
+    slug: "bernoullis-principle",
+    title: "Bernoulli's Principle",
+    category: "physics",
+    description: "Venturi tube showing how fluid speeds up and pressure drops in a constriction.",
+    longDescription:
+      "P + \u00BD\u03C1v\u00B2 + \u03C1gh = constant. Combined with continuity (A\u2081v\u2081 = A\u2082v\u2082), fluid moves faster through narrow sections and pressure drops. The simulation shows fluid particles, manometer tubes, and real-time Bernoulli calculations.",
+    parameters: [
+      { key: "flowSpeed", label: "Flow Speed", min: 1, max: 20, step: 1, defaultValue: 5, unit: "m/s" },
+      { key: "constriction", label: "Constriction", min: 10, max: 90, step: 5, defaultValue: 50, unit: "%" },
+      { key: "fluidDensity", label: "Fluid Density", min: 500, max: 2000, step: 50, defaultValue: 1000, unit: "kg/m\u00B3" },
+      { key: "showPressure", label: "Show Pressure (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#06b6d4",
+    icon: "\uD83C\uDF0A",
+  },
+  {
+    slug: "bimetal",
+    title: "Bimetal Strip",
+    category: "chemistry",
+    description: "Two bonded metals with different thermal expansion bend when heated \u2014 used in thermostats.",
+    longDescription:
+      "A bimetal strip bends when heated because the metal with higher expansion coefficient expands more. Bending radius R = t / (6 \u00D7 \u0394T \u00D7 (\u03B1\u2081 \u2212 \u03B1\u2082)). This principle is used in thermostats and thermal switches.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 0, max: 200, step: 1, defaultValue: 20, unit: "\u00B0C" },
+      { key: "metal1Expansion", label: "Metal 1 Expansion Coeff", min: 10, max: 25, step: 1, defaultValue: 23, unit: "\u00D710\u207B\u2076/\u00B0C" },
+      { key: "metal2Expansion", label: "Metal 2 Expansion Coeff", min: 5, max: 15, step: 1, defaultValue: 11, unit: "\u00D710\u207B\u2076/\u00B0C" },
+      { key: "stripLength", label: "Strip Length", min: 50, max: 200, step: 5, defaultValue: 100, unit: "mm" },
+    ],
+    thumbnailColor: "#c47d52",
+    icon: "\uD83C\uDF21\uFE0F",
+  },
+  {
+    slug: "binary-counting",
+    title: "Binary Counting",
+    category: "math",
+    description: "Mechanical-style binary counter with animated bit flips showing decimal-binary conversion.",
+    longDescription:
+      "Binary (base-2): each bit is 0 or 1, each position is a power of 2. LSB toggles every step, next bit every 2 steps. Conversion: decimal = \u03A3 b\u1D62 \u00D7 2\u2071. Shows animated bit flips with decimal, binary, hex values.",
+    parameters: [
+      { key: "numBits", label: "Number of Bits", min: 4, max: 12, step: 1, defaultValue: 8 },
+      { key: "speed", label: "Counting Speed", min: 1, max: 10, step: 1, defaultValue: 3 },
+      { key: "autoCount", label: "Auto Count (0/1)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#22c55e",
+    icon: "\uD83D\uDD22",
+  },
+  {
+    slug: "bohrs-atomic-model",
+    title: "Bohr's Atomic Model",
+    category: "chemistry",
+    description: "Hydrogen-like atoms with discrete electron orbits, energy levels, and photon transitions.",
+    longDescription:
+      "Bohr model: E\u2099 = \u221213.6/n\u00B2 eV, orbital radius a\u2099 = n\u00B2 \u00D7 a\u2080 (a\u2080 = 0.529 \u00C5). Photon energy \u0394E = 13.6 \u00D7 (1/n\u2081\u00B2 \u2212 1/n\u2082\u00B2) eV produces Lyman, Balmer, and Paschen spectral series.",
+    parameters: [
+      { key: "energyLevel", label: "Energy Level", min: 1, max: 6, step: 1, defaultValue: 1 },
+      { key: "showTransition", label: "Show Transitions (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "electronSpeed", label: "Electron Speed", min: 1, max: 10, step: 1, defaultValue: 5 },
+      { key: "atomicNumber", label: "Atomic Number", min: 1, max: 10, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "\u269B\uFE0F",
+  },
+  {
+    slug: "constellations",
+    title: "Constellations",
+    category: "astronomy",
+    description: "Interactive night sky showing major constellations with twinkling stars and glow effects.",
+    longDescription:
+      "Explore the night sky with 10 major constellations: Orion, Ursa Major, Cassiopeia, Leo, Scorpius, Cygnus, Gemini, Taurus, Lyra, and Aquila. Stars twinkle with varying brightness and bright stars display radial glow effects. Rotate the sky view.",
+    parameters: [
+      { key: "rotation", label: "Sky Rotation", min: 0, max: 360, step: 1, defaultValue: 0, unit: "\u00B0" },
+      { key: "showLines", label: "Show Lines (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showNames", label: "Show Names (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "starBrightness", label: "Star Brightness", min: 50, max: 150, step: 5, defaultValue: 100, unit: "%" },
+    ],
+    thumbnailColor: "#1e1b4b",
+    icon: "\u2B50",
+  },
+  {
+    slug: "continental-drift",
+    title: "Continental Drift",
+    category: "earth",
+    description: "Watch continents drift from Pangaea to present day with tectonic plate boundaries.",
+    longDescription:
+      "About 250 Mya all continents were joined as Pangaea. Driven by mantle convection, tectonic plates move at 2\u201310 cm/year. This simulation interpolates continent positions from Pangaea to present day.",
+    parameters: [
+      { key: "timeperiod", label: "Time Period", min: 0, max: 100, step: 1, defaultValue: 100 },
+      { key: "showLabels", label: "Show Labels (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showPlateEdges", label: "Show Plate Edges (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "animationSpeed", label: "Animation Speed", min: 1, max: 10, step: 1, defaultValue: 5 },
+    ],
+    thumbnailColor: "#1a4a7a",
+    icon: "\uD83C\uDF0D",
+  },
+  {
+    slug: "convection",
+    title: "Convection Currents",
+    category: "chemistry",
+    description: "Heated fluid particles rise and cool, creating circular convection cells.",
+    longDescription:
+      "Convection: hot fluid rises due to buoyancy (F = \u2212\u03C1g\u03B2\u0394T), cools at the top, sinks on the sides, creating convection cells. This simulation models particles with position, velocity, and temperature.",
+    parameters: [
+      { key: "heatIntensity", label: "Heat Intensity", min: 0, max: 100, step: 5, defaultValue: 50, unit: "%" },
+      { key: "numParticles", label: "Particles", min: 20, max: 200, step: 10, defaultValue: 80 },
+      { key: "viscosity", label: "Viscosity", min: 1, max: 10, step: 1, defaultValue: 3 },
+      { key: "burnerPosition", label: "Burner Position", min: 10, max: 90, step: 5, defaultValue: 50, unit: "%" },
+    ],
+    thumbnailColor: "#dc2626",
+    icon: "\uD83D\uDD25",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -663,6 +898,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "chemical-bonding": () => import("./chemistry/chemical-bonding").then((m) => m.default),
   "collision-2d": () => import("./physics/collision-2d").then((m) => m.default),
   "conical-pendulum": () => import("./physics/conical-pendulum").then((m) => m.default),
+  "archimedes": () => import("./physics/archimedes").then((m) => m.default),
+  "area-of-circle": () => import("./math/area-of-circle").then((m) => m.default),
+  "area-of-lung": () => import("./biology/area-of-lung").then((m) => m.default),
+  "atmosphere": () => import("./earth/atmosphere").then((m) => m.default),
+  "atmospheric-pressure": () => import("./physics/atmospheric-pressure").then((m) => m.default),
+  "average-velocity": () => import("./physics/average-velocity").then((m) => m.default),
+  "avogadros-law": () => import("./chemistry/avogadros-law").then((m) => m.default),
+  "balloon-pressure": () => import("./physics/balloon-pressure").then((m) => m.default),
+  "bernoullis-principle": () => import("./physics/bernoullis-principle").then((m) => m.default),
+  "bimetal": () => import("./chemistry/bimetal").then((m) => m.default),
+  "binary-counting": () => import("./math/binary-counting").then((m) => m.default),
+  "bohrs-atomic-model": () => import("./chemistry/bohrs-atomic-model").then((m) => m.default),
+  "constellations": () => import("./astronomy/constellations").then((m) => m.default),
+  "continental-drift": () => import("./earth/continental-drift").then((m) => m.default),
+  "convection": () => import("./chemistry/convection").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
@@ -687,4 +937,5 @@ export const categories: { key: Category; label: string; icon: string; color: st
   { key: "waves", label: "Waves", icon: "🌊", color: "#06b6d4" },
   { key: "math", label: "Mathematics", icon: "📐", color: "#a855f7" },
   { key: "biology", label: "Biology", icon: "🧬", color: "#ec4899" },
+  { key: "earth", label: "Earth Science", icon: "🌍", color: "#1e6091" },
 ];
