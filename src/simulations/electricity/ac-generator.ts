@@ -598,8 +598,8 @@ const ACGenerator: SimulationFactory = () => {
     },
 
     update(dt: number, params: Record<string, number>) {
-      computePhysics(params);
       time += dt;
+      computePhysics(params);
       angle = omega * time;
 
       // Sample waveform
