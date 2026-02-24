@@ -71,7 +71,7 @@ export const simulationConfigs: SimulationConfig[] = [
     category: "astronomy",
     description: "Orbital mechanics with adjustable time scale and planet information.",
     longDescription:
-      "Explore our solar system with this orbital mechanics simulation. Planets orbit the Sun following Kepler's laws of planetary motion. The simulation uses Newton's law of gravitation F = GMm/r² to compute orbital paths. Adjust the time scale to watch years pass in seconds, and click on planets to learn about their properties.",
+      "Explore our solar system with this orbital mechanics simulation. Planets orbit the Sun in circular paths with periods based on Kepler's laws of planetary motion. The simulation uses constant angular velocities derived from real planetary periods. Adjust the time scale to watch years pass in seconds, and click on planets to learn about their properties.",
     parameters: [
       { key: "timeScale", label: "Time Scale", min: 0.1, max: 50, step: 0.1, defaultValue: 5, unit: "×" },
       { key: "zoom", label: "Zoom", min: 0.2, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
