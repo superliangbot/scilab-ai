@@ -1,77 +1,77 @@
 [
   {
-    "slug": "collision_2",
-    "name": "Collision 2",
-    "url": "https://javalab.org/en/collision_2_en/"
+    "slug": "camera_2",
+    "name": "Camera 2",
+    "url": "https://javalab.org/en/camera_2_en/"
   },
   {
-    "slug": "collision",
-    "name": "Collision",
-    "url": "https://javalab.org/en/collision_en/"
+    "slug": "camera",
+    "name": "Camera",
+    "url": "https://javalab.org/en/camera_en/"
   },
   {
-    "slug": "color_cube",
-    "name": "Color Cube",
-    "url": "https://javalab.org/en/color_cube_en/"
+    "slug": "capacitor_2",
+    "name": "Capacitor 2",
+    "url": "https://javalab.org/en/capacitor_2_en/"
   },
   {
-    "slug": "color",
-    "name": "Color",
-    "url": "https://javalab.org/en/color_en/"
+    "slug": "capacitor_application",
+    "name": "Capacitor Application",
+    "url": "https://javalab.org/en/capacitor_application_en/"
   },
   {
-    "slug": "color_panel",
-    "name": "Color Panel",
-    "url": "https://javalab.org/en/color_panel_en/"
+    "slug": "capacitor_characteristic",
+    "name": "Capacitor Characteristic",
+    "url": "https://javalab.org/en/capacitor_characteristic_en/"
   },
   {
-    "slug": "condition_of_circular_movement",
-    "name": "Condition Of Circular Movement",
-    "url": "https://javalab.org/en/condition_of_circular_movement_en/"
+    "slug": "carnot_engines",
+    "name": "Carnot Engines",
+    "url": "https://javalab.org/en/carnot_engines_en/"
   },
   {
-    "slug": "conduction_2",
-    "name": "Conduction 2",
-    "url": "https://javalab.org/en/conduction_2_en/"
+    "slug": "celestial_equator_and_the_ecliptic",
+    "name": "Celestial Equator And The Ecliptic",
+    "url": "https://javalab.org/en/celestial_equator_and_the_ecliptic_en/"
   },
   {
-    "slug": "conduction_3",
-    "name": "Conduction 3",
-    "url": "https://javalab.org/en/conduction_3_en/"
+    "slug": "cell_division_model",
+    "name": "Cell Division Model",
+    "url": "https://javalab.org/en/cell_division_model_en/"
   },
   {
-    "slug": "conduction",
-    "name": "Conduction",
-    "url": "https://javalab.org/en/conduction_en/"
+    "slug": "charge_conservation",
+    "name": "Charge Conservation",
+    "url": "https://javalab.org/en/charge_conservation_en/"
   },
   {
-    "slug": "conductor_and_insulator",
-    "name": "Conductor And Insulator",
-    "url": "https://javalab.org/en/conductor_and_insulator_en/"
+    "slug": "charge_distribution_on_a_thin_conductive_plate",
+    "name": "Charge Distribution On A Thin Conductive Plate",
+    "url": "https://javalab.org/en/charge_distribution_on_a_thin_conductive_plate_en/"
   },
   {
-    "slug": "conical_pendulum",
-    "name": "Conical Pendulum",
-    "url": "https://javalab.org/en/conical_pendulum_en/"
+    "slug": "chemical_cell",
+    "name": "Chemical Cell",
+    "url": "https://javalab.org/en/chemical_cell_en/"
   },
   {
-    "slug": "constant_velocity",
-    "name": "Constant Velocity",
-    "url": "https://javalab.org/en/constant_velocity_en/"
+    "slug": "chemical_change_of_candle",
+    "name": "Chemical Change Of Candle",
+    "url": "https://javalab.org/en/chemical_change_of_candle_en/"
   },
   {
-    "slug": "constellations",
-    "name": "Constellations",
-    "url": "https://javalab.org/en/constellations_en/"
+    "slug": "chord",
+    "name": "Chord",
+    "url": "https://javalab.org/en/chord_en/"
   },
   {
-    "slug": "continental_drift",
-    "name": "Continental Drift",
-    "url": "https://javalab.org/en/continental_drift_en/"
+    "slug": "circumference_of_a_circle",
+    "name": "Circumference Of A Circle",
+    "url": "https://javalab.org/en/circumference_of_a_circle_en/"
   },
   {
-    "slug": "convection",
-    "name": "Convection",
-    "url": "https://javalab.org/en/convection_en/"
+    "slug": "clay_shooting",
+    "name": "Clay Shooting",
+    "url": "https://javalab.org/en/clay_shooting_en/"
   }
 ]

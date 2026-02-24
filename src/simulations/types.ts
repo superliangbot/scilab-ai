@@ -6,7 +6,8 @@ export type Category =
   | "waves"
   | "math"
   | "biology"
-  | "earth";
+  | "earth"
+  | "technology";
 
 export interface SimulationParameter {
   key: string;
