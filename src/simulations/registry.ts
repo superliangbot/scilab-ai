@@ -3055,7 +3055,9 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#0ea5e9",
     icon: "🧊",
-  // NEW BATCH: Underrepresented categories
+  },
+  
+  // NEW BATCH: Waves and Technology simulations
   {
     slug: "standing-waves",
     title: "Standing Waves",
@@ -3073,8 +3075,8 @@ export const simulationConfigs: SimulationConfig[] = [
     icon: "〰️",
   },
   {
-    slug: "doppler-effect",
-    title: "Doppler Effect",
+    slug: "doppler-wave-effect",
+    title: "Doppler Effect (Waves)",
     category: "waves",
     description: "Moving wave source creates frequency shift for stationary observers.",
     longDescription:
@@ -3731,7 +3733,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "phase-diagram": () => import("./chemistry/phase-diagram").then((m) => m.default),
   // NEW BATCH: Underrepresented categories
   "standing-waves": () => import("./waves/standing-waves").then((m) => m.default),
-  "doppler-effect": () => import("./waves/doppler-effect").then((m) => m.default),
+  "doppler-wave-effect": () => import("./waves/doppler-effect").then((m) => m.default),
   "sound-waves": () => import("./waves/sound-waves").then((m) => m.default),
   "diffraction": () => import("./waves/diffraction").then((m) => m.default),
   "polarization": () => import("./waves/polarization").then((m) => m.default),
