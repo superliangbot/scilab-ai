@@ -182,16 +182,20 @@ const DopplerEffect: SimulationFactory = () => {
     const v = waveSpeed;
     const vs = Math.abs(sourceVelocity);
     
+    // Bounds checking: source velocity cannot exceed wave velocity
+    const maxVs = v * 0.99; // 99% of wave speed to avoid division by zero
+    const vsLimited = Math.min(vs, maxVs);
+    
     let leftFreq: number, rightFreq: number;
     
     if (direction > 0) {
       // Source moving right
-      leftFreq = f0 * v / (v + vs); // source moving away from left observer
-      rightFreq = f0 * v / (v - vs); // source moving toward right observer
+      leftFreq = f0 * v / (v + vsLimited); // source moving away from left observer
+      rightFreq = f0 * v / Math.max(v - vsLimited, 0.01 * v); // source moving toward right observer
     } else {
       // Source moving left
-      leftFreq = f0 * v / (v - vs); // source moving toward left observer
-      rightFreq = f0 * v / (v + vs); // source moving away from right observer
+      leftFreq = f0 * v / Math.max(v - vsLimited, 0.01 * v); // source moving toward left observer
+      rightFreq = f0 * v / (v + vsLimited); // source moving away from right observer
     }
     
     return { left: leftFreq, right: rightFreq };
