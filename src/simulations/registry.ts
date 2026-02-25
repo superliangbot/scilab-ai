@@ -3055,6 +3055,7 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#0ea5e9",
     icon: "🧊",
+  },
   // NEW BATCH: Underrepresented categories
   {
     slug: "standing-waves",
