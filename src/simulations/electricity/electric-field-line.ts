@@ -42,6 +42,9 @@ const ElectricFieldLineFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   // Calculate electric field at point (px, py)
+  // NOTE: This calculates RELATIVE field strength for visualization
+  // The Coulomb constant k = 1/(4πε₀) ≈ 8.99×10⁹ N⋅m²/C² is factored out
+  // Actual field would be: E = k × (q/r²)
   function fieldAt(px: number, py: number): { ex: number; ey: number } {
     let ex = 0;
     let ey = 0;
@@ -56,7 +59,7 @@ const ElectricFieldLineFactory: SimulationFactory = (): SimulationEngine => {
       const r2 = dx * dx + dy * dy;
       const r = Math.sqrt(r2);
       if (r < 5) continue;
-      const E = c.q / r2; // Coulomb k factored out (relative)
+      const E = c.q / r2; // Relative field strength (k factored out for visualization)
       ex += E * (dx / r);
       ey += E * (dy / r);
     }
