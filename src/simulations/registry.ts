@@ -3289,6 +3289,246 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#fbbf24",
     icon: "⭐",
   },
+  {
+    slug: "electromagnetic-induction",
+    title: "Electromagnetic Induction",
+    category: "electricity",
+    description: "Moving magnet induces EMF in coil demonstrating Faraday's law.",
+    longDescription:
+      "Electromagnetic induction occurs when a changing magnetic field creates an electric field, inducing an EMF in a conductor. Faraday's law states EMF = -dΦ/dt, where Φ is magnetic flux. This simulation shows a moving magnet approaching a coil, changing the flux through it and inducing a current. The direction of induced current opposes the change (Lenz's law), demonstrating energy conservation.",
+    parameters: [
+      { key: "magnetSpeed", label: "Magnet Speed", min: 0.5, max: 5, step: 0.1, defaultValue: 2, unit: "×" },
+      { key: "coilTurns", label: "Coil Turns", min: 5, max: 20, step: 1, defaultValue: 10 },
+      { key: "magnetStrength", label: "Magnet Strength", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "showFieldLines", label: "Show Field Lines (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#22d3ee",
+    icon: "🧲",
+  },
+  {
+    slug: "lenz-law",
+    title: "Lenz's Law",
+    category: "electricity",
+    description: "Induced currents oppose the change that created them.",
+    longDescription:
+      "Lenz's law states that the direction of an induced current is such that its magnetic field opposes the change in flux that produced it. This fundamental law ensures energy conservation in electromagnetic systems. The simulation shows a magnet approaching and receding from a conducting ring, with the induced current creating forces that oppose the motion.",
+    parameters: [
+      { key: "magnetSpeed", label: "Magnet Speed", min: 0.5, max: 3, step: 0.1, defaultValue: 1.5, unit: "×" },
+      { key: "magnetDirection", label: "Direction (0=approach, 1=recede)", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "showCurrentDirection", label: "Show Current Direction (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showForces", label: "Show Forces (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "🔄",
+  },
+  {
+    slug: "eddy-currents",
+    title: "Eddy Currents",
+    category: "electricity",
+    description: "Circular currents induced in conducting materials cause electromagnetic braking.",
+    longDescription:
+      "Eddy currents are loops of electrical current induced within conductors by changing magnetic fields. These currents create their own magnetic fields that oppose the change (Lenz's law), resulting in electromagnetic braking forces. The simulation compares solid vs slotted conductors, showing how breaking current paths reduces eddy currents and associated losses.",
+    parameters: [
+      { key: "magnetSpeed", label: "Magnet Speed", min: 0.5, max: 4, step: 0.1, defaultValue: 2, unit: "×" },
+      { key: "conductorType", label: "Conductor (0=solid, 1=slotted)", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "showCurrents", label: "Show Currents (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "magnetStrength", label: "Magnet Strength", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🌀",
+  },
+  {
+    slug: "rlc-circuits",
+    title: "RLC Circuits",
+    category: "electricity",
+    description: "AC circuit analysis with resistance, inductance, and capacitance.",
+    longDescription:
+      "RLC circuits contain resistance (R), inductance (L), and capacitance (C) components. In AC circuits, these create impedance Z = √(R² + (XL - XC)²) where XL = ωL (inductive reactance) and XC = 1/(ωC) (capacitive reactance). At resonance (ωL = 1/ωC), impedance is minimized. The simulation shows phasor diagrams, waveforms, and power calculations.",
+    parameters: [
+      { key: "resistance", label: "Resistance", min: 10, max: 1000, step: 10, defaultValue: 100, unit: "Ω" },
+      { key: "inductance", label: "Inductance", min: 0.01, max: 1, step: 0.01, defaultValue: 0.1, unit: "H" },
+      { key: "capacitance", label: "Capacitance", min: 1, max: 1000, step: 10, defaultValue: 100, unit: "µF" },
+      { key: "frequency", label: "Frequency", min: 10, max: 200, step: 5, defaultValue: 60, unit: "Hz" },
+    ],
+    thumbnailColor: "#22c55e",
+    icon: "〰️",
+  },
+  {
+    slug: "half-wave-rectifier",
+    title: "Half-Wave Rectifier",
+    category: "electricity",
+    description: "Convert AC to pulsating DC using a diode, with optional smoothing capacitor.",
+    longDescription:
+      "A half-wave rectifier uses a single diode to convert AC voltage to pulsating DC by allowing current flow only during positive half-cycles. The output contains significant ripple. Adding a smoothing capacitor reduces ripple by storing energy during conducting periods and releasing it during non-conducting periods. This demonstrates basic power supply design principles.",
+    parameters: [
+      { key: "acFrequency", label: "AC Frequency", min: 50, max: 100, step: 5, defaultValue: 60, unit: "Hz" },
+      { key: "acAmplitude", label: "AC Amplitude", min: 120, max: 240, step: 10, defaultValue: 170, unit: "V" },
+      { key: "loadResistance", label: "Load Resistance", min: 100, max: 5000, step: 100, defaultValue: 1000, unit: "Ω" },
+      { key: "smoothingCapacitor", label: "Smoothing Cap (0/1)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#ef4444",
+    icon: "📡",
+  },
+  {
+    slug: "wheatstone-bridge",
+    title: "Wheatstone Bridge",
+    category: "electricity",
+    description: "Precision resistance measurement using bridge circuit balance condition.",
+    longDescription:
+      "A Wheatstone bridge measures unknown resistance by comparing it to known resistances. When balanced (galvanometer reads zero), the ratio condition R₁/R₃ = R₂/Rₓ applies, allowing calculation of Rₓ = (R₂ × R₃)/R₁. The simulation shows the bridge circuit, galvanometer deflection, and demonstrates the balance condition with real-time calculations.",
+    parameters: [
+      { key: "R1", label: "R₁ (known)", min: 10, max: 1000, step: 10, defaultValue: 100, unit: "Ω" },
+      { key: "R2", label: "R₂ (known)", min: 10, max: 1000, step: 10, defaultValue: 200, unit: "Ω" },
+      { key: "R3", label: "R₃ (known)", min: 10, max: 1000, step: 10, defaultValue: 150, unit: "Ω" },
+      { key: "Rx", label: "Rₓ (unknown)", min: 10, max: 1000, step: 10, defaultValue: 300, unit: "Ω" },
+      { key: "supplyVoltage", label: "Supply Voltage", min: 3, max: 24, step: 1, defaultValue: 12, unit: "V" },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "🔷",
+  },
+  {
+    slug: "transistor-switch",
+    title: "Transistor Switch",
+    category: "electricity",
+    description: "NPN transistor operating as a digital switch controlling LED load.",
+    longDescription:
+      "A transistor switch uses a small base current to control a much larger collector current, providing current amplification (β = IC/IB). In saturation mode, the transistor acts as a closed switch (VCE ≈ 0.2V). In cutoff mode, it acts as an open switch (IC = 0). The simulation shows the three operating regions and demonstrates digital switching applications.",
+    parameters: [
+      { key: "baseVoltage", label: "Base Voltage", min: 0, max: 5, step: 0.1, defaultValue: 0, unit: "V" },
+      { key: "vcc", label: "Supply Voltage", min: 3, max: 12, step: 0.5, defaultValue: 5, unit: "V" },
+      { key: "baseResistor", label: "Base Resistor", min: 1000, max: 100000, step: 1000, defaultValue: 10000, unit: "Ω" },
+      { key: "loadResistor", label: "Load Resistor", min: 100, max: 5000, step: 100, defaultValue: 1000, unit: "Ω" },
+    ],
+    thumbnailColor: "#ec4899",
+    icon: "🎛️",
+  },
+  {
+    slug: "solenoid-magnetic-field",
+    title: "Solenoid Magnetic Field",
+    category: "electricity",
+    description: "Uniform magnetic field generation inside a current-carrying coil.",
+    longDescription:
+      "A solenoid is a coil of wire that generates a uniform magnetic field inside when carrying current. The field strength is B = μ₀nI, where n is the turn density (turns per unit length) and I is the current. The field lines are parallel inside and form closed loops outside. This demonstrates electromagnetic principles used in inductors, transformers, and electromagnets.",
+    parameters: [
+      { key: "current", label: "Current", min: 0, max: 10, step: 0.5, defaultValue: 2, unit: "A" },
+      { key: "turns", label: "Number of Turns", min: 5, max: 20, step: 1, defaultValue: 10 },
+      { key: "length", label: "Length", min: 100, max: 400, step: 20, defaultValue: 200, unit: "px" },
+      { key: "showFieldLines", label: "Show Field Lines (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "🔗",
+  },
+  {
+    slug: "equipotential-surfaces",
+    title: "Equipotential Surfaces",
+    category: "electricity",
+    description: "Electric potential visualization with equipotential lines and field relationships.",
+    longDescription:
+      "Equipotential surfaces connect points of equal electric potential. Electric field lines are always perpendicular to equipotential surfaces, and no work is done moving charges along equipotential paths. For point charges, equipotentials form concentric spheres (circles in 2D). The simulation shows how multiple charges create complex potential landscapes and field patterns.",
+    parameters: [
+      { key: "charge1Magnitude", label: "Charge 1", min: -5, max: 5, step: 0.5, defaultValue: 3, unit: "μC" },
+      { key: "charge2Magnitude", label: "Charge 2", min: -5, max: 5, step: 0.5, defaultValue: -3, unit: "μC" },
+      { key: "separation", label: "Separation", min: 100, max: 400, step: 20, defaultValue: 200, unit: "px" },
+      { key: "showFieldLines", label: "Show Field Lines (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "🌐",
+  },
+  {
+    slug: "prime-sieve",
+    title: "Sieve of Eratosthenes",
+    category: "math",
+    description: "Ancient algorithm for finding prime numbers by systematically eliminating composites.",
+    longDescription:
+      "The Sieve of Eratosthenes is an efficient algorithm for finding all prime numbers up to a given limit. Starting with 2, it marks all multiples as composite, then moves to the next unmarked number. The process continues until reaching √n. This ancient Greek algorithm (276-194 BCE) demonstrates the fundamental theorem that every composite number has a prime factor ≤ √n.",
+    parameters: [
+      { key: "maxNumber", label: "Maximum Number", min: 30, max: 200, step: 10, defaultValue: 100 },
+      { key: "animationSpeed", label: "Animation Speed", min: 0.5, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "showSteps", label: "Show Steps (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#22c55e",
+    icon: "🔍",
+  },
+  {
+    slug: "golden-ratio-spiral",
+    title: "Golden Ratio Spiral",
+    category: "math",
+    description: "Fibonacci sequence visualization with golden ratio convergence and logarithmic spiral.",
+    longDescription:
+      "The golden ratio φ = (1+√5)/2 ≈ 1.618 appears when consecutive Fibonacci numbers approach this ratio: F(n+1)/F(n) → φ. By arranging Fibonacci squares in a spiral pattern and drawing quarter circles in each square, we create the famous golden spiral. This ratio appears throughout nature in nautilus shells, sunflower seeds, and galaxy arms.",
+    parameters: [
+      { key: "fibonacciTerms", label: "Fibonacci Terms", min: 5, max: 15, step: 1, defaultValue: 10 },
+      { key: "showSquares", label: "Show Squares (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showSpiral", label: "Show Spiral (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "animationSpeed", label: "Animation Speed", min: 0.5, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🌸",
+  },
+  {
+    slug: "pi-monte-carlo",
+    title: "Pi Monte Carlo",
+    category: "math",
+    description: "Estimate π using random sampling and geometric probability.",
+    longDescription:
+      "Monte Carlo estimation of π uses the ratio of a circle's area to a square's area. Random points in a unit square have probability π/4 of falling inside the inscribed unit circle. By generating many random points and counting those inside the circle, we estimate π ≈ 4 × (inside points)/(total points). This demonstrates the law of large numbers and statistical convergence.",
+    parameters: [
+      { key: "samplesPerSecond", label: "Samples/Second", min: 10, max: 1000, step: 10, defaultValue: 100 },
+      { key: "showAllPoints", label: "Show All Points (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "animationSpeed", label: "Animation Speed", min: 0.1, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "resetData", label: "Reset Data (0/1)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "🎯",
+  },
+  {
+    slug: "euler-formula",
+    title: "Euler's Formula",
+    category: "math",
+    description: "e^(iθ) = cos(θ) + i·sin(θ) visualization on the complex plane.",
+    longDescription:
+      "Euler's formula e^(iθ) = cos(θ) + i·sin(θ) connects exponential functions with trigonometry through complex numbers. As θ increases, e^(iθ) traces the unit circle in the complex plane. This fundamental relationship leads to Euler's identity e^(iπ) + 1 = 0, often called the most beautiful formula in mathematics as it connects five fundamental constants.",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 0.1, max: 3, step: 0.1, defaultValue: 1, unit: "Hz" },
+      { key: "showComponents", label: "Show Components (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showSpiral", label: "Show Trail (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "amplitude", label: "Visual Amplitude", min: 50, max: 150, step: 10, defaultValue: 100, unit: "px" },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "ⅇ",
+  },
+  {
+    slug: "taylor-series",
+    title: "Taylor Series",
+    category: "math",
+    description: "Polynomial approximation of functions around a center point.",
+    longDescription:
+      "Taylor series approximates any smooth function as an infinite polynomial: f(x) = f(a) + f'(a)(x-a) + f''(a)(x-a)²/2! + f'''(a)(x-a)³/3! + ... The more terms included, the better the approximation near the center point a. This simulation shows how polynomials of increasing degree converge to sin(x), cos(x), e^x, and ln(1+x).",
+    parameters: [
+      { key: "functionType", label: "Function (0=sin,1=cos,2=exp,3=ln)", min: 0, max: 3, step: 1, defaultValue: 0 },
+      { key: "numTerms", label: "Number of Terms", min: 1, max: 10, step: 1, defaultValue: 5 },
+      { key: "centerPoint", label: "Center Point", min: -2, max: 2, step: 0.1, defaultValue: 0 },
+      { key: "animationSpeed", label: "Animation Speed", min: 0.1, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#22d3ee",
+    icon: "📈",
+  },
+  {
+    slug: "lissajous-curves",
+    title: "Lissajous Curves",
+    category: "math",
+    description: "Parametric curves from perpendicular harmonic oscillations.",
+    longDescription:
+      "Lissajous curves result from plotting parametric equations x = A·sin(at + δ) and y = B·sin(bt), where the ratio a:b determines the curve's shape. These patterns appear on oscilloscopes when mixing two sinusoidal signals. Different frequency ratios and phase shifts create various geometric patterns from simple ellipses to complex rosettes, demonstrating harmonic relationships in physics and music.",
+    parameters: [
+      { key: "freqX", label: "X Frequency", min: 1, max: 6, step: 1, defaultValue: 2 },
+      { key: "freqY", label: "Y Frequency", min: 1, max: 6, step: 1, defaultValue: 3 },
+      { key: "phaseShift", label: "Phase Shift", min: 0, max: 6.28, step: 0.1, defaultValue: 0, unit: "rad" },
+      { key: "amplitude", label: "Amplitude", min: 50, max: 200, step: 10, defaultValue: 150, unit: "px" },
+    ],
+    thumbnailColor: "#ec4899",
+    icon: "〰️",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -3519,6 +3759,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "photosynthesis": () => import("./biology/photosynthesis").then((m) => m.default),
   "dna-replication": () => import("./biology/dna-replication").then((m) => m.default),
   "stellar-lifecycle": () => import("./astronomy/stellar-lifecycle").then((m) => m.default),
+  "electromagnetic-induction": () => import("./electricity/electromagnetic-induction").then((m) => m.default),
+  "lenz-law": () => import("./electricity/lenz-law").then((m) => m.default),
+  "eddy-currents": () => import("./electricity/eddy-currents").then((m) => m.default),
+  "rlc-circuits": () => import("./electricity/rlc-circuits").then((m) => m.default),
+  "half-wave-rectifier": () => import("./electricity/half-wave-rectifier").then((m) => m.default),
+  "wheatstone-bridge": () => import("./electricity/wheatstone-bridge").then((m) => m.default),
+  "transistor-switch": () => import("./electricity/transistor-switch").then((m) => m.default),
+  "solenoid-magnetic-field": () => import("./electricity/solenoid-magnetic-field").then((m) => m.default),
+  "equipotential-surfaces": () => import("./electricity/equipotential-surfaces").then((m) => m.default),
+  "prime-sieve": () => import("./math/prime-sieve").then((m) => m.default),
+  "golden-ratio-spiral": () => import("./math/golden-ratio-spiral").then((m) => m.default),
+  "pi-monte-carlo": () => import("./math/pi-monte-carlo").then((m) => m.default),
+  "euler-formula": () => import("./math/euler-formula").then((m) => m.default),
+  "taylor-series": () => import("./math/taylor-series").then((m) => m.default),
+  "lissajous-curves": () => import("./math/lissajous-curves").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
