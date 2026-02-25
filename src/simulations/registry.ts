@@ -3056,12 +3056,9 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#0ea5e9",
     icon: "🧊",
   },
-<<<<<<< HEAD
   // NEW BATCH: Underrepresented categories
-=======
   
   // NEW BATCH: Waves and Technology simulations
->>>>>>> origin/audit/physics
   {
     slug: "standing-waves",
     title: "Standing Waves",
@@ -3295,7 +3292,6 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#fbbf24",
     icon: "⭐",
   },
-<<<<<<< HEAD
   // NEW BATCH: Technology Algorithms
   {
     slug: "astar-pathfinding",
@@ -3336,7 +3332,6 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "mutationRate", label: "Mutation Rate", min: 1, max: 15, step: 1, defaultValue: 5, unit: "%" },
       { key: "crossoverRate", label: "Crossover Rate", min: 50, max: 95, step: 5, defaultValue: 80, unit: "%" },
       { key: "problemType", label: "Problem (0=OneMax, 1=Target String, 2=Knapsack)", min: 0, max: 2, step: 1, defaultValue: 0 },
-=======
   // NEW BATCH: BIOLOGY, ASTRONOMY, EARTH SCIENCE (15 simulations)
   {
     slug: "enzyme-kinetics",
@@ -3394,13 +3389,11 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "selectionPressure", label: "Selection Pressure", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "×" },
       { key: "environmentalChange", label: "Environmental Change", min: -0.5, max: 0.5, step: 0.1, defaultValue: 0 },
       { key: "populationSize", label: "Population Size", min: 30, max: 80, step: 5, defaultValue: 50 },
->>>>>>> origin/audit/physics
     ],
     thumbnailColor: "#f59e0b",
     icon: "🧬",
   },
   {
-<<<<<<< HEAD
     slug: "huffman-coding",
     title: "Huffman Coding",
     category: "technology",
@@ -3470,7 +3463,6 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#16a34a",
     icon: "🌳",
-=======
     slug: "neural-signal-transmission",
     title: "Neural Signal Transmission",
     category: "biology",
@@ -3634,7 +3626,6 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#f59e0b",
     icon: "🌍",
->>>>>>> origin/audit/physics
   },
 ];
 
@@ -3866,7 +3857,6 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "photosynthesis": () => import("./biology/photosynthesis").then((m) => m.default),
   "dna-replication": () => import("./biology/dna-replication").then((m) => m.default),
   "stellar-lifecycle": () => import("./astronomy/stellar-lifecycle").then((m) => m.default),
-<<<<<<< HEAD
   // NEW BATCH: Technology Algorithms
   "astar-pathfinding": () => import("./technology/astar-pathfinding").then((m) => m.default),
   "dijkstra-algorithm": () => import("./technology/dijkstra-algorithm").then((m) => m.default),
@@ -3876,7 +3866,6 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "stack-queue-visualization": () => import("./technology/stack-queue-visualization").then((m) => m.default),
   "image-convolution-filters": () => import("./technology/image-convolution-filters").then((m) => m.default),
   "binary-search-tree": () => import("./technology/binary-search-tree").then((m) => m.default),
-=======
   // NEW BATCH: BIOLOGY, ASTRONOMY, EARTH SCIENCE (15 simulations)
   "enzyme-kinetics": () => import("./biology/enzyme-kinetics").then((m) => m.default),
   "food-web-ecosystem": () => import("./biology/food-web-ecosystem").then((m) => m.default),
@@ -3893,7 +3882,6 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "greenhouse-effect": () => import("./earth/greenhouse-effect").then((m) => m.default),
   "ocean-currents": () => import("./earth/ocean-currents").then((m) => m.default),
   "seasons-axial-tilt": () => import("./earth/seasons-axial-tilt").then((m) => m.default),
->>>>>>> origin/audit/physics
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
