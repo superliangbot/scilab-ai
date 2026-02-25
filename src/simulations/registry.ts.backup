@@ -3055,7 +3055,6 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#0ea5e9",
     icon: "🧊",
-  },
   // NEW BATCH: Underrepresented categories
   {
     slug: "standing-waves",
@@ -3290,37 +3289,6 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#fbbf24",
     icon: "⭐",
   },
-  {
-    slug: "beat-frequency",
-    title: "Beat Frequency",
-    category: "waves",
-    description: "Two waves with slightly different frequencies creating beats through interference.",
-    longDescription: "Beat frequency demonstrates the interference of two waves with close frequencies. The resulting amplitude oscillates at the beat frequency |f₁ - f₂|, creating the familiar periodic volume variation heard when tuning musical instruments. The simulation shows wave superposition, phasor diagrams, and frequency spectrum analysis.",
-    parameters: [
-      { key: "freq1", label: "Frequency 1", min: 400, max: 500, step: 1, defaultValue: 440, unit: "Hz" },
-      { key: "freq2", label: "Frequency 2", min: 400, max: 500, step: 1, defaultValue: 442, unit: "Hz" },
-      { key: "amplitude1", label: "Amplitude 1", min: 0.1, max: 2.0, step: 0.1, defaultValue: 1.0 },
-      { key: "amplitude2", label: "Amplitude 2", min: 0.1, max: 2.0, step: 0.1, defaultValue: 1.0 },
-    ],
-    thumbnailColor: "#f59e0b",
-    icon: "🎵",
-  },
-  {
-    slug: "rsa-encryption",
-    title: "RSA Encryption",
-    category: "technology",
-    description: "Public key cryptography using modular arithmetic and prime factorization.",
-    longDescription: "RSA encryption enables secure communication without shared secrets. Based on the difficulty of factoring large integers, RSA uses public key (e,n) for encryption and private key (d,n) for decryption. Security relies on keeping prime factors p,q of n secret while publishing the public key.",
-    parameters: [
-      { key: "primeP", label: "Prime P", min: 0, max: 1, step: 0.1, defaultValue: 0.5 },
-      { key: "primeQ", label: "Prime Q", min: 0, max: 1, step: 0.1, defaultValue: 0.6 },
-      { key: "message", label: "Message", min: 0, max: 1, step: 0.04, defaultValue: 0.5 },
-      { key: "animationSpeed", label: "Animation Speed", min: 0.1, max: 3.0, step: 0.1, defaultValue: 1.0 },
-      { key: "showSteps", label: "Show Steps", min: 0, max: 1, step: 1, defaultValue: 1 },
-    ],
-    thumbnailColor: "#ef4444",
-    icon: "🔐",
-  },
 ];
 
 // Lazy-loaded simulation factories
@@ -3551,8 +3519,6 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "photosynthesis": () => import("./biology/photosynthesis").then((m) => m.default),
   "dna-replication": () => import("./biology/dna-replication").then((m) => m.default),
   "stellar-lifecycle": () => import("./astronomy/stellar-lifecycle").then((m) => m.default),
-  "beat-frequency": () => import("./waves/beat-frequency").then((m) => m.default),
-  "rsa-encryption": () => import("./technology/rsa-encryption").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
