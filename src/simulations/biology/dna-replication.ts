@@ -55,7 +55,7 @@ const DNAReplication: SimulationFactory = () => {
   // Colors
   const BG_COLOR = "#0f172a";
   const DNA_BACKBONE_COLOR = "#6b7280";
-  const BASE_COLORS = {
+  const BASE_COLORS: Record<string, string> = {
     A: "#ef4444", // red
     T: "#3b82f6", // blue  
     G: "#10b981", // green

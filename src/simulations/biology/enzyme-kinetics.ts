@@ -28,7 +28,7 @@ const EnzymeKineticsFactory: SimulationFactory = () => {
     age?: number;
   }> = [];
 
-  let reactionHistory: Array<{ time: number; velocity: number; [S]: number }> = [];
+  let reactionHistory: Array<{ time: number; velocity: number; substrate: number }> = [];
   let currentVelocity = 0;
 
   function initMolecules() {
@@ -152,7 +152,7 @@ const EnzymeKineticsFactory: SimulationFactory = () => {
       reactionHistory.push({
         time: time,
         velocity: currentVelocity,
-        [Symbol.for('S')]: currentS
+        substrate: currentS
       });
       
       // Keep only recent history

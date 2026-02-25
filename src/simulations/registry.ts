@@ -3332,6 +3332,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "mutationRate", label: "Mutation Rate", min: 1, max: 15, step: 1, defaultValue: 5, unit: "%" },
       { key: "crossoverRate", label: "Crossover Rate", min: 50, max: 95, step: 5, defaultValue: 80, unit: "%" },
       { key: "problemType", label: "Problem (0=OneMax, 1=Target String, 2=Knapsack)", min: 0, max: 2, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🧬",
+  },
   // NEW BATCH: BIOLOGY, ASTRONOMY, EARTH SCIENCE (15 simulations)
   {
     slug: "enzyme-kinetics",
@@ -3730,7 +3734,6 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "coriolis-effect": () => import("./earth/coriolis-effect").then((m) => m.default),
   "correction-of-near-sightedness": () => import("./chemistry/correction-of-near-sightedness").then((m) => m.default),
   "cosmic-expansion": () => import("./chemistry/cosmic-expansion").then((m) => m.default),
-  "countercurrent-exchange": () => import("./electricity/countercurrent-exchange").then((m) => m.default),
   "covalent-bond": () => import("./chemistry/covalent-bond").then((m) => m.default),
   "crt": () => import("./electricity/crt").then((m) => m.default),
   "crt-tv": () => import("./electricity/crt-tv").then((m) => m.default),
@@ -3796,8 +3799,6 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "evolution-of-the-eye": () => import("./physics/evolution-of-the-eye").then((m) => m.default),
   "faradays-law": () => import("./physics/faradays-law").then((m) => m.default),
   "faradays-law-2": () => import("./physics/faradays-law-2").then((m) => m.default),
-  "filedrop-cmy": () => import("./electricity/filedrop-cmy").then((m) => m.default),
-  "filedrop-cmyk": () => import("./electricity/filedrop-cmyk").then((m) => m.default),
   "fireworks": () => import("./physics/fireworks").then((m) => m.default),
   "five-kingdom": () => import("./physics/five-kingdom").then((m) => m.default),
   "flame-test": () => import("./physics/flame-test").then((m) => m.default),
