@@ -104,6 +104,59 @@ const Resonance: SimulationFactory = () => {
     }
   }
 
+<<<<<<< HEAD
+=======
+  function drawAmplitudeGraph() {
+    const graphX = width - 250;
+    const graphY = 50;
+    const graphW = 200;
+    const graphH = 150;
+    
+    // Background
+    ctx.fillStyle = "rgba(30, 41, 59, 0.8)";
+    ctx.fillRect(graphX, graphY, graphW, graphH);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(graphX, graphY, graphW, graphH);
+    
+    // Title
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("Resonance Curve", graphX + graphW/2, graphY - 10);
+    
+    // Plot amplitude vs frequency
+    ctx.strokeStyle = OSCILLATOR_COLOR;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    for (let i = 0; i <= 100; i++) {
+      const f = 0.5 + (i / 100) * 2; // 0.5 to 2.5 Hz
+      const omega = 2 * Math.PI * f;
+      const omega0 = 2 * Math.PI * naturalFreq;
+      const gamma = 2 * damping * omega0;
+      
+      // Amplitude response for driven damped oscillator
+      const responseAmplitude = amplitude / Math.sqrt(Math.pow(omega0*omega0 - omega*omega, 2) + Math.pow(gamma*omega, 2));
+      
+      const x = graphX + (f - 0.5) / 2 * graphW;
+      const y = graphY + graphH - (responseAmplitude / (amplitude * 2)) * graphH;
+      
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    
+    // Mark driving frequency
+    ctx.strokeStyle = DRIVER_COLOR;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    const driverX = graphX + (drivingFreq - 0.5) / 2 * graphW;
+    ctx.moveTo(driverX, graphY);
+    ctx.lineTo(driverX, graphY + graphH);
+    ctx.stroke();
+  }
+
+>>>>>>> origin/audit/physics
   function drawInfoPanel() {
     const panelX = 10;
     const panelY = 10;
@@ -150,6 +203,10 @@ const Resonance: SimulationFactory = () => {
       ctx.fillRect(0, 0, width, height);
 
       drawOscillators();
+<<<<<<< HEAD
+=======
+      drawAmplitudeGraph();
+>>>>>>> origin/audit/physics
       drawInfoPanel();
     },
 

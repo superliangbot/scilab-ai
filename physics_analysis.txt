@@ -1,0 +1,384 @@
+=== ac-generator.ts ===
+2-import { getSimConfig } from "../registry";
+3-
+4:interface CurrentDot {
+5-  t: number;
+6-}
+--
+14-  let height = 600;
+15-
+16:  // Physics state
+17-  let rpm = 60;
+18-  let turns = 10;
+--
+31-  const WAVEFORM_SAMPLE_INTERVAL = 0.016; // ~60fps sampling
+32-
+33:  // Current dots for animated wire flow
+
+=== ammeter.ts ===
+17-
+18-  // Parameters
+19:  let current = 2.5;
+20-  let range = 1; // 0 = 500mA, 1 = 5A
+21-  let showInternal = 1;
+22:  let batteryVoltage = 9;
+23-
+24-  // Smooth needle animation
+25:  let displayNeedle = 0; // current needle angle (smoothly approaches target)
+26-  let targetNeedle = 0;
+27-
+--
+62-  }
+63-
+64:  function computePhysics(params: Record<string, number>) {
+
+=== capacitor-2.ts ===
+28-  let plateArea = 5;
+29-  let gapDistance = 5;
+30:  let voltage = 12;
+31-  let mode = 0; // 0 = charge, 1 = discharge
+32-
+33:  // Physics state
+34-  let chargeLevel = 0; // 0 to 1 normalized charge
+35:  let currentFlow = 0; // normalized 0 to 1
+36-
+37-  // RC-like time constant for animation (not real units, just for smooth animation)
+--
+110-    // Move wire charges
+111-    for (const wc of wireCharges) {
+112:      wc.speed = currentFlow;
+113-      const direction = mode === 0 ? 1 : -1;
+
+=== capacitor-application.ts ===
+25-  // Parameters
+26-  let circuit = 0; // 0=Basic, 1=Switch, 2=Delay
+27:  let voltage = 3;
+28:  let capacitance = 1000; // uF
+29-  let speed = 1;
+30-
+31:  // Physics state
+32-  let chargeLevel = 0; // 0 to 1
+33:  let currentFlow = 0; // normalized 0 to 1
+34-  let switchState = 0; // for circuit 1: 0=charge, 1=discharge
+35-  let delayPhase = 0; // for circuit 2: 0=connected, 1=disconnected/delay
+--
+52-
+53-  function computeRC(): number {
+54:    // Animation time constant scaled by capacitance
+
+=== capacitor-characteristic.ts ===
+17-
+18-  // Parameters
+19:  let voltage = 12; // V
+20:  let resistance = 10; // kOhm
+21:  let capacitance = 100; // uF
+22-  let mode = 0; // 0 = Charge, 1 = Discharge
+23-
+24:  // Physics state
+25:  let capVoltage = 0;
+26:  let currentAmps = 0;
+27-  let tau = 0; // time constant in seconds
+28-  let chargeStored = 0;
+--
+33-
+34-  // Graph data
+
+=== capacitor.ts ===
+21-
+22-  // Parameters
+23:  let capacitance = 100; // uF
+24:  let voltage = 12; // V
+25:  let resistance = 100; // Ohms
+26-  let mode = 0; // 0 = charging, 1 = discharging
+27-
+28:  // Physics state
+29:  let capVoltage = 0; // current capacitor voltage
+30:  let currentAmps = 0; // current in circuit
+31-  let tau = 0; // time constant
+32-  let energyStored = 0;
+--
+38-
+39-  // Graph data
+
+=== charge-conservation.ts ===
+26-  // Parameters
+27-  let circuitType = 0; // 0 = series, 1 = parallel
+28:  let voltage = 3; // V
+29:  let resistance1 = 10; // Ω
+30:  let resistance2 = 10; // Ω
+31-
+32-  // Derived
+33:  let totalResistance = 0;
+34:  let totalCurrent = 0;
+35:  let current1 = 0;
+36:  let current2 = 0;
+37-
+38-  // Charge particles
+--
+41-  const NUM_CHARGES_PARALLEL = 28;
+
+=== charge-distribution-on-a-thin-conductive-plate.ts ===
+506-        `Charge Distribution on a Conductive Plate: ${numCharges} electrons on a ${shapeNames[shape]} conductor. ` +
+507-        `Charges repel each other via Coulomb's law F = kq\u2081q\u2082/r\u00B2. ` +
+508:        `Currently ${nearEdgeCount} charges near edges, ${centerCount} in interior. ` +
+509-        `In equilibrium, charges accumulate on the surface (edges) of conductors, ` +
+510-        `with higher charge density at sharp corners and tips. ` +
+
+=== circuit-builder.ts ===
+17-  let height = 600;
+18-
+19:  // Physics state
+20:  let voltage = 9;
+21:  let resistance1 = 10;
+22:  let resistance2 = 20;
+23-  let circuitType = 0; // 0 = series, 1 = parallel
+24:  let totalResistance = 0;
+25:  let current = 0;
+26-  let power = 0;
+27-  let vDrop1 = 0;
+--
+58-  }
+59-
+60:  function computePhysics(params: Record<string, number>) {
+
+=== conductor-and-insulator.ts ===
+
+=== countercurrent-exchange.ts ===
+3-
+4-/**
+5: * Countercurrent Exchange -- Heat/substance transfer between two parallel
+6- * fluids flowing in opposite directions.
+7- *
+8: * Key physics: countercurrent flow maintains a temperature gradient along the
+9- * full length of the exchanger, achieving greater total heat transfer than
+10: * concurrent (same-direction) flow, which equilibrates at a common temperature.
+11- *
+12- * The simulation shows both modes side-by-side with animated fluid particles,
+--
+23-const SEGMENTS = 40; // discretised tube segments for heat calc
+24-
+25:const CountercurrentExchangeFactory: SimulationFactory = (): SimulationEngine => {
+26:  const config = getSimConfig("countercurrent-exchange") as SimulationConfig;
+
+=== crt-tv.ts ===
+24-  const TOTAL_LINES = 480;
+25-  const LINES_PER_FIELD = 240;
+26:  let currentLine = 0;
+27:  let currentX = 0; // 0..1 fraction across the line
+28:  let currentField = 0; // 0 = odd lines, 1 = even lines
+29-  let frameCount = 0;
+30-
+--
+132-    if (showScanLine) {
+133-      const activeLine = interlaced
+134:        ? currentField * 2 + Math.floor(currentLine) * 2 + currentField
+135:        : Math.floor(currentLine);
+136-      if (activeLine >= 0 && activeLine < TOTAL_LINES) {
+137-        const ly = ty + activeLine * lineH;
+138:        const beamX = lx + currentX * sx;
+
+=== crt.ts ===
+25-
+26-  // Parameters
+27:  let horizontalVoltage = 0;
+28:  let verticalVoltage = 0;
+29:  let acceleratingVoltage = 2000;
+30:  let beamCurrent = 5;
+31-
+32-  // Electron beam particles
+--
+51-  const SCREEN_X = 0.90;
+52-
+53:  // Physics constants (arbitrary scale for visualization)
+54-  const ELECTRON_CHARGE = 1.6e-19;
+55-  const ELECTRON_MASS = 9.109e-31;
+--
+
+=== dielectric-in-capacitor.ts ===
+49-    // Read actual params from the last update cycle
+50-    // Since we need params in render, we store them
+51:    const voltage = currentParams.voltage ?? 12;
+52:    const distance = currentParams.distance ?? 50;
+53:    const dielectricK = currentParams.dielectricK ?? 1;
+54:    const showField = currentParams.showField ?? 1;
+55-
+56-    // Calculate plate separation
+--
+184-    ctx.fillText("+", cx - 8, batY - 15);
+185-    ctx.fillText("−", cx + 8, batY - 15);
+186:    ctx.fillText(`${voltage.toFixed(0)}V`, cx, batY + 25);
+187-
+188:    // Capacitance calculation
+189-    const epsilon0 = 8.854e-12;
+
+=== diode-making.ts ===
+17-  let height = 0;
+18-  let time = 0;
+19:  let currentParams: Record<string, number> = {};
+20-  let lattice: (Atom | null)[][] = [];
+21-  let animPhase = 0;
+--
+25-
+26-  function buildLattice(): void {
+27:    const dopingLevel = currentParams.dopingLevel ?? 2;
+28-    const dopingCount = Math.round(dopingLevel);
+29-
+--
+71-
+72-  function update(dt: number, params: Record<string, number>): void {
+73:    const oldLevel = Math.round(currentParams.dopingLevel ?? 2);
+
+=== diode.ts ===
+18-  let height = 0;
+19-  let time = 0;
+20:  let currentParams: Record<string, number> = {};
+21-  let carriers: Carrier[] = [];
+22-
+--
+60-
+61-  function update(dt: number, params: Record<string, number>): void {
+62:    currentParams = params;
+63-    const biasMode = Math.round(params.biasMode ?? 0); // 0=forward, 1=unbiased, 2=reverse
+64-    const junctionX = width / 2;
+--
+110-        }
+111-        if (biasMode === 0 && c.x > width - 20) {
+112:          // Wrap around in forward bias (current flowing)
+
+=== electric-circuit.ts ===
+11-  let time = 0;
+12-
+13:  let voltage = 9; // V
+14:  let resistance1 = 100; // Ω
+15:  let resistance2 = 200; // Ω
+16-  let circuitType = 0; // 0=series, 1=parallel
+17-
+--
+39-  }
+40-
+41:  function getCircuitValues(): { totalR: number; current: number; v1: number; v2: number; i1: number; i2: number; power: number } {
+42-    let totalR: number, i1: number, i2: number, v1: number, v2: number;
+43-    if (circuitType === 0) {
+44-      // Series
+45:      totalR = resistance1 + resistance2;
+
+=== electric-circuits-ac.ts ===
+11-  let time = 0;
+12-
+13:  let acVoltage = 120; // V peak
+14-  let frequency = 60; // Hz
+15:  let resistance = 100; // Ω
+16:  let capacitance = 10; // μF
+17-
+18-  function init(c: HTMLCanvasElement): void {
+--
+25-
+26-  function update(dt: number, params: Record<string, number>): void {
+27:    acVoltage = params.acVoltage ?? 120;
+28-    frequency = params.frequency ?? 60;
+29:    resistance = params.resistance ?? 100;
+30:    capacitance = params.capacitance ?? 10;
+
+=== electric-current.ts ===
+2-import { getSimConfig } from "../registry";
+3-
+4:const ElectricCurrentFactory: SimulationFactory = (): SimulationEngine => {
+5:  const config = getSimConfig("electric-current") as SimulationConfig;
+6-
+7-  let canvas: HTMLCanvasElement;
+--
+102-    if (prevMat !== materialType) initMaterial();
+103-
+104:    const voltageForce = numBatteries * 15; // pixels/s² drift force
+105-
+106-    for (const e of electrons) {
+--
+114-          e.y = atom.y + orbitR * Math.sin(e.orbitAngle);
+115-
+
+=== electric-field-line.ts ===
+
+=== electric-plating.ts ===
+9-  let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D;
+10-  let width = 0, height = 0, time = 0;
+11:  let currentParams: Record<string, number> = {};
+12-  let ions: Ion[] = [], electrons: Electron[] = [];
+13-  let cathodeThick = 0, anodeThick = 0;
+--
+46-
+47-  function update(dt: number, params: Record<string, number>): void {
+48:    currentParams = params;
+49:    const V = params.voltage ?? 6, I = params.current ?? 2;
+50-    const spd = params.platingTime ?? 1, conc = params.electrolyteConcentration ?? 1;
+51-    const b = bk(), aR = anR(), cR = caR();
+--
+109-    ctx.fillStyle = "#0d1117";
+110-    ctx.fillRect(0, 0, width, height);
+
+=== electric-potential-2.ts ===
+9-  let W = 0, H = 0, time = 0;
+10-
+11:  let voltage = 50, plateSep = 5, showField = 1, chargePos = 50;
+12-  let eField = 0, vAtCharge = 0, workDone = 0;
+13-
+--
+24-  }
+25-
+26:  function physics(): void {
+27:    eField = voltage / (plateSep / 100);
+28-    const f = chargePos / 100;
+29:    vAtCharge = voltage * (1 - f);
+30:    workDone = 1.6e-19 * (voltage - vAtCharge);
+31-  }
+32-
+
+=== electric-potential-3.ts ===
+
+=== electric-potential.ts ===
+331-  }
+332-
+333:  /** Draw the voltage color-scale legend on the right side. */
+334-  function drawLegend(): void {
+335-    const legendX = width - 42;
+--
+385-    ctx.font = "bold 13px system-ui, sans-serif";
+386-    ctx.textAlign = "left";
+387:    ctx.fillText("Electric Potential (Voltage)", 16, 26);
+388-
+389-    ctx.font = "11px system-ui, sans-serif";
+--
+422-    drawInfoPanel();
+423-
+424:    // Footer formula
+
+=== electric-transformer.ts ===
+31-  }
+32-
+33:  function physics(p: Record<string, number>) {
+34-    N1 = Math.round(p.primaryTurns ?? N1);
+35-    N2 = Math.round(p.secondaryTurns ?? N2);
+36:    Vin = p.inputVoltage ?? Vin;
+37-    freq = p.frequency ?? freq;
+38-    omega = 2 * Math.PI * freq;
+--
+180-    ctx.fillStyle = SEC; ctx.fillText("\u2014 V\u2082 (out)", ox + 10, oy + 22);
+181-    ctx.fillStyle = TXT; ctx.font = "bold 10px monospace"; ctx.textAlign = "right";
+182:    ctx.fillText("VOLTAGE WAVEFORMS", ox + w - 8, oy + 10);
+183-  }
+184-
+--
+
+=== filedrop-cmy.ts ===
+202-    drawBarGraph();
+203-
+204:    // Formula
+205-    ctx.fillStyle = "#94a3b8";
+206-    ctx.font = "12px monospace";
+
+=== filedrop-cmyk.ts ===
+207-    drawSeparationPreview();
+208-
+209:    // Formula at bottom
+210-    const [rNoK, gNoK, bNoK] = cmykToRgb(cyan, magenta, yellow, 0);
+211-    const fy = H - 40;
+

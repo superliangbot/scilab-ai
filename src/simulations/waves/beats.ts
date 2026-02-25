@@ -16,18 +16,32 @@ const Beats: SimulationFactory = () => {
   let time = 0;
 
   // Wave history for plotting
+<<<<<<< HEAD
   const historyLength = 800;
   let waveHistory: number[][] = [[], []];
   let beatHistory: number[] = [];
+=======
+  const historyLength = 1000;
+  let waveHistory: number[][] = [[], []];
+  let beatHistory: number[] = [];
+  let timeHistory: number[] = [];
+>>>>>>> origin/audit/physics
 
   // Colors and styles
   const BG_COLOR = "#0a0a0f";
   const WAVE1_COLOR = "#3b82f6";
   const WAVE2_COLOR = "#ef4444";
   const BEAT_COLOR = "#fbbf24";
+<<<<<<< HEAD
   const TEXT_COLOR = "#e2e8f0";
 
   function updateWaves() {
+=======
+  const ENVELOPE_COLOR = "#10b981";
+  const TEXT_COLOR = "#e2e8f0";
+
+  function updateWaves(dt: number) {
+>>>>>>> origin/audit/physics
     const wave1 = amplitude * Math.cos(2 * Math.PI * freq1 * time);
     const wave2 = amplitude * Math.cos(2 * Math.PI * freq2 * time);
     const beatWave = wave1 + wave2;
@@ -36,12 +50,20 @@ const Beats: SimulationFactory = () => {
     waveHistory[0].push(wave1);
     waveHistory[1].push(wave2);
     beatHistory.push(beatWave);
+<<<<<<< HEAD
+=======
+    timeHistory.push(time);
+>>>>>>> origin/audit/physics
     
     // Keep only recent history
     if (waveHistory[0].length > historyLength) {
       waveHistory[0].shift();
       waveHistory[1].shift();
       beatHistory.shift();
+<<<<<<< HEAD
+=======
+      timeHistory.shift();
+>>>>>>> origin/audit/physics
     }
   }
 
@@ -89,6 +111,44 @@ const Beats: SimulationFactory = () => {
       }
       ctx.stroke();
       
+<<<<<<< HEAD
+=======
+      // Beat envelope (amplitude modulation)
+      const beatFreq = Math.abs(freq2 - freq1);
+      ctx.strokeStyle = ENVELOPE_COLOR;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      for (let i = 0; i < timeHistory.length; i++) {
+        const x = graphX + (i / historyLength) * graphW;
+        const envelope = 2 * amplitude * Math.abs(Math.cos(Math.PI * beatFreq * timeHistory[i]));
+        const yTop = graphY + graphH/2 - (envelope / amplitude) * graphH/4;
+        const yBot = graphY + graphH/2 + (envelope / amplitude) * graphH/4;
+        
+        if (i === 0) {
+          ctx.moveTo(x, yTop);
+        } else {
+          ctx.lineTo(x, yTop);
+        }
+      }
+      ctx.stroke();
+      
+      ctx.beginPath();
+      for (let i = 0; i < timeHistory.length; i++) {
+        const x = graphX + (i / historyLength) * graphW;
+        const envelope = 2 * amplitude * Math.abs(Math.cos(Math.PI * beatFreq * timeHistory[i]));
+        const yBot = graphY + graphH/2 + (envelope / amplitude) * graphH/4;
+        
+        if (i === 0) {
+          ctx.moveTo(x, yBot);
+        } else {
+          ctx.lineTo(x, yBot);
+        }
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+>>>>>>> origin/audit/physics
       // Beat waveform (sum)
       ctx.strokeStyle = BEAT_COLOR;
       ctx.lineWidth = 2;
@@ -103,6 +163,51 @@ const Beats: SimulationFactory = () => {
     }
   }
 
+<<<<<<< HEAD
+=======
+  function drawTuningForks() {
+    const fork1X = 100;
+    const fork2X = 200;
+    const forkY = height - 150;
+    
+    // Tuning fork 1
+    ctx.strokeStyle = WAVE1_COLOR;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    const vibration1 = 5 * Math.sin(2 * Math.PI * freq1 * time);
+    ctx.moveTo(fork1X - 20, forkY - 50);
+    ctx.lineTo(fork1X - 20 + vibration1, forkY - 10);
+    ctx.lineTo(fork1X + 20 + vibration1, forkY - 10);
+    ctx.lineTo(fork1X + 20, forkY - 50);
+    ctx.moveTo(fork1X, forkY - 10);
+    ctx.lineTo(fork1X, forkY + 30);
+    ctx.stroke();
+    
+    ctx.fillStyle = WAVE1_COLOR;
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`${freq1} Hz`, fork1X, forkY + 50);
+    
+    // Tuning fork 2
+    ctx.strokeStyle = WAVE2_COLOR;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    const vibration2 = 5 * Math.sin(2 * Math.PI * freq2 * time);
+    ctx.moveTo(fork2X - 20, forkY - 50);
+    ctx.lineTo(fork2X - 20 + vibration2, forkY - 10);
+    ctx.lineTo(fork2X + 20 + vibration2, forkY - 10);
+    ctx.lineTo(fork2X + 20, forkY - 50);
+    ctx.moveTo(fork2X, forkY - 10);
+    ctx.lineTo(fork2X, forkY + 30);
+    ctx.stroke();
+    
+    ctx.fillStyle = WAVE2_COLOR;
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`${freq2} Hz`, fork2X, forkY + 50);
+  }
+
+>>>>>>> origin/audit/physics
   function drawInfoPanel() {
     const panelX = width - 320;
     const panelY = 20;
@@ -131,6 +236,63 @@ const Beats: SimulationFactory = () => {
     ctx.fillText(`Period: ${(1/beatFreq).toFixed(2)} s`, panelX + 10, panelY + 125);
   }
 
+<<<<<<< HEAD
+=======
+  function drawLegend() {
+    const legendX = 350;
+    const legendY = height - 80;
+    
+    ctx.fillStyle = "rgba(10, 10, 15, 0.8)";
+    ctx.fillRect(legendX, legendY, 200, 60);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(legendX, legendY, 200, 60);
+    
+    ctx.font = "11px monospace";
+    
+    // Wave 1
+    ctx.strokeStyle = WAVE1_COLOR;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(legendX + 10, legendY + 15);
+    ctx.lineTo(legendX + 30, legendY + 15);
+    ctx.stroke();
+    ctx.fillStyle = WAVE1_COLOR;
+    ctx.fillText("Wave 1", legendX + 35, legendY + 19);
+    
+    // Wave 2
+    ctx.strokeStyle = WAVE2_COLOR;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(legendX + 110, legendY + 15);
+    ctx.lineTo(legendX + 130, legendY + 15);
+    ctx.stroke();
+    ctx.fillStyle = WAVE2_COLOR;
+    ctx.fillText("Wave 2", legendX + 135, legendY + 19);
+    
+    // Beat
+    ctx.strokeStyle = BEAT_COLOR;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(legendX + 10, legendY + 35);
+    ctx.lineTo(legendX + 30, legendY + 35);
+    ctx.stroke();
+    ctx.fillStyle = BEAT_COLOR;
+    ctx.fillText("Beat (Sum)", legendX + 35, legendY + 39);
+    
+    // Envelope
+    ctx.strokeStyle = ENVELOPE_COLOR;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(legendX + 110, legendY + 35);
+    ctx.lineTo(legendX + 130, legendY + 35);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = ENVELOPE_COLOR;
+    ctx.fillText("Envelope", legendX + 135, legendY + 39);
+  }
+
+>>>>>>> origin/audit/physics
   const engine: SimulationEngine = {
     config,
 
@@ -147,7 +309,11 @@ const Beats: SimulationFactory = () => {
       amplitude = params.amplitude ?? amplitude;
 
       time += dt;
+<<<<<<< HEAD
       updateWaves();
+=======
+      updateWaves(dt);
+>>>>>>> origin/audit/physics
     },
 
     render() {
@@ -155,13 +321,23 @@ const Beats: SimulationFactory = () => {
       ctx.fillRect(0, 0, width, height);
 
       drawWaveforms();
+<<<<<<< HEAD
       drawInfoPanel();
+=======
+      drawTuningForks();
+      drawInfoPanel();
+      drawLegend();
+>>>>>>> origin/audit/physics
     },
 
     reset() {
       time = 0;
       waveHistory = [[], []];
       beatHistory = [];
+<<<<<<< HEAD
+=======
+      timeHistory = [];
+>>>>>>> origin/audit/physics
     },
 
     destroy() {
