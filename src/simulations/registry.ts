@@ -3055,6 +3055,239 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#0ea5e9",
     icon: "🧊",
+  // NEW BATCH: Underrepresented categories
+  {
+    slug: "standing-waves",
+    title: "Standing Waves",
+    category: "waves",
+    description: "Visualize standing wave patterns with nodes and antinodes from wave reflection.",
+    longDescription:
+      "Standing waves form when two waves of equal frequency and amplitude traveling in opposite directions interfere. The resulting pattern has stationary nodes (zero amplitude) and antinodes (maximum amplitude). Common in musical instruments and organ pipes, standing waves follow y = 2A·sin(kx)·cos(ωt) where nodes occur at distances nλ/2 from the boundary. Observe how wavelength affects the node spacing.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 30, max: 150, step: 5, defaultValue: 80, unit: "px" },
+      { key: "amplitude", label: "Amplitude", min: 10, max: 80, step: 5, defaultValue: 40, unit: "px" },
+      { key: "frequency", label: "Frequency", min: 0.5, max: 3, step: 0.1, defaultValue: 1.5, unit: "Hz" },
+      { key: "damping", label: "Damping", min: 0, max: 0.1, step: 0.005, defaultValue: 0.02 },
+    ],
+    thumbnailColor: "#06b6d4",
+    icon: "〰️",
+  },
+  {
+    slug: "doppler-effect",
+    title: "Doppler Effect",
+    category: "waves",
+    description: "Moving wave source creates frequency shift for stationary observers.",
+    longDescription:
+      "The Doppler effect describes the frequency change when a wave source moves relative to an observer. For sound waves, f' = f × v/(v ± vs) where v is wave speed and vs is source speed. When the source approaches, frequency increases (blue shift); when receding, frequency decreases (red shift). This effect explains why ambulance sirens change pitch and enables radar speed detection.",
+    parameters: [
+      { key: "sourceVelocity", label: "Source Velocity", min: 20, max: 200, step: 10, defaultValue: 100, unit: "px/s" },
+      { key: "waveSpeed", label: "Wave Speed", min: 200, max: 500, step: 20, defaultValue: 300, unit: "px/s" },
+      { key: "frequency", label: "Source Frequency", min: 1, max: 5, step: 0.2, defaultValue: 2, unit: "Hz" },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🎶",
+  },
+  {
+    slug: "sound-waves",
+    title: "Sound Waves",
+    category: "waves",
+    description: "Longitudinal sound waves showing compression and rarefaction of air particles.",
+    longDescription:
+      "Sound is a longitudinal wave where air particles oscillate parallel to wave propagation. Compressions (high pressure) and rarefactions (low pressure) alternate, creating the wave pattern we hear. The simulation shows both particle displacement and pressure waves, which are 90° out of phase. Sound speed in air is ~343 m/s, frequency determines pitch (20 Hz-20 kHz human range), and amplitude determines loudness.",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 200, max: 800, step: 20, defaultValue: 440, unit: "Hz" },
+      { key: "amplitude", label: "Amplitude", min: 10, max: 50, step: 2, defaultValue: 30, unit: "units" },
+      { key: "waveSpeed", label: "Wave Speed", min: 300, max: 400, step: 10, defaultValue: 343, unit: "m/s" },
+    ],
+    thumbnailColor: "#10b981",
+    icon: "🔊",
+  },
+  {
+    slug: "diffraction",
+    title: "Single-Slit Diffraction", 
+    category: "waves",
+    description: "Wave bending through a narrow opening showing diffraction pattern.",
+    longDescription:
+      "Single-slit diffraction demonstrates wave behavior when waves pass through an opening comparable to their wavelength. Using Huygens' principle, each point in the slit acts as a wave source, creating an interference pattern. Minima occur at angles where sin θ = nλ/a (n ≠ 0), where a is slit width. When a << λ, strong diffraction occurs; when a >> λ, diffraction is minimal and geometric optics applies.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 15, max: 60, step: 3, defaultValue: 30, unit: "px" },
+      { key: "slitWidth", label: "Slit Width", min: 20, max: 120, step: 5, defaultValue: 40, unit: "px" },
+      { key: "frequency", label: "Frequency", min: 1, max: 4, step: 0.2, defaultValue: 2, unit: "Hz" },
+      { key: "amplitude", label: "Amplitude", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "📡",
+  },
+  {
+    slug: "polarization",
+    title: "Light Polarization",
+    category: "waves",
+    description: "Polarized light through filters demonstrating Malus's law.",
+    longDescription:
+      "Light polarization restricts electromagnetic oscillations to specific orientations. Unpolarized light becomes linearly polarized after passing through a polarizer. A second polarizer (analyzer) transmits intensity I = I₀cos²θ according to Malus's law, where θ is the angle between polarization axes. At θ=0° (parallel), maximum transmission occurs; at θ=90° (crossed), complete blocking results. Applications include LCD screens, sunglasses, and optical filters.",
+    parameters: [
+      { key: "polarizerAngle", label: "Polarizer Angle", min: 0, max: 180, step: 5, defaultValue: 45, unit: "°" },
+      { key: "analyzerAngle", label: "Analyzer Angle", min: 0, max: 180, step: 5, defaultValue: 0, unit: "°" },
+      { key: "amplitude", label: "Amplitude", min: 40, max: 120, step: 5, defaultValue: 80 },
+      { key: "frequency", label: "Frequency", min: 0.8, max: 3, step: 0.1, defaultValue: 1.5, unit: "Hz" },
+    ],
+    thumbnailColor: "#ec4899", 
+    icon: "🔍",
+  },
+  {
+    slug: "plate-tectonics",
+    title: "Plate Tectonics",
+    category: "earth",
+    description: "Convergent boundary with oceanic-continental collision creating geological features.",
+    longDescription:
+      "Plate tectonics drives Earth's geological activity through lithospheric plate movement. At convergent boundaries, denser oceanic plates subduct beneath lighter continental plates, forming ocean trenches, volcanic arcs, and mountain ranges. The subducting plate melts due to pressure and heat, creating magma that rises to form volcanoes. Earthquakes result from stress accumulation and release along fault zones.",
+    parameters: [
+      { key: "convergenceRate", label: "Convergence Rate", min: 0.5, max: 8, step: 0.3, defaultValue: 2, unit: "cm/year" },
+      { key: "timeScale", label: "Time Scale", min: 10, max: 200, step: 10, defaultValue: 50, unit: "×" },
+      { key: "showMagma", label: "Show Magma (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#dc2626",
+    icon: "🌋",
+  },
+  {
+    slug: "water-cycle",
+    title: "Water Cycle",
+    category: "earth", 
+    description: "Complete hydrological cycle with evaporation, condensation, precipitation, and collection.",
+    longDescription:
+      "The water cycle describes water's continuous movement through Earth's systems. Solar energy drives evaporation from oceans and lakes. Water vapor rises, cools, and condenses into clouds at higher altitudes. Precipitation occurs when water droplets become too heavy, often enhanced by orographic lifting over mountains. Surface runoff and groundwater flow return water to oceans, completing the cycle.",
+    parameters: [
+      { key: "evaporationRate", label: "Evaporation Rate", min: 1, max: 15, step: 0.5, defaultValue: 5, unit: "/s" },
+      { key: "temperature", label: "Temperature", min: 10, max: 40, step: 1, defaultValue: 25, unit: "°C" },
+      { key: "windSpeed", label: "Wind Speed", min: 10, max: 60, step: 5, defaultValue: 30, unit: "px/s" },
+      { key: "precipitation", label: "Force Precipitation (0/1)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#3b82f6",
+    icon: "🌧️",
+  },
+  {
+    slug: "rock-cycle", 
+    title: "Rock Cycle",
+    category: "earth",
+    description: "Rock transformations through igneous, sedimentary, and metamorphic processes.",
+    longDescription:
+      "The rock cycle describes the transformation of rocks through geological processes. Igneous rocks form from cooling magma/lava. Weathering breaks rocks into sediments, which lithify into sedimentary rocks under pressure. Heat and pressure metamorphose existing rocks without melting. Extreme heat melts any rock back to magma. The cycle operates over millions of years, driven by tectonic forces and surface weathering.",
+    parameters: [
+      { key: "temperature", label: "Deep Temperature", min: 400, max: 1500, step: 50, defaultValue: 800, unit: "°C" },
+      { key: "pressure", label: "Deep Pressure", min: 20, max: 100, step: 5, defaultValue: 50, unit: "kbar" },
+      { key: "timeScale", label: "Time Scale", min: 5, max: 50, step: 2, defaultValue: 10, unit: "×" },
+      { key: "weatheringRate", label: "Weathering Rate", min: 0.2, max: 3, step: 0.1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#78716c",
+    icon: "🪨",
+  },
+  {
+    slug: "seismic-waves",
+    title: "Seismic Waves",
+    category: "earth",
+    description: "P-waves and S-waves propagating from earthquake epicenter to seismograph stations.",
+    longDescription:
+      "Earthquakes generate seismic waves that travel through Earth. P-waves (primary, compressional) are faster (~6 km/s in crust) and arrive first. S-waves (secondary, shear) are slower (~3.5 km/s) but carry more energy. The time difference between P and S wave arrivals helps locate earthquake epicenters via triangulation. Wave amplitude indicates magnitude, while frequency content reveals subsurface structure.",
+    parameters: [
+      { key: "magnitude", label: "Magnitude", min: 4, max: 9, step: 0.2, defaultValue: 6.5 },
+      { key: "depth", label: "Depth", min: 1, max: 50, step: 2, defaultValue: 10, unit: "km" },
+      { key: "pWaveSpeed", label: "P-wave Speed", min: 4, max: 8, step: 0.2, defaultValue: 6, unit: "km/s" },
+      { key: "sWaveSpeed", label: "S-wave Speed", min: 2, max: 6, step: 0.2, defaultValue: 3.5, unit: "km/s" },
+    ],
+    thumbnailColor: "#fbbf24",
+    icon: "📈",
+  },
+  {
+    slug: "logic-gates",
+    title: "Logic Gates",
+    category: "technology",
+    description: "Digital logic gates (AND, OR, NOT, XOR, NAND, NOR) with truth tables.",
+    longDescription:
+      "Logic gates are fundamental building blocks of digital circuits that perform Boolean operations. Each gate implements a specific logic function: AND (both inputs), OR (either input), NOT (inverter), XOR (exclusive-or), NAND (not-AND), NOR (not-OR), XNOR (not-XOR). Gates combine to create complex digital systems like computers, with truth tables defining all possible input-output combinations.",
+    parameters: [
+      { key: "clockSpeed", label: "Auto Clock Speed", min: 0.5, max: 5, step: 0.2, defaultValue: 2, unit: "Hz" },
+      { key: "autoMode", label: "Auto Mode (0/1)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#4f46e5",
+    icon: "⚡",
+  },
+  {
+    slug: "binary-adder",
+    title: "Binary Adder",
+    category: "technology", 
+    description: "Ripple-carry adder circuit demonstrating binary arithmetic with full adders.",
+    longDescription:
+      "A binary adder performs addition on binary numbers using full adder circuits. Each full adder handles one bit position, computing Sum = A⊕B⊕Cin and Carry = AB + Cin(A⊕B). The ripple-carry design propagates carry bits from least to most significant bit. This fundamental circuit underlies all computer arithmetic, demonstrating how complex operations emerge from simple Boolean logic gates.",
+    parameters: [
+      { key: "numberA", label: "Number A", min: 0, max: 15, step: 1, defaultValue: 5 },
+      { key: "numberB", label: "Number B", min: 0, max: 15, step: 1, defaultValue: 3 },
+      { key: "numBits", label: "Bit Width", min: 3, max: 6, step: 1, defaultValue: 4 },
+      { key: "showAnimation", label: "Show Animation (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#059669", 
+    icon: "➕",
+  },
+  {
+    slug: "sorting-algorithms",
+    title: "Sorting Algorithms",
+    category: "technology",
+    description: "Animated comparison of bubble, selection, insertion, quick, and merge sort algorithms.",
+    longDescription:
+      "Sorting algorithms arrange data in order, fundamental to computer science. Bubble sort repeatedly swaps adjacent elements (O(n²)). Selection sort finds minimum and places it (O(n²)). Insertion sort builds sorted array incrementally (O(n²)). Quick sort uses divide-and-conquer with pivot (O(n log n)). Merge sort divides, sorts, and merges (O(n log n)). Watch how different algorithms trade time complexity for implementation simplicity.",
+    parameters: [
+      { key: "algorithm", label: "Algorithm (0-4)", min: 0, max: 0.99, step: 0.2, defaultValue: 0 },
+      { key: "arraySize", label: "Array Size", min: 8, max: 40, step: 2, defaultValue: 20 },
+      { key: "speed", label: "Speed", min: 0.5, max: 20, step: 0.5, defaultValue: 5, unit: "ops/s" },
+    ],
+    thumbnailColor: "#7c2d12",
+    icon: "📊",
+  },
+  {
+    slug: "photosynthesis",
+    title: "Photosynthesis",
+    category: "biology",
+    description: "Light-dependent reactions and Calvin cycle converting CO₂ and water to glucose.",
+    longDescription:
+      "Photosynthesis converts light energy into chemical energy via 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂. Light reactions in thylakoids capture photons, split water (releasing O₂), and generate ATP/NADPH. The Calvin cycle in stroma fixes CO₂ into organic molecules using stored energy. Environmental factors (light intensity, CO₂ concentration, temperature, water) affect photosynthetic rate through limiting factors.",
+    parameters: [
+      { key: "lightIntensity", label: "Light Intensity", min: 20, max: 100, step: 5, defaultValue: 80, unit: "%" },
+      { key: "co2Concentration", label: "CO₂ Concentration", min: 200, max: 800, step: 20, defaultValue: 400, unit: "ppm" },
+      { key: "temperature", label: "Temperature", min: 10, max: 40, step: 1, defaultValue: 25, unit: "°C" },
+      { key: "waterAvailability", label: "Water Availability", min: 30, max: 100, step: 5, defaultValue: 90, unit: "%" },
+    ],
+    thumbnailColor: "#22c55e",
+    icon: "🌱",
+  },
+  {
+    slug: "dna-replication",
+    title: "DNA Replication", 
+    category: "biology",
+    description: "Semi-conservative DNA replication with helicase, primase, polymerase, and ligase enzymes.",
+    longDescription:
+      "DNA replication creates two identical copies from one double helix using semi-conservative mechanism. Helicase unwinds the double helix, primase synthesizes RNA primers, DNA polymerase III adds nucleotides (5' to 3' direction), and ligase joins Okazaki fragments. Leading strand synthesizes continuously; lagging strand forms discontinuous fragments. Base pairing rules (A-T, G-C) ensure accuracy.",
+    parameters: [
+      { key: "replicationSpeed", label: "Replication Speed", min: 0.5, max: 5, step: 0.2, defaultValue: 2, unit: "bp/s" },
+      { key: "dnaLength", label: "DNA Length", min: 15, max: 40, step: 2, defaultValue: 30, unit: "bp" },
+      { key: "showEnzymes", label: "Show Enzymes (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showDetails", label: "Show Details (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "🧬",
+  },
+  {
+    slug: "stellar-lifecycle",
+    title: "Stellar Lifecycle",
+    category: "astronomy",
+    description: "Complete stellar evolution from protostar to white dwarf, neutron star, or black hole.",
+    longDescription:
+      "Stars evolve through distinct phases determined by initial mass. Low mass stars (< 8 M☉) become white dwarfs after red giant and planetary nebula phases. High mass stars (> 8 M☉) explode as supernovae, forming neutron stars (< 25 M☉) or black holes (> 25 M☉). Main sequence lifetime scales as M^-2.5. Evolution tracks on the H-R diagram show temperature-luminosity relationships throughout stellar life.",
+    parameters: [
+      { key: "initialMass", label: "Initial Mass", min: 0.3, max: 30, step: 0.2, defaultValue: 1, unit: "M☉" },
+      { key: "timeScale", label: "Time Scale", min: 10, max: 1000, step: 25, defaultValue: 100, unit: "×" },
+      { key: "showHRDiagram", label: "Show H-R Diagram (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#fbbf24",
+    icon: "⭐",
   },
 ];
 
@@ -3270,6 +3503,22 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "nuclear-decay-simulation": () => import("./chemistry/nuclear-decay-simulation").then((m) => m.default),
   "reaction-kinetics": () => import("./chemistry/reaction-kinetics").then((m) => m.default),
   "phase-diagram": () => import("./chemistry/phase-diagram").then((m) => m.default),
+  // NEW BATCH: Underrepresented categories
+  "standing-waves": () => import("./waves/standing-waves").then((m) => m.default),
+  "doppler-effect": () => import("./waves/doppler-effect").then((m) => m.default),
+  "sound-waves": () => import("./waves/sound-waves").then((m) => m.default),
+  "diffraction": () => import("./waves/diffraction").then((m) => m.default),
+  "polarization": () => import("./waves/polarization").then((m) => m.default),
+  "plate-tectonics": () => import("./earth/plate-tectonics").then((m) => m.default),
+  "water-cycle": () => import("./earth/water-cycle").then((m) => m.default),
+  "rock-cycle": () => import("./earth/rock-cycle").then((m) => m.default),
+  "seismic-waves": () => import("./earth/seismic-waves").then((m) => m.default),
+  "logic-gates": () => import("./technology/logic-gates").then((m) => m.default),
+  "binary-adder": () => import("./technology/binary-adder").then((m) => m.default),
+  "sorting-algorithms": () => import("./technology/sorting-algorithms").then((m) => m.default),
+  "photosynthesis": () => import("./biology/photosynthesis").then((m) => m.default),
+  "dna-replication": () => import("./biology/dna-replication").then((m) => m.default),
+  "stellar-lifecycle": () => import("./astronomy/stellar-lifecycle").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
