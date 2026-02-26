@@ -4504,6 +4504,8 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#6366f1",
     icon: "\u269B\uFE0F",
+  },
+  {
     slug: "maximum-elongation-of-inner-planets",
     title: "Maximum Elongation Of Inner Planets",
     category: "chemistry",
@@ -4891,6 +4893,8 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "torque", label: "Torque", min: 0, max: 20, step: 0.5, defaultValue: 5, unit: "N·m" },
     ],
     thumbnailColor: "#a855f7",
+  },
+  {
     slug: "oersteds-experiment",
     title: "Oersted's Experiment",
     category: "physics",
@@ -5165,6 +5169,8 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#a855f7",
     icon: "△",
+  },
+  {
     slug: "phase-of-moon-2",
     title: "Phase Of Moon 2",
     category: "astronomy",
@@ -5575,6 +5581,9 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "green", label: "Green", min: 0, max: 255, step: 1, defaultValue: 255 },
       { key: "blue", label: "Blue", min: 0, max: 255, step: 1, defaultValue: 255 },
       { key: "circleSize", label: "Circle Size", min: 50, max: 200, step: 5, defaultValue: 120, unit: "px" },
+    ],
+    thumbnailColor: "#666666",
+  },
   // Batch 26
   {
     slug: "rutherford-scattering",
@@ -5602,6 +5611,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "inputGreen", label: "Input Green", min: 0, max: 255, step: 1, defaultValue: 255 },
       { key: "inputBlue", label: "Input Blue", min: 0, max: 255, step: 1, defaultValue: 255 },
       { key: "separation", label: "Beam Separation", min: 10, max: 200, step: 5, defaultValue: 80, unit: "px" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "rutherford-scattering-and-size-of-nucleus",
     title: "Rutherford Scattering And Size Of Nucleus",
     category: "physics",
@@ -5737,6 +5750,8 @@ export const simulationConfigs: SimulationConfig[] = [
     category: "chemistry",
     description: "Simulates series and parallel resistance connections with Ohm's law (V = IR).",
     longDescription: "Explore how resistors behave in series (R_total = R1 + R2, same current) and parallel (1/R_total = 1/R1 + 1/R2, same voltage) configurations. Animated current dots flow through the circuit with voltage drops calculated using Ohm's Law.",
+  },
+  {
     slug: "same-circuit",
     title: "Same Circuit",
     category: "electricity",
@@ -5790,6 +5805,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "mass", label: "Mass", min: 100, max: 5000, step: 100, defaultValue: 1000, unit: "kg" },
       { key: "burnTime", label: "Burn Time", min: 1, max: 10, step: 0.5, defaultValue: 5, unit: "s" },
       { key: "friction", label: "Friction", min: 0, max: 1, step: 0.05, defaultValue: 0 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "scale-of-atom",
     title: "Scale Of Atom",
     category: "chemistry",
@@ -5828,6 +5847,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "timeOfDay", label: "Time (0=Day, 1=Night)", min: 0, max: 1, step: 1, defaultValue: 0 },
       { key: "windStrength", label: "Wind Strength", min: 1, max: 10, step: 1, defaultValue: 5 },
       { key: "particleCount", label: "Air Particles", min: 20, max: 150, step: 10, defaultValue: 80 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "size-of-atom-and-light",
     title: "Size of Atom and Light",
     category: "physics",
@@ -6019,6 +6042,7 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#10b981",
   },
+  {
     slug: "seeing-the-light",
     title: "Seeing The Light",
     category: "physics",
@@ -6085,6 +6109,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "rSeries", label: "R Series", min: 1, max: 100, step: 1, defaultValue: 10, unit: "Ω" },
       { key: "rParallelA", label: "R Parallel A", min: 1, max: 100, step: 1, defaultValue: 20, unit: "Ω" },
       { key: "rParallelB", label: "R Parallel B", min: 1, max: 100, step: 1, defaultValue: 30, unit: "Ω" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "spring",
     title: "Spring (Hooke's Law)",
     category: "physics",
@@ -6167,6 +6195,8 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "animSpeed", label: "Animation Speed", min: 0.1, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
     ],
     thumbnailColor: "#a855f7",
+  },
+  {
     slug: "spring-scales",
     title: "Spring Scale",
     category: "physics",
