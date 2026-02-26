@@ -28,8 +28,9 @@ const LensFactory: SimulationFactory = (): SimulationEngine => {
     // 1/v = 1/f - 1/(-u) = 1/f + 1/u
     // Actually using: 1/f = 1/v - 1/(-u) = 1/v + 1/u
     // v = f*u / (u - f)
-    const v = (f * u) / (u - f);
-    const magnification = v / u;
+    const denom = u - f;
+    const v = denom !== 0 ? (f * u) / denom : 1e6 * Math.sign(f * u); // image at infinity when object at focal point
+    const magnification = u !== 0 ? v / u : 0;
     return { v, magnification };
   }
 

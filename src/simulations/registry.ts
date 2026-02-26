@@ -2356,7 +2356,7 @@ export const simulationConfigs: SimulationConfig[] = [
       "Band theory explains the electronic properties of solids. Isolated atoms have discrete energy levels. When atoms are brought together in a solid, their energy levels split and broaden into quasi-continuous bands. The valence band (filled with electrons) and conduction band (empty or partially filled) determine a material's electrical properties. Conductors have overlapping bands, semiconductors have a small gap (~1 eV), and insulators have a large gap (>5 eV).",
     parameters: [
       { key: "atomCount", label: "Number of Atom Groups", min: 1, max: 6, step: 1, defaultValue: 4 },
-      { key: "bandGap", label: "Band Gap", min: 0, max: 8, step: 0.5, defaultValue: 3, unit: "eV" },
+      { key: "bandGap", label: "Band Gap", min: 0.5, max: 8, step: 0.5, defaultValue: 3, unit: "eV" },
       { key: "materialType", label: "Material (0/1/2)", min: 0, max: 2, step: 1, defaultValue: 0 },
     ],
     thumbnailColor: "#ec4899",
@@ -3707,7 +3707,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "fuel-cell",
     title: "Fuel Cell",
-    category: "biology",
+    category: "chemistry",
     description: "Visualize a hydrogen PEM fuel cell generating electricity from H₂ and O₂.",
     longDescription: "A hydrogen Proton Exchange Membrane (PEM) fuel cell simulation showing the electrochemical process: hydrogen gas is oxidized at the anode (2H₂ → 4H⁺ + 4e⁻), protons pass through the membrane, and electrons flow through an external circuit. At the cathode, oxygen combines with protons and electrons to form water (O₂ + 4H⁺ + 4e⁻ → 2H₂O). Shows voltage, current, power output, and efficiency.",
     parameters: [

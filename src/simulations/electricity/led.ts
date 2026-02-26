@@ -39,7 +39,7 @@ const LedFactory: SimulationFactory = (): SimulationEngine => {
   function wavelengthFromBandGap(eV: number): number {
     // E = hc/lambda => lambda = hc/E
     // hc = 1240 eV·nm
-    return 1240 / eV;
+    return 1240 / Math.max(eV, 0.01);
   }
 
   function wavelengthToColor(nm: number): string {

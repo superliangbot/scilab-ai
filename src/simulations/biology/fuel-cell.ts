@@ -125,7 +125,7 @@ const FuelCellFactory: SimulationFactory = (): SimulationEngine => {
     // Water production rate proportional to current (2H2 + O2 -> 2H2O)
     const reactionRate = Math.min(hydrogenFlow / 2, oxygenFlow) * 0.1;
     waterProduced += reactionRate * dt;
-    efficiency = Math.min(0.95, (voltage / 1.48) * 100); // Thermoneutral voltage = 1.48V
+    efficiency = Math.min(95, (voltage / 1.48) * 100); // Thermoneutral voltage = 1.48V
 
     // Spawn particles
     spawnTimer += dt;
