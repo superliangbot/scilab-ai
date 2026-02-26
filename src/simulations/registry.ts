@@ -3467,6 +3467,8 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#16a34a",
     icon: "🌳",
+  },
+  {
     slug: "neural-signal-transmission",
     title: "Neural Signal Transmission",
     category: "biology",
@@ -3643,6 +3645,9 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "height2", label: "Height B", min: 10, max: 200, step: 5, defaultValue: 80, unit: "m" },
       { key: "mass1", label: "Mass A", min: 0.1, max: 50, step: 0.1, defaultValue: 1, unit: "kg" },
       { key: "mass2", label: "Mass B", min: 0.1, max: 50, step: 0.1, defaultValue: 5, unit: "kg" },
+    ],
+    thumbnailColor: "#666666",
+  },
   // BATCH 17 (15 simulations)
   {
     slug: "inductor-and-capacitor-2",
@@ -3710,6 +3715,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "oxygenFlow", label: "O₂ Flow Rate", min: 1, max: 15, step: 1, defaultValue: 3 },
       { key: "temperature", label: "Temperature", min: 20, max: 200, step: 5, defaultValue: 80, unit: "°C" },
       { key: "loadResistance", label: "Load Resistance", min: 1, max: 100, step: 1, defaultValue: 10, unit: "Ω" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "integral",
     title: "Integral",
     category: "math",
@@ -3733,6 +3742,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "flowRate", label: "Flow Rate", min: 0.2, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
       { key: "ionCount", label: "Ion Count", min: 5, max: 30, step: 1, defaultValue: 15 },
       { key: "resinCapacity", label: "Resin Capacity", min: 0, max: 1, step: 0.1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "law-of-definite-proportions-2",
     title: "Law of Definite Proportions 2",
     category: "chemistry",
@@ -3895,6 +3908,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "temperature", label: "Temperature", min: 50, max: 800, step: 10, defaultValue: 300, unit: "K" },
       { key: "containerWidth", label: "Container Width", min: 30, max: 100, step: 5, defaultValue: 80, unit: "%" },
       { key: "showVectors", label: "Show Velocity Vectors", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "keplers-law",
     title: "Keplers Law",
     category: "physics",
@@ -3961,6 +3978,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "viewMode", label: "View (0=both, 1=geo)", min: 0, max: 1, step: 1, defaultValue: 0 },
       { key: "showOrbits", label: "Show Orbits", min: 0, max: 1, step: 1, defaultValue: 1 },
       { key: "showTrails", label: "Show Trails", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "lcd-display",
     title: "LCD Display",
     category: "physics",
@@ -4046,6 +4067,7 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#f59e0b",
   },
+  {
     slug: "kinetic-theory-model",
     title: "Kinetic Theory Model",
     category: "physics",
@@ -4097,6 +4119,7 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#10b981",
   },
+  {
     slug: "lcd-display-2",
     title: "LCD Display 2",
     category: "physics",
