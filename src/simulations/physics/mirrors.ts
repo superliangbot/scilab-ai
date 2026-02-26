@@ -60,8 +60,8 @@ const MirrorsFactory: SimulationFactory = (): SimulationEngine => {
 
     update(_dt: number, params: Record<string, number>) {
       mirrorType = Math.round(params.mirrorType ?? 0);
-      focalLength = params.focalLength ?? 100;
-      objectDistance = params.objectDistance ?? 200;
+      focalLength = Math.max(1, params.focalLength ?? 100);
+      objectDistance = Math.max(1, params.objectDistance ?? 200);
       objectHeight = params.objectHeight ?? 60;
     },
 

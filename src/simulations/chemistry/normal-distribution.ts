@@ -37,8 +37,9 @@ const NormalDistributionFactory: SimulationFactory = (): SimulationEngine => {
   const GRAPH_BOTTOM_RATIO = 0.92;
 
   function normalPDF(x: number, mu: number, sigma: number): number {
-    const z = (x - mu) / sigma;
-    return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+    const s = Math.max(sigma, 0.01);
+    const z = (x - mu) / s;
+    return Math.exp(-0.5 * z * z) / (s * Math.sqrt(2 * Math.PI));
   }
 
   function initBins(): void {

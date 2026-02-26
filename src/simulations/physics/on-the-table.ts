@@ -81,8 +81,8 @@ const OnTheTableFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   function update(dt: number, params: Record<string, number>): void {
-    mass = params.mass ?? 2;
-    friction = params.friction ?? 0.3;
+    mass = Math.max(0.01, params.mass ?? 2);
+    friction = Math.max(0, params.friction ?? 0.3);
     appliedForce = params.appliedForce ?? 15;
     angle = params.angle ?? 0;
 

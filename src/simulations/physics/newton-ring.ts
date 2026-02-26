@@ -59,9 +59,9 @@ const NewtonRingFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   function update(_dt: number, params: Record<string, number>): void {
-    lensRadius = params.lensRadius ?? 200;
-    wavelength = params.wavelength ?? 550;
-    refractiveIndex = params.refractiveIndex ?? 1.0;
+    lensRadius = Math.max(1, params.lensRadius ?? 200);
+    wavelength = Math.max(1, params.wavelength ?? 550);
+    refractiveIndex = Math.max(0.01, params.refractiveIndex ?? 1.0);
     showCrossSection = params.showCrossSection ?? 1;
     computeRings();
   }

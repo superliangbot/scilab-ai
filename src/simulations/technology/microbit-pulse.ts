@@ -46,9 +46,9 @@ const MicrobitPulseFactory: SimulationFactory = (): SimulationEngine => {
     },
 
     update(dt: number, params: Record<string, number>) {
-      frequency = params.frequency ?? 10;
-      dutyCycle = params.dutyCycle ?? 50;
-      amplitude = params.amplitude ?? 5;
+      frequency = Math.max(0.1, params.frequency ?? 10);
+      dutyCycle = Math.max(0, Math.min(100, params.dutyCycle ?? 50));
+      amplitude = Math.max(0, params.amplitude ?? 5);
       showAverage = params.showAverage ?? 1;
       time += dt;
     },

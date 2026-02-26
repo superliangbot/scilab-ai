@@ -42,9 +42,9 @@ const MicroscopeFactory: SimulationFactory = (): SimulationEngine => {
     },
 
     update(_dt: number, params: Record<string, number>) {
-      fObjective = params.fObjective ?? 20;
-      fEyepiece = params.fEyepiece ?? 50;
-      objectDistance = params.objectDistance ?? 25;
+      fObjective = Math.max(1, params.fObjective ?? 20);
+      fEyepiece = Math.max(1, params.fEyepiece ?? 50);
+      objectDistance = Math.max(1, params.objectDistance ?? 25);
       tubeLength = params.tubeLength ?? 160;
     },
 

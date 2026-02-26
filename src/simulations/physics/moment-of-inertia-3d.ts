@@ -110,8 +110,8 @@ const MomentOfInertia3DFactory: SimulationFactory = (): SimulationEngine => {
         angularVelocity = 0;
         angle = 0;
       }
-      mass = params.mass ?? 2;
-      dimension = params.dimension ?? 0.5;
+      mass = Math.max(0.01, params.mass ?? 2);
+      dimension = Math.max(0.01, params.dimension ?? 0.5);
       torque = params.torque ?? 5;
 
       const I = getMomentOfInertia();
@@ -299,7 +299,7 @@ const MomentOfInertia3DFactory: SimulationFactory = (): SimulationEngine => {
       return (
         `Moment of Inertia 3D: ${shape.name}, m=${mass}kg, R/L=${dimension}m. ` +
         `${shape.formula} = ${I.toFixed(4)} kg·m². ` +
-        `τ=${torque}N·m, α=${(torque / I).toFixed(2)}rad/s², ω=${angularVelocity.toFixed(2)}rad/s. ` +
+        `τ=${torque}N·m, α=${(I > 0 ? torque / I : 0).toFixed(2)}rad/s², ω=${angularVelocity.toFixed(2)}rad/s. ` +
         `L=Iω=${L.toFixed(3)}kg·m²/s, KE_rot=½Iω²=${KE.toFixed(2)}J.`
       );
     },
