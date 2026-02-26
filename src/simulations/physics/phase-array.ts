@@ -103,7 +103,7 @@ const PhaseArrayFactory: SimulationFactory = (): SimulationEngine => {
   function update(dt: number, params: Record<string, number>): void {
     const newNum = Math.round(params.numSources ?? 4);
     const newPhase = params.phaseDelta ?? 0;
-    const newFreq = params.frequency ?? 2;
+    const newFreq = Math.max(0.1, params.frequency ?? 2);
     const newSpacing = params.spacing ?? 40;
 
     if (newNum !== numSources || newPhase !== phaseDelta ||

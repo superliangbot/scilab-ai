@@ -86,8 +86,8 @@ const PeriodOfPendulumFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   function update(dt: number, params: Record<string, number>): void {
-    const newL1 = params.length1 ?? 1;
-    const newL2 = params.length2 ?? 2;
+    const newL1 = Math.max(0.01, params.length1 ?? 1);
+    const newL2 = Math.max(0.01, params.length2 ?? 2);
     const newM1 = params.mass1 ?? 1;
     const newM2 = params.mass2 ?? 3;
 

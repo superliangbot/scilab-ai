@@ -79,7 +79,7 @@ const PendulumFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   function update(dt: number, params: Record<string, number>): void {
-    const newLength = params.length ?? 1.5;
+    const newLength = Math.max(0.01, params.length ?? 1.5);
     const newGravity = params.gravity ?? 9.8;
     const newAngle = params.initialAngle ?? 30;
     const newDamping = params.damping ?? 0;

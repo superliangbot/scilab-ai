@@ -57,7 +57,7 @@ const PressureFactory: SimulationFactory = (): SimulationEngine => {
 
   function update(dt: number, params: Record<string, number>) {
     force = params.force ?? 10;
-    area = params.area ?? 0.01;
+    area = Math.max(0.0001, params.area ?? 0.01);
     showMode = params.showMode ?? 0;
 
     targetDeformation = calcDeformation();

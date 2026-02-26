@@ -26,7 +26,11 @@ const MicroscopeFactory: SimulationFactory = (): SimulationEngine => {
   function thinLensImage(objectDist: number, focalLength: number): { imageDist: number; magnification: number } {
     // 1/v - 1/u = 1/f  (sign convention: u negative for real object)
     // 1/v = 1/f + 1/u  => 1/v = 1/f - 1/|u|
-    const v = 1 / (1 / focalLength - 1 / objectDist);
+    const denom = 1 / focalLength - 1 / objectDist;
+    if (Math.abs(denom) < 1e-10) {
+      return { imageDist: Infinity, magnification: Infinity };
+    }
+    const v = 1 / denom;
     const mag = -v / objectDist;
     return { imageDist: v, magnification: mag };
   }

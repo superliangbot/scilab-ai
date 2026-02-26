@@ -46,7 +46,7 @@ const PascalsTriangleFactory: SimulationFactory = (): SimulationEngine => {
   }
 
   function update(dt: number, params: Record<string, number>): void {
-    const newRows = Math.round(params.numRows ?? 10);
+    const newRows = Math.max(1, Math.round(params.numRows ?? 10));
     colorMode = Math.round(params.colorMode ?? 1);
     highlightRow = Math.round(params.highlightRow ?? 5);
     animationSpeed = params.animationSpeed ?? 1;
