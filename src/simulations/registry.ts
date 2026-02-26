@@ -4504,6 +4504,225 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#6366f1",
     icon: "\u269B\uFE0F",
+    slug: "maximum-elongation-of-inner-planets",
+    title: "Maximum Elongation Of Inner Planets",
+    category: "chemistry",
+    description: "Visualize the maximum angular separation of Mercury and Venus from the Sun as seen from Earth.",
+    longDescription:
+      "Maximum elongation is the greatest angular distance an inner planet (Mercury or Venus) reaches from the Sun as observed from Earth. Because these planets orbit closer to the Sun than Earth, they never appear far from it in the sky. Mercury reaches ~18°–28° and Venus ~45°–47°. This simulation shows the orbital geometry and real-time elongation angle calculation.",
+    parameters: [
+      { key: "planetType", label: "Planet (0=Mercury,1=Venus)", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "timeScale", label: "Time Scale", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "showElongationLine", label: "Show Elongation Lines", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showOrbits", label: "Show Orbits", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+  },
+  {
+    slug: "measuring-the-earth",
+    title: "Measuring The Earth",
+    category: "physics",
+    description: "Eratosthenes' method: calculating Earth's circumference from shadow angles at two cities.",
+    longDescription:
+      "Around 240 BC, Eratosthenes measured the circumference of the Earth using the difference in shadow angles between Alexandria and Syene (modern Aswan) on the summer solstice. At Syene, the Sun was directly overhead (no shadow), while at Alexandria it cast a shadow at 7.2°. Since 7.2° is 1/50 of 360°, and the distance between cities was ~800 km, he estimated C ≈ 50 × 800 = 40,000 km — remarkably close to the actual value of 40,075 km.",
+    parameters: [
+      { key: "distanceBetweenCities", label: "City Distance", min: 100, max: 2000, step: 50, defaultValue: 800, unit: "km" },
+      { key: "shadowAngle", label: "Shadow Angle", min: 1, max: 45, step: 0.1, defaultValue: 7.2, unit: "°" },
+      { key: "sunElevation", label: "Sun Animation", min: 0, max: 1, step: 0.1, defaultValue: 0.5 },
+    ],
+    thumbnailColor: "#3b82f6",
+  },
+  {
+    slug: "measuring-the-earth-2",
+    title: "Measuring The Earth 2",
+    category: "physics",
+    description: "Calculate Earth's radius using the horizon distance method: d = √(2Rh).",
+    longDescription:
+      "When standing at height h above sea level, the distance to the horizon d is related to Earth's radius R by d ≈ √(2Rh) for h << R. This comes from the Pythagorean theorem applied to the triangle formed by Earth's center, the observer, and the horizon point: (R+h)² = R² + d², giving d² = 2Rh + h². By measuring the observer's height and the distance to the visible horizon, one can estimate R.",
+    parameters: [
+      { key: "observerHeight", label: "Observer Height", min: 1, max: 500, step: 1, defaultValue: 30, unit: "m" },
+      { key: "earthRadiusGuess", label: "Earth Radius (guess)", min: 3000, max: 10000, step: 100, defaultValue: 6371, unit: "km" },
+      { key: "showGeometry", label: "Show Geometry", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#2563eb",
+  },
+  {
+    slug: "meiosis",
+    title: "Meiosis",
+    category: "biology",
+    description: "Cell division producing gametes — shows all 8 stages from Prophase I to Telophase II.",
+    longDescription:
+      "Meiosis is a type of cell division that produces four genetically unique haploid daughter cells (gametes) from one diploid parent cell. It involves two rounds of division (meiosis I and II) through stages: Prophase I (synapsis and crossing over), Metaphase I, Anaphase I (homologs separate), Telophase I, then Prophase II through Telophase II (sister chromatids separate). The result: 4 cells with half the chromosome number (n), enabling sexual reproduction.",
+    parameters: [
+      { key: "speed", label: "Speed", min: 0.1, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "chromosomeCount", label: "Chromosome Count (2n)", min: 2, max: 8, step: 2, defaultValue: 4 },
+      { key: "showLabels", label: "Show Labels", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#ec4899",
+  },
+  {
+    slug: "mendeleev",
+    title: "Mendeleev's Periodic Table",
+    category: "physics",
+    description: "Interactive periodic table showing element properties, groups, and periodic trends.",
+    longDescription:
+      "Dmitri Mendeleev organized elements by atomic mass in 1869, revealing periodic patterns in chemical properties. This interactive table shows the first 36 elements with their atomic number, symbol, mass, and electronegativity. Color modes highlight element categories (metals, nonmetals, metalloids), electronegativity trends (increases left→right, bottom→top), and atomic mass. Hover over elements to see detailed properties.",
+    parameters: [
+      { key: "colorMode", label: "Color (0=Cat,1=EN,2=Mass)", min: 0, max: 2, step: 1, defaultValue: 0 },
+      { key: "highlightGroup", label: "Highlight Group (0=none)", min: 0, max: 18, step: 1, defaultValue: 0 },
+      { key: "showLabels", label: "Show Labels", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#6366f1",
+  },
+  {
+    slug: "mendels-law-of-heredity",
+    title: "Mendel's Law Of Heredity",
+    category: "physics",
+    description: "Simulate monohybrid and dihybrid crosses with Punnett squares and phenotype ratios.",
+    longDescription:
+      "Gregor Mendel discovered the fundamental laws of inheritance using pea plants. The Law of Segregation states that allele pairs separate during gamete formation. The Law of Independent Assortment states that genes for different traits sort independently. This simulation demonstrates monohybrid crosses (F1: all dominant, F2: 3:1 ratio) and dihybrid crosses (F2: 9:3:3:1 ratio) with visual Punnett squares and statistical distributions.",
+    parameters: [
+      { key: "crossType", label: "Cross (0=Mono,1=Di)", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "generation", label: "Generation (1=F1,2=F2)", min: 1, max: 2, step: 1, defaultValue: 2 },
+      { key: "traitType", label: "Trait (0=Shape,1=Color)", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "numTrials", label: "Number of Trials", min: 20, max: 500, step: 10, defaultValue: 100 },
+    ],
+    thumbnailColor: "#22c55e",
+  },
+  {
+    slug: "michelson-interferometer",
+    title: "Michelson Interferometer",
+    category: "physics",
+    description: "Split light into two beams that recombine to produce interference fringes.",
+    longDescription:
+      "The Michelson interferometer splits a beam of light into two perpendicular paths using a beam splitter. Each beam reflects off a mirror and returns to recombine. If the path lengths differ, the beams arrive with a phase difference, creating constructive or destructive interference. Moving one mirror by λ/2 shifts the pattern by one fringe. This device was used in the famous Michelson-Morley experiment that disproved the luminiferous aether.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 380, max: 700, step: 5, defaultValue: 550, unit: "nm" },
+      { key: "mirrorOffset", label: "Mirror 2 Offset", min: -1000, max: 1000, step: 10, defaultValue: 0, unit: "nm" },
+      { key: "beamSplitterReflect", label: "Beam Splitter Ratio", min: 0.1, max: 0.9, step: 0.05, defaultValue: 0.5 },
+      { key: "showFringes", label: "Show Fringe Pattern", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+  },
+  {
+    slug: "microbit-capacitor",
+    title: "Capacitor Charging & Discharging",
+    category: "electricity",
+    description: "RC circuit simulation showing exponential charging and discharging curves.",
+    longDescription:
+      "A capacitor in an RC circuit charges exponentially: V(t) = V₀(1 - e^(-t/RC)) and discharges as V(t) = V₀·e^(-t/RC). The time constant τ = RC determines how quickly the capacitor reaches its final voltage — at t = 1τ, it reaches 63.2% of the final value (charging) or drops to 36.8% (discharging). After 5τ, the capacitor is essentially fully charged or discharged (>99%).",
+    parameters: [
+      { key: "voltage", label: "Source Voltage", min: 1, max: 12, step: 0.5, defaultValue: 5, unit: "V" },
+      { key: "capacitance", label: "Capacitance", min: 10, max: 1000, step: 10, defaultValue: 100, unit: "µF" },
+      { key: "resistance", label: "Resistance", min: 1, max: 100, step: 1, defaultValue: 10, unit: "kΩ" },
+      { key: "isCharging", label: "Mode (1=Charge,0=Discharge)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+  },
+  {
+    slug: "microbit-pulse",
+    title: "Pulse Width Modulation (PWM)",
+    category: "technology",
+    description: "Visualize PWM signals, duty cycle, and their effect on LED brightness and motor speed.",
+    longDescription:
+      "Pulse Width Modulation (PWM) is a technique for controlling power delivery by rapidly switching between HIGH and LOW states. The duty cycle (% of time HIGH) determines the average voltage. At 50% duty cycle with a 5V signal, the average output is 2.5V. PWM is widely used in microcontrollers to control LED brightness, motor speed, and servo position. This simulation shows the waveform, duty cycle visualization, and practical applications.",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 1, max: 100, step: 1, defaultValue: 10, unit: "Hz" },
+      { key: "dutyCycle", label: "Duty Cycle", min: 0, max: 100, step: 1, defaultValue: 50, unit: "%" },
+      { key: "amplitude", label: "Amplitude", min: 1, max: 12, step: 0.5, defaultValue: 5, unit: "V" },
+      { key: "showAverage", label: "Show Average Voltage", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#6366f1",
+  },
+  {
+    slug: "microscope",
+    title: "Compound Microscope",
+    category: "physics",
+    description: "Ray diagram of a compound microscope showing objective and eyepiece image formation.",
+    longDescription:
+      "A compound microscope uses two converging lenses to produce high magnification. The objective lens creates a magnified real image of the specimen, which the eyepiece further magnifies as a virtual image. Total magnification = M_objective × M_eyepiece. The thin lens equation 1/f = 1/v - 1/u governs image formation. Typical microscopes achieve 40× to 1000× magnification with tube lengths around 160mm.",
+    parameters: [
+      { key: "fObjective", label: "Objective Focal Length", min: 5, max: 50, step: 1, defaultValue: 20, unit: "mm" },
+      { key: "fEyepiece", label: "Eyepiece Focal Length", min: 20, max: 100, step: 5, defaultValue: 50, unit: "mm" },
+      { key: "objectDistance", label: "Object Distance", min: 10, max: 100, step: 1, defaultValue: 25, unit: "mm" },
+      { key: "tubeLength", label: "Tube Length", min: 80, max: 250, step: 10, defaultValue: 160, unit: "mm" },
+    ],
+    thumbnailColor: "#3b82f6",
+  },
+  {
+    slug: "microscopic-image",
+    title: "Microscopic Image",
+    category: "physics",
+    description: "Simulates the view through a microscope at different magnifications with various biological samples.",
+    longDescription:
+      "This simulation shows what you would see through a microscope at different magnification levels. View plant cells (~50µm), blood cells (~7µm), or bacteria (~1-3µm). As magnification increases, the field of view narrows but detail increases — until hitting the optical resolution limit of ~0.2µm (set by the diffraction of visible light at λ≈550nm). The simulation includes scale bars, focus control, and realistic cell morphology.",
+    parameters: [
+      { key: "magnification", label: "Magnification", min: 40, max: 1000, step: 10, defaultValue: 100, unit: "×" },
+      { key: "sampleType", label: "Sample (0=Plant,1=Blood,2=Bacteria)", min: 0, max: 2, step: 1, defaultValue: 0 },
+      { key: "showScale", label: "Show Scale Bar", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "focusDepth", label: "Focus", min: 0, max: 1, step: 0.05, defaultValue: 0.5 },
+    ],
+    thumbnailColor: "#8b5cf6",
+  },
+  {
+    slug: "mirrors",
+    title: "Mirrors",
+    category: "physics",
+    description: "Image formation by plane, concave, and convex mirrors with ray diagrams.",
+    longDescription:
+      "Mirrors form images by reflecting light. Plane mirrors create virtual, upright images at equal distance behind the mirror. Concave mirrors can form real or virtual images depending on object position relative to the focal point. Convex mirrors always form virtual, diminished images. The mirror equation 1/f = 1/v + 1/u and magnification m = -v/u describe image properties. This simulation shows interactive ray diagrams for all three mirror types.",
+    parameters: [
+      { key: "mirrorType", label: "Type (0=Plane,1=Concave,2=Convex)", min: 0, max: 2, step: 1, defaultValue: 1 },
+      { key: "focalLength", label: "Focal Length", min: 30, max: 200, step: 5, defaultValue: 100, unit: "px" },
+      { key: "objectDistance", label: "Object Distance", min: 50, max: 400, step: 5, defaultValue: 200, unit: "px" },
+      { key: "objectHeight", label: "Object Height", min: 20, max: 100, step: 5, defaultValue: 60, unit: "px" },
+    ],
+    thumbnailColor: "#94a3b8",
+  },
+  {
+    slug: "molecule",
+    title: "Molecule Viewer",
+    category: "chemistry",
+    description: "3D ball-and-stick models of common molecules with rotation and property display.",
+    longDescription:
+      "Explore molecular structures in 3D with this interactive viewer. See ball-and-stick models of water (bent, 104.5°), CO₂ (linear), methane (tetrahedral), ammonia (trigonal pyramidal), ethanol, and benzene (planar hexagonal). Each molecule displays its geometry, bond types (single, double, triple), and atomic composition. The VSEPR theory explains why molecules adopt specific geometries based on electron pair repulsion.",
+    parameters: [
+      { key: "moleculeIndex", label: "Molecule (0-5)", min: 0, max: 5, step: 1, defaultValue: 0 },
+      { key: "rotationSpeed", label: "Rotation Speed", min: 0, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
+      { key: "showLabels", label: "Show Labels", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showBondAngles", label: "Show Bond Angles", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#10b981",
+  },
+  {
+    slug: "moment-of-inertia-2",
+    title: "Moment Of Inertia — Rolling Race",
+    category: "physics",
+    description: "Compare how different shaped objects roll down an incline based on their moment of inertia.",
+    longDescription:
+      "Objects rolling down an incline convert potential energy into both translational and rotational kinetic energy. The acceleration a = g sin(θ) / (1 + I/mR²) depends on the moment of inertia ratio I/mR². A solid sphere (I = 2/5 mR²) always wins because it devotes less energy to rotation. A hollow cylinder (I = mR²) always finishes last. This elegant result is independent of mass and radius — only shape matters!",
+    parameters: [
+      { key: "inclineAngle", label: "Incline Angle", min: 5, max: 60, step: 1, defaultValue: 30, unit: "°" },
+      { key: "gravity", label: "Gravity", min: 1, max: 20, step: 0.1, defaultValue: 9.81, unit: "m/s²" },
+      { key: "rampLength", label: "Ramp Length", min: 1, max: 10, step: 0.5, defaultValue: 3, unit: "m" },
+      { key: "showFormulas", label: "Show Formulas", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+  },
+  {
+    slug: "moment-of-inertia-3d",
+    title: "Moment Of Inertia 3D",
+    category: "physics",
+    description: "Visualize moment of inertia for 3D shapes: sphere, cylinder, rod, disc, and ring.",
+    longDescription:
+      "The moment of inertia I = ∫r²dm measures an object's resistance to angular acceleration. Different shapes have different I values: solid sphere (2/5)mR², solid cylinder (1/2)mR², thin rod at center (1/12)mL², disc (1/2)mR², and ring mR². Given constant torque τ, angular acceleration α = τ/I, so higher I means slower rotation. This simulation visualizes each shape spinning with real-time calculation of angular velocity, kinetic energy, and angular momentum.",
+    parameters: [
+      { key: "shapeType", label: "Shape (0-4)", min: 0, max: 4, step: 1, defaultValue: 0 },
+      { key: "mass", label: "Mass", min: 0.5, max: 10, step: 0.5, defaultValue: 2, unit: "kg" },
+      { key: "dimension", label: "Radius / Length", min: 0.1, max: 1, step: 0.05, defaultValue: 0.5, unit: "m" },
+      { key: "torque", label: "Torque", min: 0, max: 20, step: 0.5, defaultValue: 5, unit: "N·m" },
+    ],
+    thumbnailColor: "#a855f7",
   },
 ];
 
@@ -4820,6 +5039,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "magnitude": () => import("./physics/magnitude").then((m) => m.default),
   "mandelbrot-set": () => import("./math/mandelbrot-set").then((m) => m.default),
   "matter-wave": () => import("./physics/matter-wave").then((m) => m.default),
+  "maximum-elongation-of-inner-planets": () => import("./chemistry/maximum-elongation-of-inner-planets").then((m) => m.default),
+  "measuring-the-earth": () => import("./physics/measuring-the-earth").then((m) => m.default),
+  "measuring-the-earth-2": () => import("./physics/measuring-the-earth-2").then((m) => m.default),
+  "meiosis": () => import("./biology/meiosis").then((m) => m.default),
+  "mendeleev": () => import("./physics/mendeleev").then((m) => m.default),
+  "mendels-law-of-heredity": () => import("./physics/mendels-law-of-heredity").then((m) => m.default),
+  "michelson-interferometer": () => import("./physics/michelson-interferometer").then((m) => m.default),
+  "microbit-capacitor": () => import("./electricity/microbit-capacitor").then((m) => m.default),
+  "microbit-pulse": () => import("./technology/microbit-pulse").then((m) => m.default),
+  "microscope": () => import("./physics/microscope").then((m) => m.default),
+  "microscopic-image": () => import("./physics/microscopic-image").then((m) => m.default),
+  "mirrors": () => import("./physics/mirrors").then((m) => m.default),
+  "molecule": () => import("./chemistry/molecule").then((m) => m.default),
+  "moment-of-inertia-2": () => import("./physics/moment-of-inertia-2").then((m) => m.default),
+  "moment-of-inertia-3d": () => import("./physics/moment-of-inertia-3d").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
