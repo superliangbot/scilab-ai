@@ -4261,6 +4261,250 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#8b5cf6",
   },
+  {
+    slug: "magnet",
+    title: "Magnet",
+    category: "physics",
+    description: "Visualize a bar magnet with its magnetic field lines and compass needles.",
+    longDescription:
+      "Explore the magnetic field of a bar magnet. Field lines emanate from the North pole (red) and curve around to enter the South pole (blue), forming closed loops. The simulation uses the magnetic dipole field equation B = (mu0/4pi)(3(m*r)r - m)/r^3 to compute the field at every point. Compass needles scattered around the magnet align with the local field direction, just as they would in a real experiment. Rotate the magnet and adjust its strength to see how the field pattern changes.",
+    parameters: [
+      { key: "magnetStrength", label: "Magnet Strength", min: 1, max: 15, step: 0.5, defaultValue: 5, unit: "T" },
+      { key: "numFieldLines", label: "Field Lines", min: 4, max: 24, step: 1, defaultValue: 12 },
+      { key: "showCompass", label: "Show Compass Needles", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "magnetAngle", label: "Magnet Angle", min: 0, max: 360, step: 5, defaultValue: 0, unit: "°" },
+    ],
+    thumbnailColor: "#e74c3c",
+    icon: "🧲",
+  },
+  {
+    slug: "magnet-and-electromagnet",
+    title: "Magnet and Electromagnet",
+    category: "physics",
+    description: "A permanent bar magnet alongside an electromagnet showing attraction and repulsion.",
+    longDescription:
+      "Compare a permanent bar magnet with an electromagnet (a coil of wire wound around an iron core). The electromagnet's field strength depends on the current flowing through the coil and the number of turns, following B = mu0 * n * I. When the magnets' like poles face each other they repel; opposite poles attract. Adjust the current, number of coil turns, distance, and polarity to observe how the interaction force changes. Field lines from both sources are shown simultaneously.",
+    parameters: [
+      { key: "current", label: "Current", min: 0, max: 20, step: 0.5, defaultValue: 5, unit: "A" },
+      { key: "coilTurns", label: "Coil Turns", min: 2, max: 30, step: 1, defaultValue: 10 },
+      { key: "distance", label: "Distance", min: 120, max: 400, step: 10, defaultValue: 200, unit: "px" },
+      { key: "flipPolarity", label: "Flip Electromagnet Polarity", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#f39c12",
+    icon: "🔌",
+  },
+  {
+    slug: "magnetic-field-around-a-bar-magnet",
+    title: "Magnetic Field Around a Bar Magnet",
+    category: "physics",
+    description: "Classic iron filings visualization showing the magnetic field pattern around a bar magnet.",
+    longDescription:
+      "Recreate the classic classroom experiment of sprinkling iron filings around a bar magnet. Hundreds of tiny filings align with the local magnetic field direction, revealing the characteristic dipole pattern seen in textbook images. The simulation uses the magnetic dipole field equation B = (mu0/4pi)(3(m*r_hat)r_hat - m)/r^3 with a two-pole superposition model for near-field accuracy. Field strength is mapped to filing brightness — brighter filings indicate stronger field regions near the poles. Toggle field vector arrows for a quantitative view.",
+    parameters: [
+      { key: "magnetStrength", label: "Magnet Strength", min: 1, max: 15, step: 0.5, defaultValue: 5, unit: "T" },
+      { key: "numFilings", label: "Number of Filings", min: 100, max: 2000, step: 50, defaultValue: 800 },
+      { key: "showFieldVectors", label: "Show Field Vectors", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "magnetLength", label: "Magnet Length", min: 40, max: 200, step: 10, defaultValue: 100, unit: "px" },
+    ],
+    thumbnailColor: "#9b59b6",
+    icon: "🧲",
+  },
+  {
+    slug: "magnetic-field-around-a-circular-wire",
+    title: "Magnetic Field Around a Circular Wire",
+    category: "physics",
+    description: "Visualize the magnetic field around a current-carrying circular wire loop using the Biot-Savart law.",
+    longDescription:
+      "A circular current-carrying loop viewed in cross-section shows two wire dots with current flowing in opposite directions. The magnetic field lines form closed loops, strongest at the center of the coil. The on-axis field follows B = mu0*I*R^2 / (2*(R^2+x^2)^(3/2)), computed here via numerical Biot-Savart integration for the full 2D field. Adjust the current and loop radius to see how field strength and shape change. Current direction indicators (dot for out-of-page, cross for into-page) and field line arrows show the vector nature of the field.",
+    parameters: [
+      { key: "current", label: "Current (I)", min: 0.5, max: 20, step: 0.5, defaultValue: 5, unit: "A" },
+      { key: "loopRadius", label: "Loop Radius", min: 2, max: 30, step: 1, defaultValue: 10, unit: "cm" },
+      { key: "numFieldLines", label: "Number of Field Lines", min: 4, max: 20, step: 1, defaultValue: 12 },
+      { key: "showStrength", label: "Show Field Strength", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#6366f1",
+    icon: "🔵",
+  },
+  {
+    slug: "magnetic-field-around-a-coil",
+    title: "Magnetic Field Around a Coil",
+    category: "physics",
+    description: "Visualize the magnetic field of a solenoid (multi-turn coil) with uniform interior field and bar-magnet-like exterior.",
+    longDescription:
+      "A solenoid is a coil of wire with multiple turns. Inside the solenoid, the magnetic field is nearly uniform with magnitude B = mu0*n*I, where n = N/L is the number of turns per unit length. Outside, the field lines curve from one end (N pole) to the other (S pole), resembling a bar magnet. This cross-section view shows each wire turn with current direction indicators. Field lines are computed by superposing the Biot-Savart contributions of each individual loop. Adjust current, number of turns, and coil length to explore how solenoid geometry affects the field.",
+    parameters: [
+      { key: "current", label: "Current (I)", min: 0.5, max: 20, step: 0.5, defaultValue: 5, unit: "A" },
+      { key: "numTurns", label: "Number of Turns", min: 3, max: 30, step: 1, defaultValue: 10 },
+      { key: "coilLength", label: "Coil Length", min: 5, max: 50, step: 1, defaultValue: 20, unit: "cm" },
+      { key: "showVectors", label: "Show Field Vectors", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "🧲",
+  },
+  {
+    slug: "magnetic-field-around-a-wire",
+    title: "Magnetic Field Around a Wire",
+    category: "physics",
+    description: "Straight current-carrying wire with concentric circular magnetic field lines and compass needles.",
+    longDescription:
+      "A straight current-carrying wire, viewed end-on, produces circular magnetic field lines centered on the wire. The field magnitude follows B = mu0*I/(2*pi*r), decreasing inversely with distance. The field direction is given by the right-hand rule: wrap your right hand around the wire with the thumb pointing in the current direction, and your fingers curl in the field direction. This simulation shows the wire as a dot (current out of page) or cross (current into page), concentric field lines color-coded by strength (red = strong near wire, blue = weak far away), and compass needles aligning tangent to the field circles.",
+    parameters: [
+      { key: "current", label: "Current (I)", min: 0.5, max: 20, step: 0.5, defaultValue: 5, unit: "A" },
+      { key: "showStrengthColors", label: "Show Field Strength Colors", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "numFieldLines", label: "Number of Field Lines", min: 3, max: 15, step: 1, defaultValue: 8 },
+      { key: "wireDirection", label: "Wire Direction (0=in, 1=out)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🔴",
+  },
+  {
+    slug: "magnetic-force",
+    title: "Magnetic Force on a Wire",
+    category: "physics",
+    description: "Visualize the Lorentz force on a current-carrying wire in a magnetic field.",
+    longDescription:
+      "A straight current-carrying wire placed between the poles of a magnet experiences a force perpendicular to both the current and the magnetic field. This is the Lorentz force, given by F = BIL sin(\u03B8), where B is the magnetic field strength, I is the current, L is the wire length, and \u03B8 is the angle between the wire and the field. Adjust current, field strength, wire length, and angle to see how the force changes. The wire animates in the direction of the force (right-hand rule).",
+    parameters: [
+      { key: "current", label: "Current (I)", min: 0.5, max: 20, step: 0.5, defaultValue: 5, unit: "A" },
+      { key: "wireLength", label: "Wire Length (L)", min: 0.1, max: 2, step: 0.05, defaultValue: 0.5, unit: "m" },
+      { key: "fieldStrength", label: "Field Strength (B)", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "T" },
+      { key: "angle", label: "Angle (\u03B8)", min: 0, max: 180, step: 5, defaultValue: 90, unit: "\u00B0" },
+    ],
+    thumbnailColor: "#dc2626",
+    icon: "\uD83E\uDDF2",
+  },
+  {
+    slug: "magnetic-induction",
+    title: "Magnetic Induction",
+    category: "physics",
+    description: "Faraday's law: a moving magnet induces EMF in a coil, the basis of electric generators.",
+    longDescription:
+      "Electromagnetic induction is the production of an electromotive force (EMF) across a conductor when it is exposed to a changing magnetic flux. Faraday's law states EMF = -N d\u03A6/dt, where N is the number of coil turns and \u03A6 = BA cos(\u03B8) is the magnetic flux. A bar magnet oscillates toward and away from a coil, inducing an alternating EMF. When the magnet approaches, EMF drives current one way; when it recedes, the current reverses (Lenz's law). A voltmeter and real-time graph display the induced EMF.",
+    parameters: [
+      { key: "magnetSpeed", label: "Magnet Speed", min: 0.5, max: 10, step: 0.5, defaultValue: 3 },
+      { key: "magnetStrength", label: "Magnet Strength", min: 1, max: 10, step: 0.5, defaultValue: 5 },
+      { key: "coilTurns", label: "Coil Turns (N)", min: 1, max: 20, step: 1, defaultValue: 5 },
+      { key: "coilArea", label: "Coil Area", min: 0.001, max: 0.05, step: 0.001, defaultValue: 0.01, unit: "m\u00B2" },
+    ],
+    thumbnailColor: "#2563eb",
+    icon: "\u26A1",
+  },
+  {
+    slug: "magnetization",
+    title: "Magnetization & Hysteresis",
+    category: "physics",
+    description: "Watch magnetic domains align under an external field, producing a hysteresis B-H curve.",
+    longDescription:
+      "Ferromagnetic materials like iron contain magnetic domains \u2014 small regions where atomic dipoles are aligned. In an unmagnetized state, domains point in random directions, so the net magnetization is zero. Applying an external magnetic field H causes domains to gradually align, increasing magnetization M. When the field is removed, some alignment persists (remnant magnetization). The B-H hysteresis curve shows that magnetization lags behind the applied field. Soft ferromagnets (iron) have narrow loops and lose magnetization easily; hard ferromagnets (steel) retain it. Temperature adds thermal noise that disrupts alignment.",
+    parameters: [
+      { key: "extField", label: "External Field (H)", min: -10, max: 10, step: 0.5, defaultValue: 0 },
+      { key: "temperature", label: "Temperature", min: 50, max: 800, step: 10, defaultValue: 300, unit: "K" },
+      { key: "materialType", label: "Material (0=Soft,1=Hard)", min: 0, max: 1, step: 1, defaultValue: 0 },
+      { key: "domainCount", label: "Domain Grid Size", min: 4, max: 20, step: 1, defaultValue: 12 },
+    ],
+    thumbnailColor: "#7c3aed",
+    icon: "\uD83E\uDDF2",
+  },
+  {
+    slug: "lorentzs-force",
+    title: "Lorentz Force",
+    category: "physics",
+    description: "Charged particle moving in crossed electric and magnetic fields with force vectors.",
+    longDescription:
+      "The Lorentz force F = q(E + v \u00D7 B) governs the motion of charged particles in electromagnetic fields. In a magnetic field alone, the force is always perpendicular to the velocity, causing circular (cyclotron) motion with radius r = mv/(|q|B). When an electric field is also present, the particle experiences an E \u00D7 B drift perpendicular to both fields. This simulation visualizes the trajectory, force components, and cyclotron dynamics in 2D.",
+    parameters: [
+      { key: "charge", label: "Charge (q)", min: -3, max: 3, step: 0.1, defaultValue: 1, unit: "C" },
+      { key: "electricField", label: "Electric Field (E)", min: -2, max: 2, step: 0.1, defaultValue: 0, unit: "V/m" },
+      { key: "magneticField", label: "Magnetic Field (B)", min: -3, max: 3, step: 0.1, defaultValue: 1, unit: "T" },
+      { key: "mass", label: "Particle Mass", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "kg" },
+      { key: "initialVelocity", label: "Initial Velocity", min: 0.5, max: 5, step: 0.1, defaultValue: 2, unit: "m/s" },
+    ],
+    thumbnailColor: "#ef4444",
+    icon: "\u26A1",
+  },
+  {
+    slug: "lorentzs-force-3d",
+    title: "Lorentz Force 3D",
+    category: "physics",
+    description: "3D helical motion of a charged particle in a magnetic field with isometric projection.",
+    longDescription:
+      "When a charged particle has velocity components both parallel and perpendicular to a magnetic field, it follows a helical trajectory. The perpendicular component causes circular (cyclotron) motion while the parallel component carries the particle along the field lines. The helix radius is r = mv_perp/(|q|B) and the pitch depends on v_parallel. This 3D simulation uses Canvas 2D isometric projection and a Boris integrator that exactly conserves kinetic energy.",
+    parameters: [
+      { key: "charge", label: "Charge (q)", min: -3, max: 3, step: 0.1, defaultValue: 1, unit: "C" },
+      { key: "magneticField", label: "Magnetic Field (B)", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "T" },
+      { key: "vx", label: "Initial v_x", min: -3, max: 3, step: 0.1, defaultValue: 1, unit: "m/s" },
+      { key: "vy", label: "Initial v_y", min: -3, max: 3, step: 0.1, defaultValue: 1, unit: "m/s" },
+      { key: "vz", label: "Initial v_z (parallel to B)", min: -3, max: 3, step: 0.1, defaultValue: 0.5, unit: "m/s" },
+      { key: "mass", label: "Particle Mass", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "kg" },
+    ],
+    thumbnailColor: "#8b5cf6",
+    icon: "\uD83E\uDDED",
+  },
+  {
+    slug: "lorenzs-water-mill",
+    title: "Lorenz Water Mill",
+    category: "physics",
+    description: "Malkus waterwheel demonstrating chaotic behavior as a physical Lorenz attractor.",
+    longDescription:
+      "The Lorenz water mill (Malkus waterwheel) is a mechanical system that physically realizes the Lorenz equations. A wheel has leaky buckets around its rim, and water pours onto the top. At low flow rates, the wheel remains stationary. At moderate flow, it rotates steadily. At high flow rates, the wheel exhibits chaotic behavior \u2014 spontaneously reversing direction in an unpredictable pattern. This is a vivid demonstration of deterministic chaos and sensitivity to initial conditions (the butterfly effect). The simulation shows the wheel, water levels, and a phase-space portrait.",
+    parameters: [
+      { key: "flowRate", label: "Water Flow Rate", min: 0.5, max: 10, step: 0.1, defaultValue: 3, unit: "L/s" },
+      { key: "leakRate", label: "Leak Rate", min: 0.1, max: 3, step: 0.1, defaultValue: 1 },
+      { key: "friction", label: "Friction", min: 0.05, max: 2, step: 0.05, defaultValue: 0.5 },
+      { key: "numBuckets", label: "Number of Buckets", min: 4, max: 20, step: 1, defaultValue: 8 },
+    ],
+    thumbnailColor: "#0ea5e9",
+    icon: "\uD83C\uDF0A",
+  },
+  // Batch 19
+  {
+    slug: "magnitude",
+    title: "Earthquake Magnitude",
+    category: "physics",
+    description: "Visualize earthquake magnitude on the Richter scale with seismic waves and building damage.",
+    longDescription:
+      "The Richter magnitude scale measures earthquake size logarithmically: each whole number increase corresponds to 10x greater ground motion amplitude and approximately 31.6x more energy released. This simulation shows a cross-section of the Earth with an earthquake focus (hypocenter) at adjustable depth. Seismic P-waves (primary, compressional) and S-waves (secondary, shear) radiate outward from the focus. A seismograph trace shows the recorded ground motion, while a comparison panel illustrates the exponential growth of energy and the damage expected at each magnitude level.",
+    parameters: [
+      { key: "magnitude", label: "Magnitude", min: 1, max: 10, step: 0.1, defaultValue: 5 },
+      { key: "depth", label: "Depth of Focus", min: 5, max: 300, step: 5, defaultValue: 30, unit: "km" },
+      { key: "showWaves", label: "Show Seismic Waves", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showComparison", label: "Show Comparison", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#ef4444",
+    icon: "\uD83C\uDF0D",
+  },
+  {
+    slug: "mandelbrot-set",
+    title: "Mandelbrot Set",
+    category: "math",
+    description: "Classic Mandelbrot set fractal with smooth coloring and progressive rendering.",
+    longDescription:
+      "The Mandelbrot set is the set of complex numbers c for which the iteration z_{n+1} = z_n\u00B2 + c (starting with z_0 = 0) remains bounded. Points inside the set are colored black; points outside are colored based on the number of iterations before |z| exceeds the escape radius of 2. This simulation uses smooth coloring via log-based escape time to eliminate banding artifacts. Five color schemes are available, and progressive rendering starts at low resolution and refines to full detail. The set's boundary has infinite fractal detail with self-similar structures at all scales.",
+    parameters: [
+      { key: "maxIterations", label: "Max Iterations", min: 10, max: 500, step: 10, defaultValue: 100 },
+      { key: "colorScheme", label: "Color Scheme (0-4)", min: 0, max: 4, step: 1, defaultValue: 0 },
+      { key: "zoomLevel", label: "Zoom Level", min: 1, max: 20, step: 0.5, defaultValue: 1, unit: "\u00D7" },
+      { key: "centerXOffset", label: "Center X Offset", min: -2, max: 2, step: 0.01, defaultValue: 0 },
+    ],
+    thumbnailColor: "#1e3a5f",
+    icon: "\uD83D\uDD2C",
+  },
+  {
+    slug: "matter-wave",
+    title: "Matter Wave (de Broglie)",
+    category: "physics",
+    description: "De Broglie matter wave visualization showing wave-particle duality and probability density.",
+    longDescription:
+      "Louis de Broglie proposed that every particle has an associated wavelength: \u03BB = h/p = h/(mv), where h is Planck's constant, m is mass, and v is velocity. This wave-particle duality is fundamental to quantum mechanics. The simulation shows a particle (electron, proton, etc.) moving with its associated matter wave packet. The wave function \u03C8(x,t) is displayed with its real part (blue), imaginary part (green), and probability density |\u03C8|\u00B2 (red fill). A Gaussian envelope shapes the wave packet. Heavier or faster particles have shorter wavelengths (more classical behavior), while lighter or slower particles have longer wavelengths (more quantum behavior).",
+    parameters: [
+      { key: "particleMass", label: "Particle Mass (electron=1)", min: 1, max: 2000, step: 1, defaultValue: 1, unit: "m\u2091" },
+      { key: "velocity", label: "Velocity", min: 0.5, max: 15, step: 0.5, defaultValue: 5 },
+      { key: "showProbDensity", label: "Show |\u03C8|\u00B2 Density", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "wavePacketWidth", label: "Wave Packet Width", min: 10, max: 80, step: 5, defaultValue: 30 },
+    ],
+    thumbnailColor: "#6366f1",
+    icon: "\u269B\uFE0F",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -4560,6 +4804,22 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "light-refraction": () => import("./physics/light-refraction").then((m) => m.default),
   "little-princes-trampoline": () => import("./physics/little-princes-trampoline").then((m) => m.default),
   "logic": () => import("./physics/logic").then((m) => m.default),
+  "magnet": () => import("./physics/magnet").then((m) => m.default),
+  "magnet-and-electromagnet": () => import("./physics/magnet-and-electromagnet").then((m) => m.default),
+  "magnetic-field-around-a-bar-magnet": () => import("./physics/magnetic-field-around-a-bar-magnet").then((m) => m.default),
+  "magnetic-field-around-a-circular-wire": () => import("./physics/magnetic-field-around-a-circular-wire").then((m) => m.default),
+  "magnetic-field-around-a-coil": () => import("./physics/magnetic-field-around-a-coil").then((m) => m.default),
+  "magnetic-field-around-a-wire": () => import("./physics/magnetic-field-around-a-wire").then((m) => m.default),
+  "magnetic-force": () => import("./physics/magnetic-force").then((m) => m.default),
+  "magnetic-induction": () => import("./physics/magnetic-induction").then((m) => m.default),
+  "magnetization": () => import("./physics/magnetization").then((m) => m.default),
+  "lorentzs-force": () => import("./physics/lorentzs-force").then((m) => m.default),
+  "lorentzs-force-3d": () => import("./physics/lorentzs-force-3d").then((m) => m.default),
+  "lorenzs-water-mill": () => import("./physics/lorenzs-water-mill").then((m) => m.default),
+  // Batch 19
+  "magnitude": () => import("./physics/magnitude").then((m) => m.default),
+  "mandelbrot-set": () => import("./math/mandelbrot-set").then((m) => m.default),
+  "matter-wave": () => import("./physics/matter-wave").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
