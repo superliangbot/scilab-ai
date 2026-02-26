@@ -111,6 +111,7 @@ const RectifierCircuitFactory = (): SimulationEngine => {
   function drawArrow(x1: number, y1: number, x2: number, y2: number, color: string): void {
     const dx = x2 - x1, dy = y2 - y1;
     const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 0.001) return;
     const ux = dx / len, uy = dy / len;
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;

@@ -59,6 +59,7 @@ const SeeingTheLightFactory: SimulationFactory = (): SimulationEngine => {
       const dx = x2 - x1;
       const dy = y2 - y1;
       const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 0.001) return;
       const nx = dx / dist;
       const ny = dy / dist;
 

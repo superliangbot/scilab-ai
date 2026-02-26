@@ -5750,6 +5750,12 @@ export const simulationConfigs: SimulationConfig[] = [
     category: "chemistry",
     description: "Simulates series and parallel resistance connections with Ohm's law (V = IR).",
     longDescription: "Explore how resistors behave in series (R_total = R1 + R2, same current) and parallel (1/R_total = 1/R1 + 1/R2, same voltage) configurations. Animated current dots flow through the circuit with voltage drops calculated using Ohm's Law.",
+    parameters: [
+      { key: "voltage", label: "Battery Voltage", min: 1, max: 24, step: 0.5, defaultValue: 9, unit: "V" },
+      { key: "resistance1", label: "Resistor 1", min: 1, max: 100, step: 1, defaultValue: 10, unit: "Ω" },
+      { key: "resistance2", label: "Resistor 2", min: 1, max: 100, step: 1, defaultValue: 20, unit: "Ω" },
+      { key: "connectionType", label: "Type (0=Series, 1=Parallel)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
   },
   {
     slug: "same-circuit",
