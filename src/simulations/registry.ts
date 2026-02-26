@@ -5200,6 +5200,9 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "speed", label: "Speed", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "×" },
       { key: "showLabels", label: "Show Labels (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
       { key: "zoom", label: "Zoom", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#666666",
+  },
   // Batch 24
   {
     slug: "prism",
@@ -5344,6 +5347,10 @@ export const simulationConfigs: SimulationConfig[] = [
     parameters: [
       { key: "chargeType", label: "Charge (0=None, 1=+, 2=-)", min: 0, max: 2, step: 1, defaultValue: 0 },
       { key: "dropRate", label: "Drop Rate", min: 1, max: 10, step: 1, defaultValue: 5 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "pythagorean-theorem",
     title: "Pythagorean Theorem",
     category: "math",
@@ -5393,6 +5400,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "numSides", label: "Number of Sides", min: 3, max: 12, step: 1, defaultValue: 4 },
       { key: "speed", label: "Speed", min: 0.2, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
       { key: "showAxleLine", label: "Show Axle Height (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "radians",
     title: "Radians",
     category: "math",
@@ -5441,6 +5452,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "force", label: "Force", min: 1, max: 50, step: 1, defaultValue: 10, unit: "N" },
       { key: "area", label: "Contact Area", min: 0.001, max: 0.05, step: 0.001, defaultValue: 0.01, unit: "m²" },
       { key: "showMode", label: "Mode (0=Sponge, 1=Spring)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "radio-wave-communication",
     title: "Radio Wave Communication",
     category: "physics",
@@ -5504,6 +5519,10 @@ export const simulationConfigs: SimulationConfig[] = [
     parameters: [
       { key: "launchSpeed", label: "Launch Speed", min: 2, max: 14, step: 0.1, defaultValue: 6, unit: "km/s" },
       { key: "showTrail", label: "Show Trail (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "rainbow-by-raindrops",
     title: "Rainbow By Raindrops",
     category: "physics",
