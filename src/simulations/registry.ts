@@ -6237,7 +6237,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "sum-of-exterior-angle",
     title: "Sum of Exterior Angles",
-    category: "physics",
+    category: "math",
     description: "Visualize how exterior angles of any convex polygon always sum to 360 degrees.",
     longDescription: "The sum of exterior angles of any convex polygon is always 360°. For a regular n-sided polygon, each exterior angle equals 360°/n. The exterior angle at each vertex is the supplement of the interior angle (exterior = 180° - interior). This simulation draws regular polygons with colored arcs showing each exterior angle and animates a 'walk' around the perimeter to demonstrate the accumulated turn totaling exactly one full rotation.",
     parameters: [
@@ -6445,7 +6445,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "trigonometric-functions",
     title: "Trigonometric Functions",
-    category: "chemistry",
+    category: "math",
     description: "Unit circle and real-time sine/cosine graphs showing how trig functions work.",
     longDescription: "Trigonometric functions relate angles to coordinates on the unit circle. As a point rotates around the circle, its x-coordinate traces cos(θ) and its y-coordinate traces sin(θ). This simulation shows the unit circle with a rotating radius alongside real-time graphs of sin and cos, making the connection between circular motion and wave functions visually clear.",
     parameters: [
@@ -6517,7 +6517,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "stoichiometry-with-ammonia-synthesis",
     title: "Stoichiometry: Ammonia Synthesis",
-    category: "physics",
+    category: "chemistry",
     description: "Visualize the Haber process: N\u2082 + 3H\u2082 \u2192 2NH\u2083 with animated molecules.",
     longDescription: "The Haber-Bosch process synthesizes ammonia from nitrogen and hydrogen gases: N\u2082 + 3H\u2082 \u2192 2NH\u2083. This reaction is one of the most important industrial chemical processes, producing ammonia for fertilizers. It requires an iron catalyst, temperatures around 450\u00B0C, and pressures of ~200 atm. This simulation visualizes the stoichiometry: for every 1 molecule of N\u2082, 3 molecules of H\u2082 are needed, producing 2 molecules of NH\u2083 (mole ratio 1:3:2).",
     parameters: [
@@ -6532,7 +6532,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "stoichiometry-with-water-synthesis",
     title: "Stoichiometry: Water Synthesis",
-    category: "physics",
+    category: "chemistry",
     description: "Visualize water formation: 2H\u2082 + O\u2082 \u2192 2H\u2082O with animated molecules.",
     longDescription: "Water synthesis is the combustion of hydrogen gas with oxygen: 2H\u2082 + O\u2082 \u2192 2H\u2082O. This highly exothermic reaction demonstrates stoichiometric ratios: 2 moles of H\u2082 react with 1 mole of O\u2082 to produce 2 moles of H\u2082O. The simulation shows hydrogen (white) and oxygen (red) molecules combining to form water molecules with their characteristic 104.5\u00B0 bond angle. It also illustrates the concept of a limiting reagent.",
     parameters: [
@@ -6645,7 +6645,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "stellar-classification",
     title: "Stellar Classification",
-    category: "chemistry",
+    category: "astronomy",
     description: "Hertzsprung-Russell diagram and stellar spectral classification (O, B, A, F, G, K, M types).",
     longDescription: "Stars are classified by their surface temperature into spectral types O, B, A, F, G, K, M (from hottest to coolest). The Hertzsprung-Russell (H-R) diagram plots luminosity vs temperature, revealing distinct populations: the main sequence (where most stars reside), red giants, white dwarfs, and supergiants. Our Sun is a G-type main sequence star. Each spectral class has characteristic absorption lines in its spectrum, used to determine composition and temperature.",
     parameters: [
@@ -6700,7 +6700,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "test-cross",
     title: "Test Cross",
-    category: "physics",
+    category: "biology",
     description: "Genetics test cross — determine genotype by crossing with homozygous recessive.",
     longDescription: "A test cross breeds an organism showing the dominant phenotype with a homozygous recessive organism to determine whether the tested parent is homozygous dominant (AA) or heterozygous (Aa). If any offspring show the recessive phenotype, the parent must be Aa. This simulation animates a Punnett square, shows allele separation and combination, and displays offspring ratios as a pie chart.",
     parameters: [
@@ -7597,8 +7597,8 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "stellar-parallax": () => import("./physics/stellar-parallax").then((m) => m.default),
   "stellar-parallax-3d": () => import("./physics/stellar-parallax-3d").then((m) => m.default),
   "step-response": () => import("./physics/step-response").then((m) => m.default),
-  "stoichiometry-with-ammonia-synthesis": () => import("./physics/stoichiometry-with-ammonia-synthesis").then((m) => m.default),
-  "stoichiometry-with-water-synthesis": () => import("./physics/stoichiometry-with-water-synthesis").then((m) => m.default),
+  "stoichiometry-with-ammonia-synthesis": () => import("./chemistry/stoichiometry-with-ammonia-synthesis").then((m) => m.default),
+  "stoichiometry-with-water-synthesis": () => import("./chemistry/stoichiometry-with-water-synthesis").then((m) => m.default),
   "stopwatch-for-pulse-measurement": () => import("./physics/stopwatch-for-pulse-measurement").then((m) => m.default),
   // Batch 28 (standing-waves through stellar-classification)
   "standing-waves-on-a-string": () => import("./physics/standing-waves-on-a-string").then((m) => m.default),
@@ -7606,16 +7606,16 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "status-of-water": () => import("./physics/status-of-water").then((m) => m.default),
   "status-of-water-2": () => import("./physics/status-of-water-2").then((m) => m.default),
   "status-solid-liquid-gas": () => import("./physics/status-solid-liquid-gas").then((m) => m.default),
-  "stellar-classification": () => import("./chemistry/stellar-classification").then((m) => m.default),
+  "stellar-classification": () => import("./astronomy/stellar-classification").then((m) => m.default),
   // Batch 29
-  "sum-of-exterior-angle": () => import("./physics/sum-of-exterior-angle").then((m) => m.default),
+  "sum-of-exterior-angle": () => import("./math/sum-of-exterior-angle").then((m) => m.default),
   "superposition": () => import("./physics/superposition").then((m) => m.default),
   "superposition-and-interference": () => import("./physics/superposition-and-interference").then((m) => m.default),
   "surface-tension": () => import("./chemistry/surface-tension").then((m) => m.default),
   "swingby-1": () => import("./physics/swingby-1").then((m) => m.default),
   "swingby-2": () => import("./physics/swingby-2").then((m) => m.default),
   "temperature-and-reaction-rate": () => import("./chemistry/temperature-and-reaction-rate").then((m) => m.default),
-  "test-cross": () => import("./physics/test-cross").then((m) => m.default),
+  "test-cross": () => import("./biology/test-cross").then((m) => m.default),
   "theo-jansen": () => import("./physics/theo-jansen").then((m) => m.default),
   "thermometer": () => import("./physics/thermometer").then((m) => m.default),
   "thin-film-interference": () => import("./physics/thin-film-interference").then((m) => m.default),
@@ -7634,7 +7634,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   // Batch 30
   "triangle-trick": () => import("./math/triangle-trick").then((m) => m.default),
   "triboelectricity": () => import("./electricity/triboelectricity").then((m) => m.default),
-  "trigonometric-functions": () => import("./chemistry/trigonometric-functions").then((m) => m.default),
+  "trigonometric-functions": () => import("./math/trigonometric-functions").then((m) => m.default),
   "tuning-fork-and-sound-wave": () => import("./physics/tuning-fork-and-sound-wave").then((m) => m.default),
   "uniform-motion": () => import("./physics/uniform-motion").then((m) => m.default),
   "uniformly-accelerated-motion": () => import("./physics/uniformly-accelerated-motion").then((m) => m.default),

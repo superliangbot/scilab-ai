@@ -159,7 +159,7 @@ const TidalForceFactory: SimulationFactory = (): SimulationEngine => {
         // Vector from this point to Moon
         const dx = moonCX - px;
         const dy = moonCY - py;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         const dirX = dx / dist;
         const dirY = dy / dist;
 
@@ -171,7 +171,7 @@ const TidalForceFactory: SimulationFactory = (): SimulationEngine => {
         // Approximate: project along and perpendicular to Moon direction
         const dxMoon = moonCX - earthCX;
         const dyMoon = moonCY - earthCY;
-        const distMoon = Math.sqrt(dxMoon * dxMoon + dyMoon * dyMoon);
+        const distMoon = Math.sqrt(dxMoon * dxMoon + dyMoon * dyMoon) || 1;
         const moonDirX = dxMoon / distMoon;
         const moonDirY = dyMoon / distMoon;
 

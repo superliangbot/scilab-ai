@@ -71,13 +71,13 @@ const WhyAreCellsSmallFactory: SimulationFactory = (): SimulationEngine => {
       // Move toward cell (diffusion)
       const dx = cx - p.x;
       const dy = cy - p.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
       p.x += (dx / dist) * diffusionSpeed * 30 * dt + (Math.random() - 0.5) * 20 * dt;
       p.y += (dy / dist) * diffusionSpeed * 30 * dt + (Math.random() - 0.5) * 20 * dt;
 
       // Check absorption at membrane
-      const newDist = Math.sqrt((cx - p.x) ** 2 + (cy - p.y) ** 2);
+      const newDist = Math.sqrt((cx - p.x) ** 2 + (cy - p.y) ** 2) || 1;
       if (newDist <= radius + 3) {
         p.absorbed = true;
         p.x = cx + (p.x - cx) / newDist * (radius - 5);

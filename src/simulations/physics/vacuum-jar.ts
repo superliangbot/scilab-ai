@@ -98,7 +98,7 @@ const VacuumJarFactory: SimulationFactory = (): SimulationEngine => {
       const by = jarY + jarH * 0.55;
       const dx = mol.x - bx;
       const dy = mol.y - by;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
       if (dist < balloonRadius + mol.radius) {
         const nx = dx / dist;
         const ny = dy / dist;

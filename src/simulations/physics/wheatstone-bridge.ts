@@ -38,7 +38,7 @@ const WheatstoneBridgeFactory: SimulationFactory = (): SimulationEngine => {
     const my = (y1 + y2) / 2;
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const len = Math.sqrt(dx * dx + dy * dy);
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
     const nx = -dy / len;
     const ny = dx / len;
 

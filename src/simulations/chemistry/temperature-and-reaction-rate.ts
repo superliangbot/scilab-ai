@@ -66,7 +66,7 @@ const TemperatureAndReactionRateFactory: SimulationFactory = (): SimulationEngin
       for (let j = i + 1; j < particles.length; j++) {
         const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 12) {
+        if (dist > 0 && dist < 12) {
           if (particles[i].speed + particles[j].speed > eaT) {
             reactionCount++; particles[i].flash = 1; particles[j].flash = 1;
             reactionFlashes.push({ x: (particles[i].x + particles[j].x) / 2, y: (particles[i].y + particles[j].y) / 2, life: 0.5 });
