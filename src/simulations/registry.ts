@@ -5818,6 +5818,20 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#3b82f6",
   },
   {
+    slug: "seismic-wave",
+    title: "Seismic Wave",
+    category: "physics",
+    description: "Visualize P-wave and S-wave propagation through a particle medium.",
+    longDescription: "Seismic waves carry energy from earthquakes through the Earth. P-waves (primary) are longitudinal — particles compress and expand parallel to the wave direction, traveling at ~6 km/s in crust rock. S-waves (secondary) are transverse — particles move perpendicular to propagation, traveling at ~3.5 km/s. The speed difference means P-waves arrive first; the time gap (S−P interval) reveals the distance to the earthquake source.",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 0.5, max: 5, step: 0.5, defaultValue: 2, unit: "Hz" },
+      { key: "amplitude", label: "Amplitude", min: 5, max: 60, step: 5, defaultValue: 30, unit: "px" },
+      { key: "waveType", label: "Type (0=P,1=S,2=Both)", min: 0, max: 2, step: 1, defaultValue: 0 },
+      { key: "speed", label: "Wave Speed", min: 1, max: 8, step: 0.5, defaultValue: 3, unit: "km/s" },
+    ],
+    thumbnailColor: "#f97316",
+  },
+  {
     slug: "seismometer-and-inertia",
     title: "Seismometer And Inertia",
     category: "physics",
@@ -7336,6 +7350,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "scale-of-solar-system": () => import("./astronomy/scale-of-solar-system").then((m) => m.default),
   "sea-breeze": () => import("./physics/sea-breeze").then((m) => m.default),
   "seeing-the-light": () => import("./physics/seeing-the-light").then((m) => m.default),
+  "seismic-wave": () => import("./physics/seismic-wave").then((m) => m.default),
   "seismometer-and-inertia": () => import("./physics/seismometer-and-inertia").then((m) => m.default),
   "separation-of-iron-and-aluminum": () => import("./chemistry/separation-of-iron-and-aluminum").then((m) => m.default),
   "serial-parallel-circuit": () => import("./electricity/serial-parallel-circuit").then((m) => m.default),
