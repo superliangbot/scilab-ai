@@ -2,7 +2,7 @@ import type { SimulationEngine, SimulationFactory } from "../types";
 import { getSimConfig } from "../registry";
 
 const DopplerEffect: SimulationFactory = () => {
-  const config = getSimConfig("doppler-effect")!;
+  const config = getSimConfig("doppler-effect-waves")!;
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
