@@ -6228,7 +6228,12 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "waveSpeed", label: "Wave Speed", min: 0.5, max: 5, step: 0.1, defaultValue: 2 },
       { key: "amplitude", label: "Amplitude", min: 10, max: 80, step: 1, defaultValue: 40, unit: "px" },
       { key: "damping", label: "Damping", min: 0, max: 0.5, step: 0.01, defaultValue: 0.05 },
+    ],
+    thumbnailColor: "#666666",
+  },
   // ── Batch 29 simulations (23 new) ──────────────────────────────────
+  {
+  },
   {
     slug: "sum-of-exterior-angle",
     title: "Sum of Exterior Angles",
@@ -6295,7 +6300,12 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "amplitude", label: "Amplitude", min: 10, max: 60, step: 1, defaultValue: 30 },
       { key: "speed", label: "Wave Speed", min: 0.5, max: 5, step: 0.1, defaultValue: 2 },
       { key: "harmonicNumber", label: "Harmonic Number", min: 1, max: 8, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
   // Batch 30
+  {
+  },
   {
     slug: "triangle-trick",
     title: "Triangle Trick",
@@ -6320,6 +6330,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "modeN", label: "Radial Mode n", min: 1, max: 4, step: 1, defaultValue: 1 },
       { key: "amplitude", label: "Amplitude", min: 0.5, max: 2, step: 0.1, defaultValue: 1 },
       { key: "animSpeed", label: "Animation Speed", min: 0.1, max: 3, step: 0.1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "superposition",
     title: "Superposition",
     category: "physics",
@@ -6400,6 +6414,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "showOrbits", label: "Show Orbits (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
       { key: "showLabels", label: "Show Labels (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
       { key: "animSpeed", label: "Animation Speed", min: 0.1, max: 3, step: 0.1, defaultValue: 1, unit: "\u00D7" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "surface-tension",
     title: "Surface Tension",
     category: "chemistry",
@@ -6409,6 +6427,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "surfaceTension", label: "Surface Tension", min: 0.02, max: 0.08, step: 0.005, defaultValue: 0.072, unit: "N/m" },
       { key: "objectMass", label: "Object Mass", min: 0.1, max: 2, step: 0.1, defaultValue: 0.5, unit: "g" },
       { key: "temperature", label: "Temperature", min: 10, max: 80, step: 5, defaultValue: 20, unit: "°C" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "triboelectricity",
     title: "Triboelectricity",
     category: "electricity",
@@ -6575,6 +6597,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "temperature", label: "Temperature", min: -30, max: 150, step: 1, defaultValue: 25, unit: "\u00B0C" },
       { key: "pressure", label: "Pressure", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "atm" },
       { key: "zoom", label: "Zoom", min: 0.5, max: 2, step: 0.1, defaultValue: 1, unit: "\u00D7" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "tuning-fork-and-sound-wave",
     title: "Tuning Fork And Sound Wave",
     category: "physics",
@@ -6630,6 +6656,7 @@ export const simulationConfigs: SimulationConfig[] = [
     ],
     thumbnailColor: "#fbbf24",
   },
+  {
     slug: "swingby-1",
     title: "Swingby 1",
     category: "physics",
@@ -6734,6 +6761,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "mass1", label: "Mass 1", min: 0.5, max: 5, step: 0.5, defaultValue: 1 },
       { key: "mass2", label: "Mass 2", min: 0.5, max: 5, step: 0.5, defaultValue: 1 },
       { key: "mass3", label: "Mass 3", min: 0.5, max: 5, step: 0.5, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "uniform-motion",
     title: "Uniform Motion",
     category: "physics",
@@ -6906,6 +6937,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "beta", label: "Current Gain (β)", min: 50, max: 300, step: 10, defaultValue: 100 },
       { key: "vcc", label: "Supply Voltage", min: 3, max: 12, step: 0.5, defaultValue: 5, unit: "V" },
       { key: "loadResistance", label: "Load Resistance", min: 100, max: 10000, step: 100, defaultValue: 1000, unit: "Ω" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "vapor-pressure-lowering",
     title: "Vapor Pressure Lowering",
     category: "physics",
@@ -7015,6 +7050,8 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "showDiagonal", label: "Show Diagonal (0/1)", min: 0, max: 1, step: 1, defaultValue: 0 },
     ],
     thumbnailColor: "#a855f7",
+  },
+  {
     slug: "why-are-cells-small",
     title: "Why Are Cells Small",
     category: "biology",
