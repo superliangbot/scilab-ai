@@ -6061,6 +6061,20 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#666666",
   },
   {
+    slug: "standing-wave-synthesis",
+    title: "Standing Wave Synthesis",
+    category: "physics",
+    description: "Watch standing waves form from superposition of incident and reflected waves on a driven string.",
+    longDescription: "Standing waves arise when a traveling wave reflects off a fixed boundary and interferes with itself. This simulation drives one end of a 1D spring-mass chain sinusoidally while the other end is fixed. Spring forces propagate the disturbance through the medium, and the reflected wave superposes with the incident wave to create stationary nodes (zero displacement) and antinodes (maximum displacement). Adjusting the drive frequency changes which resonant modes are excited.",
+    parameters: [
+      { key: "frequency", label: "Drive Frequency", min: 0.1, max: 3, step: 0.05, defaultValue: 1, unit: "Hz" },
+      { key: "damping", label: "Damping", min: 0.99, max: 1, step: 0.001, defaultValue: 0.998 },
+      { key: "amplitude", label: "Drive Amplitude", min: 10, max: 80, step: 5, defaultValue: 40, unit: "px" },
+      { key: "showTrace", label: "Show Trace (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#7c3aed",
+  },
+  {
     slug: "superposition-and-interference",
     title: "Superposition and Interference",
     category: "physics",
@@ -6358,7 +6372,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "stellar-classification",
     title: "Stellar Classification",
-    category: "astronomy",
+    category: "chemistry",
     description: "Hertzsprung-Russell diagram and stellar spectral classification (O, B, A, F, G, K, M types).",
     longDescription: "Stars are classified by their surface temperature into spectral types O, B, A, F, G, K, M (from hottest to coolest). The Hertzsprung-Russell (H-R) diagram plots luminosity vs temperature, revealing distinct populations: the main sequence (where most stars reside), red giants, white dwarfs, and supergiants. Our Sun is a G-type main sequence star. Each spectral class has characteristic absorption lines in its spectrum, used to determine composition and temperature.",
     parameters: [
@@ -7364,6 +7378,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "stairbulb": () => import("./physics/stairbulb").then((m) => m.default),
   "standard-reduction-potentials": () => import("./chemistry/standard-reduction-potentials").then((m) => m.default),
   "standing-waves-on-a-drum-surface": () => import("./physics/standing-waves-on-a-drum-surface").then((m) => m.default),
+  "standing-wave-synthesis": () => import("./physics/standing-wave-synthesis").then((m) => m.default),
   "stratum-making": () => import("./physics/stratum-making").then((m) => m.default),
   "straw": () => import("./physics/straw").then((m) => m.default),
   "stroboscope": () => import("./physics/stroboscope").then((m) => m.default),
@@ -7381,7 +7396,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "status-of-water": () => import("./physics/status-of-water").then((m) => m.default),
   "status-of-water-2": () => import("./physics/status-of-water-2").then((m) => m.default),
   "status-solid-liquid-gas": () => import("./physics/status-solid-liquid-gas").then((m) => m.default),
-  "stellar-classification": () => import("./astronomy/stellar-classification").then((m) => m.default),
+  "stellar-classification": () => import("./chemistry/stellar-classification").then((m) => m.default),
   // Batch 29
   "sum-of-exterior-angle": () => import("./math/sum-of-exterior-angle").then((m) => m.default),
   "superposition-and-interference": () => import("./physics/superposition-and-interference").then((m) => m.default),
