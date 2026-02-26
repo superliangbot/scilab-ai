@@ -39,13 +39,22 @@ const GreenhouseEffectFactory: SimulationFactory = () => {
 
       time += dt;
 
-      // Simple energy balance calculation
-      const effectiveIncoming = incomingSolar * solarIntensity * (1 - albedo) * (1 - cloudCover * 0.3);
-      const greenhouseEffect = 1 - Math.exp(-co2Concentration / 1000);
-      outgoingIR = effectiveIncoming * (1 - greenhouseEffect);
+      // Energy balance using Stefan-Boltzmann law
+      // Incoming solar absorbed per m² (divide by 4 for sphere, apply albedo)
+      const effectiveIncoming = (incomingSolar * solarIntensity / 4) * (1 - albedo) * (1 - cloudCover * 0.3);
+      
+      // Greenhouse trapping factor: emissivity decreases with CO₂
+      // At 280 ppm (pre-industrial), ε ≈ 0.612; logarithmic forcing from CO₂
+      const emissivity = 0.612 - 0.04 * Math.log(co2Concentration / 280);
+      
+      // Outgoing IR via Stefan-Boltzmann: σT⁴ × emissivity
+      const sigma = 5.67e-8; // W/(m²·K⁴)
+      const surfaceTempK = surfaceTemp + 273.15;
+      outgoingIR = emissivity * sigma * Math.pow(surfaceTempK, 4);
       
       const energyImbalance = effectiveIncoming - outgoingIR;
-      surfaceTemp += energyImbalance * 0.0001 * dt;
+      // Heat capacity scaling (simplified ocean+atmosphere thermal inertia)
+      surfaceTemp += energyImbalance * 0.00002 * dt;
     },
 
     render() {

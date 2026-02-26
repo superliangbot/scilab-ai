@@ -53,7 +53,7 @@ const LcOscillatorFactory: SimulationFactory = (): SimulationEngine => {
     // LC oscillation: q(t) = Q0 * cos(omega*t), i(t) = -Q0*omega*sin(omega*t)
     const omega = 2 * Math.PI * resonantFreq();
     charge = initialCharge * Math.cos(omega * time);
-    current = -initialCharge * Math.sin(omega * time);
+    current = -initialCharge * omega * Math.sin(omega * time);
 
     // Record history
     chargeHistory.push(charge);

@@ -104,8 +104,6 @@ const Resonance: SimulationFactory = () => {
     }
   }
 
-<<<<<<< HEAD
-=======
   function drawAmplitudeGraph() {
     const graphX = width - 250;
     const graphY = 50;
@@ -156,7 +154,6 @@ const Resonance: SimulationFactory = () => {
     ctx.stroke();
   }
 
->>>>>>> origin/audit/physics
   function drawInfoPanel() {
     const panelX = 10;
     const panelY = 10;
@@ -203,10 +200,7 @@ const Resonance: SimulationFactory = () => {
       ctx.fillRect(0, 0, width, height);
 
       drawOscillators();
-<<<<<<< HEAD
-=======
       drawAmplitudeGraph();
->>>>>>> origin/audit/physics
       drawInfoPanel();
     },
 

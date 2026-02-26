@@ -23,10 +23,15 @@ const PopulationDynamicsFactory: SimulationFactory = () => {
       time += dt;
       
       // Lotka-Volterra equations: dN/dt = αN - βNP, dP/dt = δβNP - γP
-      const dN_dt = preyGrowthRate * preyPop - predationRate * preyPop * predatorPop;
-      const dP_dt = predatorEfficiency * predationRate * preyPop * predatorPop - predatorDeathRate * predatorPop;
-      preyPop = Math.max(0, preyPop + dN_dt * dt);
-      predatorPop = Math.max(0, predatorPop + dP_dt * dt);
+      // Using RK2 (midpoint method) for better numerical stability
+      const dN1 = preyGrowthRate * preyPop - predationRate * preyPop * predatorPop;
+      const dP1 = predatorEfficiency * predationRate * preyPop * predatorPop - predatorDeathRate * predatorPop;
+      const midN = Math.max(0, preyPop + dN1 * dt * 0.5);
+      const midP = Math.max(0, predatorPop + dP1 * dt * 0.5);
+      const dN2 = preyGrowthRate * midN - predationRate * midN * midP;
+      const dP2 = predatorEfficiency * predationRate * midN * midP - predatorDeathRate * midP;
+      preyPop = Math.max(0, preyPop + dN2 * dt);
+      predatorPop = Math.max(0, predatorPop + dP2 * dt);
     },
     render() {
       ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, W, H);

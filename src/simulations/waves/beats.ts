@@ -16,32 +16,20 @@ const Beats: SimulationFactory = () => {
   let time = 0;
 
   // Wave history for plotting
-<<<<<<< HEAD
-  const historyLength = 800;
-  let waveHistory: number[][] = [[], []];
-  let beatHistory: number[] = [];
-=======
   const historyLength = 1000;
   let waveHistory: number[][] = [[], []];
   let beatHistory: number[] = [];
   let timeHistory: number[] = [];
->>>>>>> origin/audit/physics
 
   // Colors and styles
   const BG_COLOR = "#0a0a0f";
   const WAVE1_COLOR = "#3b82f6";
   const WAVE2_COLOR = "#ef4444";
   const BEAT_COLOR = "#fbbf24";
-<<<<<<< HEAD
-  const TEXT_COLOR = "#e2e8f0";
-
-  function updateWaves() {
-=======
   const ENVELOPE_COLOR = "#10b981";
   const TEXT_COLOR = "#e2e8f0";
 
   function updateWaves(dt: number) {
->>>>>>> origin/audit/physics
     const wave1 = amplitude * Math.cos(2 * Math.PI * freq1 * time);
     const wave2 = amplitude * Math.cos(2 * Math.PI * freq2 * time);
     const beatWave = wave1 + wave2;
@@ -50,20 +38,14 @@ const Beats: SimulationFactory = () => {
     waveHistory[0].push(wave1);
     waveHistory[1].push(wave2);
     beatHistory.push(beatWave);
-<<<<<<< HEAD
-=======
     timeHistory.push(time);
->>>>>>> origin/audit/physics
     
     // Keep only recent history
     if (waveHistory[0].length > historyLength) {
       waveHistory[0].shift();
       waveHistory[1].shift();
       beatHistory.shift();
-<<<<<<< HEAD
-=======
       timeHistory.shift();
->>>>>>> origin/audit/physics
     }
   }
 
@@ -111,8 +93,6 @@ const Beats: SimulationFactory = () => {
       }
       ctx.stroke();
       
-<<<<<<< HEAD
-=======
       // Beat envelope (amplitude modulation)
       const beatFreq = Math.abs(freq2 - freq1);
       ctx.strokeStyle = ENVELOPE_COLOR;
@@ -148,7 +128,6 @@ const Beats: SimulationFactory = () => {
       ctx.stroke();
       ctx.setLineDash([]);
       
->>>>>>> origin/audit/physics
       // Beat waveform (sum)
       ctx.strokeStyle = BEAT_COLOR;
       ctx.lineWidth = 2;
@@ -163,8 +142,6 @@ const Beats: SimulationFactory = () => {
     }
   }
 
-<<<<<<< HEAD
-=======
   function drawTuningForks() {
     const fork1X = 100;
     const fork2X = 200;
@@ -207,7 +184,6 @@ const Beats: SimulationFactory = () => {
     ctx.fillText(`${freq2} Hz`, fork2X, forkY + 50);
   }
 
->>>>>>> origin/audit/physics
   function drawInfoPanel() {
     const panelX = width - 320;
     const panelY = 20;
@@ -236,8 +212,6 @@ const Beats: SimulationFactory = () => {
     ctx.fillText(`Period: ${(1/beatFreq).toFixed(2)} s`, panelX + 10, panelY + 125);
   }
 
-<<<<<<< HEAD
-=======
   function drawLegend() {
     const legendX = 350;
     const legendY = height - 80;
@@ -292,7 +266,6 @@ const Beats: SimulationFactory = () => {
     ctx.fillText("Envelope", legendX + 135, legendY + 39);
   }
 
->>>>>>> origin/audit/physics
   const engine: SimulationEngine = {
     config,
 
@@ -309,11 +282,7 @@ const Beats: SimulationFactory = () => {
       amplitude = params.amplitude ?? amplitude;
 
       time += dt;
-<<<<<<< HEAD
-      updateWaves();
-=======
       updateWaves(dt);
->>>>>>> origin/audit/physics
     },
 
     render() {
@@ -321,23 +290,16 @@ const Beats: SimulationFactory = () => {
       ctx.fillRect(0, 0, width, height);
 
       drawWaveforms();
-<<<<<<< HEAD
-      drawInfoPanel();
-=======
       drawTuningForks();
       drawInfoPanel();
       drawLegend();
->>>>>>> origin/audit/physics
     },
 
     reset() {
       time = 0;
       waveHistory = [[], []];
       beatHistory = [];
-<<<<<<< HEAD
-=======
       timeHistory = [];
->>>>>>> origin/audit/physics
     },
 
     destroy() {

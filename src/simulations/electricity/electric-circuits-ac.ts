@@ -41,7 +41,7 @@ const ElectricCircuitsAcFactory: SimulationFactory = (): SimulationEngine => {
     const Xc = 1 / (omega * capF); // capacitive reactance
     const Z = Math.sqrt(resistance * resistance + Xc * Xc); // impedance
     const peakCurrent = acVoltage / Z;
-    const phaseAngle = Math.atan(Xc / resistance); // current lags voltage in RC
+    const phaseAngle = Math.atan(Xc / resistance); // current leads voltage in RC
     const powerFactor = Math.cos(phaseAngle);
     const rmsVoltage = acVoltage / Math.sqrt(2);
     const rmsCurrent = peakCurrent / Math.sqrt(2);
@@ -137,7 +137,7 @@ const ElectricCircuitsAcFactory: SimulationFactory = (): SimulationEngine => {
 
     // Animated electrons
     const instantV = acVoltage * Math.sin(omega * time);
-    const instantI = peakCurrent * Math.sin(omega * time - phaseAngle);
+    const instantI = peakCurrent * Math.sin(omega * time + phaseAngle);
     const electronOffset = Math.sin(omega * time) * 15;
 
     ctx.fillStyle = "rgba(100,180,255,0.6)";
@@ -203,7 +203,7 @@ const ElectricCircuitsAcFactory: SimulationFactory = (): SimulationEngine => {
     ctx.beginPath();
     for (let i = 0; i <= waveW; i++) {
       const t = (i / waveW) * period * periods;
-      const curr = peakCurrent * Math.sin(omega * t - phaseAngle);
+      const curr = peakCurrent * Math.sin(omega * t + phaseAngle);
       const y = waveY + waveH / 2 - (curr / peakCurrent) * (waveH * 0.4);
       if (i === 0) ctx.moveTo(waveX + i, y);
       else ctx.lineTo(waveX + i, y);
@@ -232,7 +232,7 @@ const ElectricCircuitsAcFactory: SimulationFactory = (): SimulationEngine => {
     // Phase info
     const phaseDeg = (phaseAngle * 180) / Math.PI;
     ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.fillText(`Phase angle: ${phaseDeg.toFixed(1)}° (current lags)`, waveX + 260, waveY - 8);
+    ctx.fillText(`Phase angle: ${phaseDeg.toFixed(1)}° (current leads)`, waveX + 260, waveY - 8);
 
     // Axes labels
     ctx.fillStyle = "rgba(255,255,255,0.4)";

@@ -48,7 +48,7 @@ const StandingWavesOnAStringFactory: SimulationFactory = (): SimulationEngine =>
   function getFrequency(n: number): number {
     const L = stringLength / 100; // convert px to "meters" for display
     const v = Math.sqrt(tension / linearDensity);
-    return (n / (2 * L)) * 1;
+    return (n / (2 * L)) * v;
   }
 
   function getWaveSpeed(): number {

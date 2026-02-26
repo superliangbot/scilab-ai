@@ -299,7 +299,7 @@ const DijkstraAlgorithmFactory: SimulationFactory = (): SimulationEngine => {
 
     if (isRunning) {
       stepDelay += dt;
-      if (stepDelay >= 1000 / speed) {
+      if (stepDelay >= 1 / speed) {
         stepAlgorithm();
         stepDelay = 0;
       }

@@ -68,8 +68,6 @@ const Harmonics: SimulationFactory = () => {
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
-<<<<<<< HEAD
-=======
     
     // Draw nodes for fundamental
     ctx.fillStyle = "#ef4444";
@@ -90,7 +88,6 @@ const Harmonics: SimulationFactory = () => {
         ctx.fill();
       }
     }
->>>>>>> origin/audit/physics
   }
 
   function drawHarmonicSpectrum() {
@@ -131,11 +128,6 @@ const Harmonics: SimulationFactory = () => {
       ctx.font = "8px monospace";
       ctx.textAlign = "center";
       ctx.fillText(`${freq}Hz`, barX + barWidth * 0.4, spectrumY + spectrumH + 12);
-<<<<<<< HEAD
-    }
-  }
-
-=======
       ctx.fillText(`f${h}`, barX + barWidth * 0.4, spectrumY + spectrumH + 24);
     }
   }
@@ -210,7 +202,6 @@ const Harmonics: SimulationFactory = () => {
     ctx.fillText("Composite Waveform", waveX, waveY - 60);
   }
 
->>>>>>> origin/audit/physics
   function drawInfoPanel() {
     const panelX = 10;
     const panelY = 50;
@@ -234,11 +225,7 @@ const Harmonics: SimulationFactory = () => {
       const color = h === 1 ? FUNDAMENTAL_COLOR : HARMONIC_COLORS[(h - 2) % HARMONIC_COLORS.length];
       
       ctx.fillStyle = color;
-<<<<<<< HEAD
-      ctx.fillText(`f${h}: ${freq} Hz`, panelX + 10, panelY + 60 + h * 15);
-=======
       ctx.fillText(`${h === 1 ? 'f₁' : `f₁×${h}`}: ${freq} Hz`, panelX + 10, panelY + 60 + h * 15);
->>>>>>> origin/audit/physics
     }
     
     ctx.fillStyle = TEXT_COLOR;
@@ -259,19 +246,12 @@ const Harmonics: SimulationFactory = () => {
       fundamental = params.fundamental ?? fundamental;
       numHarmonics = Math.round(params.numHarmonics ?? numHarmonics);
       
-<<<<<<< HEAD
-      // Adjust amplitude array
-      if (params.amplitude1 !== undefined) harmonicAmplitudes[0] = params.amplitude1;
-      if (params.amplitude2 !== undefined) harmonicAmplitudes[1] = params.amplitude2;
-      if (params.amplitude3 !== undefined) harmonicAmplitudes[2] = params.amplitude3;
-=======
       // Adjust amplitude array length
       if (params.amplitude1 !== undefined) harmonicAmplitudes[0] = params.amplitude1;
       if (params.amplitude2 !== undefined) harmonicAmplitudes[1] = params.amplitude2;
       if (params.amplitude3 !== undefined) harmonicAmplitudes[2] = params.amplitude3;
       if (params.amplitude4 !== undefined) harmonicAmplitudes[3] = params.amplitude4;
       if (params.amplitude5 !== undefined) harmonicAmplitudes[4] = params.amplitude5;
->>>>>>> origin/audit/physics
 
       time += dt;
     },
@@ -282,10 +262,7 @@ const Harmonics: SimulationFactory = () => {
 
       drawString();
       drawHarmonicSpectrum();
-<<<<<<< HEAD
-=======
       drawCompositeWaveform();
->>>>>>> origin/audit/physics
       drawInfoPanel();
     },
 

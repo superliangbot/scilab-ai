@@ -182,17 +182,27 @@ const TitrationCurvesFactory: SimulationFactory = () => {
   function weakAcidStrongBasePH(molesAcid: number, molesBase: number, totalVolume: number, Ka: number, pKa: number): number {
     const totalVolumeL = totalVolume / 1000;
     
-    if (molesBase === 0) {
-      // Initial weak acid solution
+    if (molesBase < 1e-12) {
+      // Initial weak acid solution: [H+] = sqrt(Ka * Ca)
       const Ca = molesAcid / totalVolumeL;
-      return 0.5 * (pKa - Math.log10(Ca));
+      const H = Math.sqrt(Ka * Ca);
+      return -Math.log10(Math.max(H, 1e-14));
     }
     
-    if (molesBase >= molesAcid) {
-      // Past equivalence point
+    if (Math.abs(molesBase - molesAcid) < 1e-12) {
+      // At equivalence point: salt of weak acid hydrolysis
+      // Conjugate base Kb = Kw/Ka, [OH-] = sqrt(Kb * Csalt)
+      const Csalt = molesAcid / totalVolumeL;
+      const Kb = 1e-14 / Ka;
+      const OH = Math.sqrt(Kb * Csalt);
+      return 14 + Math.log10(Math.max(OH, 1e-14));
+    }
+    
+    if (molesBase > molesAcid) {
+      // Past equivalence point — excess strong base dominates
       const excessBase = molesBase - molesAcid;
       const concentration = excessBase / totalVolumeL;
-      return 14 + Math.log10(concentration);
+      return 14 + Math.log10(Math.max(concentration, 1e-14));
     }
     
     // Before equivalence point - Henderson-Hasselbalch
@@ -200,25 +210,55 @@ const TitrationCurvesFactory: SimulationFactory = () => {
     const molesConjugateBase = molesBase;
     
     const ratio = molesConjugateBase / molesAcidRemaining;
+    if (ratio < 1e-10) {
+      // Very little base added — use weak acid approximation
+      const Ca = molesAcidRemaining / totalVolumeL;
+      const H = Math.sqrt(Ka * Ca);
+      return -Math.log10(Math.max(H, 1e-14));
+    }
     return pKa + Math.log10(ratio);
   }
 
   function strongAcidWeakBasePH(molesAcid: number, molesBase: number, totalVolume: number, Kb: number): number {
     const totalVolumeL = totalVolume / 1000;
     const pKb = -Math.log10(Kb);
-    const pKw = 14;
+    const pKa_conjugate = 14 - pKb; // pKa of conjugate acid
     
-    if (molesAcid >= molesBase) {
-      // Excess acid
-      const excessAcid = molesAcid - molesBase;
-      const concentration = excessAcid / totalVolumeL;
-      return -Math.log10(concentration);
+    if (molesAcid < 1e-12) {
+      // Pure weak base: [OH-] = sqrt(Kb * Cb)
+      const Cb = molesBase / totalVolumeL;
+      const OH = Math.sqrt(Kb * Cb);
+      return 14 + Math.log10(Math.max(OH, 1e-14));
     }
     
-    // Past equivalence point - excess base
-    const excessBase = molesBase - molesAcid;
-    const concentration = excessBase / totalVolumeL;
-    return pKw - pKb + 0.5 * Math.log10(concentration);
+    if (Math.abs(molesAcid - molesBase) < 1e-12) {
+      // Equivalence point: conjugate acid hydrolysis
+      // [H+] = sqrt(Ka_conj * Csalt) where Ka_conj = Kw/Kb
+      const Csalt = molesBase / totalVolumeL;
+      const Ka_conj = 1e-14 / Kb;
+      const H = Math.sqrt(Ka_conj * Csalt);
+      return -Math.log10(Math.max(H, 1e-14));
+    }
+    
+    if (molesAcid > molesBase) {
+      // Excess strong acid dominates
+      const excessAcid = molesAcid - molesBase;
+      const concentration = excessAcid / totalVolumeL;
+      return -Math.log10(Math.max(concentration, 1e-14));
+    }
+    
+    // Excess weak base — buffer region (base + conjugate acid)
+    const molesBaseRemaining = molesBase - molesAcid;
+    const molesConjugateAcid = molesAcid;
+    const ratio = molesBaseRemaining / molesConjugateAcid;
+    if (ratio < 1e-10) {
+      const Csalt = molesConjugateAcid / totalVolumeL;
+      const Ka_conj = 1e-14 / Kb;
+      const H = Math.sqrt(Ka_conj * Csalt);
+      return -Math.log10(Math.max(H, 1e-14));
+    }
+    // Henderson-Hasselbalch for the conjugate acid/base pair
+    return pKa_conjugate + Math.log10(ratio);
   }
 
   function weakAcidWeakBasePH(molesAcid: number, molesBase: number, totalVolume: number, Ka: number, Kb: number): number {

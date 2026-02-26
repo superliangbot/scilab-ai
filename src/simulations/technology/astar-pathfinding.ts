@@ -249,7 +249,7 @@ const AStarPathfindingFactory: SimulationFactory = (): SimulationEngine => {
 
     if (isSearching) {
       stepDelay += dt;
-      if (stepDelay >= 1000 / speed) {
+      if (stepDelay >= 1 / speed) {
         stepSearch();
         stepDelay = 0;
       }
