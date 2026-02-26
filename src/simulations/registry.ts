@@ -4529,6 +4529,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "distanceBetweenCities", label: "City Distance", min: 100, max: 2000, step: 50, defaultValue: 800, unit: "km" },
       { key: "shadowAngle", label: "Shadow Angle", min: 1, max: 45, step: 0.1, defaultValue: 7.2, unit: "°" },
       { key: "sunElevation", label: "Sun Animation", min: 0, max: 1, step: 0.1, defaultValue: 0.5 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "motion-analysis",
     title: "Motion Analysis",
     category: "physics",
@@ -4626,6 +4630,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "capacitance", label: "Capacitance", min: 10, max: 1000, step: 10, defaultValue: 100, unit: "µF" },
       { key: "resistance", label: "Resistance", min: 1, max: 100, step: 1, defaultValue: 10, unit: "kΩ" },
       { key: "isCharging", label: "Mode (1=Charge,0=Discharge)", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "motion-shot",
     title: "Motion Shot",
     category: "physics",
@@ -4711,6 +4719,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "rotationSpeed", label: "Rotation Speed", min: 0, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
       { key: "showLabels", label: "Show Labels", min: 0, max: 1, step: 1, defaultValue: 1 },
       { key: "showBondAngles", label: "Show Bond Angles", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "multiple-reflections",
     title: "Multiple Reflections",
     category: "physics",
@@ -4750,6 +4762,10 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "gravity", label: "Gravity", min: 1, max: 20, step: 0.1, defaultValue: 9.81, unit: "m/s²" },
       { key: "rampLength", label: "Ramp Length", min: 1, max: 10, step: 0.5, defaultValue: 3, unit: "m" },
       { key: "showFormulas", label: "Show Formulas", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "nephron",
     title: "Nephron",
     category: "biology",
