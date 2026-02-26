@@ -5370,6 +5370,21 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#3b82f6",
   },
   {
+    slug: "rgb",
+    title: "RGB",
+    category: "physics",
+    description: "Additive color mixing with three overlapping light circles for red, green, and blue.",
+    longDescription:
+      "Red, green, and blue are the three primary colors of light. When combined additively, R+G produces yellow, R+B produces magenta, G+B produces cyan, and all three together produce white. This mirrors how human vision works: cone cells in the retina have peak sensitivities near 440 nm (S-cones/blue), 530 nm (M-cones/green), and 570 nm (L-cones/red). Adjust each channel's intensity to explore the full RGB color space.",
+    parameters: [
+      { key: "red", label: "Red", min: 0, max: 255, step: 1, defaultValue: 255 },
+      { key: "green", label: "Green", min: 0, max: 255, step: 1, defaultValue: 255 },
+      { key: "blue", label: "Blue", min: 0, max: 255, step: 1, defaultValue: 255 },
+      { key: "spread", label: "Circle Spread", min: 10, max: 100, step: 5, defaultValue: 50, unit: "%" },
+    ],
+    thumbnailColor: "#666666",
+  },
+  {
     slug: "rgb-decomposer",
     title: "RGB Decomposer",
     category: "physics",
@@ -7313,6 +7328,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "rainbow-colors": () => import("./physics/rainbow-colors").then((m) => m.default),
   "rainbow-formation": () => import("./physics/rainbow-formation").then((m) => m.default),
   // Batch 25
+  "rgb": () => import("./physics/rgb").then((m) => m.default),
   "rgb-decomposer": () => import("./physics/rgb-decomposer").then((m) => m.default),
   "rgb-filter": () => import("./physics/rgb-filter").then((m) => m.default),
   // Batch 25
