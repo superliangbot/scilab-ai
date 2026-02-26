@@ -3733,6 +3733,60 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "flowRate", label: "Flow Rate", min: 0.2, max: 3, step: 0.1, defaultValue: 1, unit: "×" },
       { key: "ionCount", label: "Ion Count", min: 5, max: 30, step: 1, defaultValue: 15 },
       { key: "resinCapacity", label: "Resin Capacity", min: 0, max: 1, step: 0.1, defaultValue: 1 },
+    slug: "law-of-definite-proportions-2",
+    title: "Law of Definite Proportions 2",
+    category: "chemistry",
+    description: "Chemical reactions demonstrate fixed stoichiometric ratios between reactants and products.",
+    longDescription:
+      "The Law of Definite Proportions states that a chemical compound always contains the same elements in exactly the same proportions by mass. This simulation shows the reaction Pb(NO₃)₂ + 2KI → PbI₂ + 2KNO₃, where adding lead nitrate to potassium iodide produces yellow lead iodide precipitate. Once the limiting reagent is consumed, no more product forms regardless of how much excess reactant is added.",
+    parameters: [
+      { key: "pourRate", label: "Pour Rate", min: 1, max: 20, step: 1, defaultValue: 5, unit: "×" },
+      { key: "numVessels", label: "Number of Vessels", min: 2, max: 6, step: 1, defaultValue: 4 },
+    ],
+    thumbnailColor: "#fbbf24",
+  },
+  {
+    slug: "law-of-reflection",
+    title: "Law of Reflection",
+    category: "physics",
+    description: "Light reflecting off a plane mirror where the angle of incidence equals the angle of reflection.",
+    longDescription:
+      "The Law of Reflection states that when light hits a reflective surface, the angle of incidence (θᵢ) equals the angle of reflection (θᵣ), both measured from the normal to the surface. This simulation shows a light ray hitting a plane mirror, with incident and reflected rays, angle measurements, and the virtual image ray behind the mirror.",
+    parameters: [
+      { key: "incidentAngle", label: "Incident Angle", min: 5, max: 85, step: 1, defaultValue: 45, unit: "°" },
+      { key: "mirrorY", label: "Mirror Position", min: 0.2, max: 0.8, step: 0.05, defaultValue: 0.5 },
+      { key: "showNormal", label: "Show Normal", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#22d3ee",
+  },
+  {
+    slug: "lc-filter",
+    title: "LC Filter",
+    category: "physics",
+    description: "Low-pass and high-pass LC filters processing signals at different frequencies.",
+    longDescription:
+      "An LC filter uses inductors (L) and capacitors (C) to selectively pass or block electrical signals based on frequency. A low-pass filter passes frequencies below the resonant frequency and attenuates higher ones, while a high-pass filter does the opposite. The resonant frequency is f₀ = 1/(2π√LC). This simulation shows circuit diagrams, input/output waveforms, and frequency response curves.",
+    parameters: [
+      { key: "inductance", label: "Inductance", min: 1, max: 1000, step: 10, defaultValue: 100, unit: "μH" },
+      { key: "capacitance", label: "Capacitance", min: 1, max: 1000, step: 10, defaultValue: 100, unit: "μF" },
+      { key: "freqLow", label: "Low Frequency", min: 10, max: 500, step: 10, defaultValue: 100, unit: "Hz" },
+      { key: "freqHigh", label: "High Frequency", min: 1000, max: 20000, step: 500, defaultValue: 5000, unit: "Hz" },
+      { key: "filterType", label: "Filter Type (0=LP, 1=HP)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#a78bfa",
+  },
+  {
+    slug: "lc-oscillator",
+    title: "LC Oscillator",
+    category: "physics",
+    description: "Energy oscillation between capacitor and inductor in an LC circuit.",
+    longDescription:
+      "An LC oscillator demonstrates how electrical energy oscillates between the electric field of a capacitor and the magnetic field of an inductor. The resonant frequency is f = 1/(2π√LC). When the capacitor is fully charged, all energy is in the electric field. As it discharges through the inductor, energy transfers to the magnetic field, then back again — analogous to a mechanical spring-mass system.",
+    parameters: [
+      { key: "inductance", label: "Inductance", min: 1, max: 100, step: 1, defaultValue: 10, unit: "mH" },
+      { key: "capacitance", label: "Capacitance", min: 10, max: 500, step: 10, defaultValue: 100, unit: "μF" },
+      { key: "initialCharge", label: "Initial Charge", min: 0.1, max: 1, step: 0.1, defaultValue: 1 },
+      { key: "speed", label: "Speed", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "×" },
     ],
     thumbnailColor: "#10b981",
   },
@@ -3907,6 +3961,17 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "viewMode", label: "View (0=both, 1=geo)", min: 0, max: 1, step: 1, defaultValue: 0 },
       { key: "showOrbits", label: "Show Orbits", min: 0, max: 1, step: 1, defaultValue: 1 },
       { key: "showTrails", label: "Show Trails", min: 0, max: 1, step: 1, defaultValue: 1 },
+    slug: "lcd-display",
+    title: "LCD Display",
+    category: "physics",
+    description: "How LCD screens create colors by combining red, green, and blue subpixels.",
+    longDescription:
+      "LCD monitors create colors using additive RGB color mixing. Each pixel contains three subpixels — red, green, and blue — that emit light at varying intensities. The human eye has three types of cone cells that detect these colors, and the brain blends them into a single perceived color. This simulation lets you adjust RGB values and zoom into the pixel structure.",
+    parameters: [
+      { key: "red", label: "Red", min: 0, max: 255, step: 1, defaultValue: 255 },
+      { key: "green", label: "Green", min: 0, max: 255, step: 1, defaultValue: 128 },
+      { key: "blue", label: "Blue", min: 0, max: 255, step: 1, defaultValue: 64 },
+      { key: "zoom", label: "Zoom Level", min: 1, max: 8, step: 0.5, defaultValue: 1, unit: "×" },
     ],
     thumbnailColor: "#6366f1",
   },
@@ -4031,6 +4096,147 @@ export const simulationConfigs: SimulationConfig[] = [
       { key: "autoReact", label: "Auto React", min: 0, max: 1, step: 1, defaultValue: 0 },
     ],
     thumbnailColor: "#10b981",
+  },
+    slug: "lcd-display-2",
+    title: "LCD Display 2",
+    category: "physics",
+    description: "Zoom into sample images to see RGB subpixel structure of LCD displays.",
+    longDescription:
+      "An advanced LCD display simulation where you can zoom into sample images on a virtual monitor to see the underlying RGB subpixel structure. As magnification increases, individual red, green, and blue subpixels become visible as vertical bars within each pixel, demonstrating how discrete colored elements combine to form full-color images.",
+    parameters: [
+      { key: "magnification", label: "Magnification", min: 2, max: 15, step: 1, defaultValue: 5, unit: "×" },
+      { key: "magDiameter", label: "Magnifier Size", min: 60, max: 200, step: 10, defaultValue: 120, unit: "px" },
+      { key: "imageIndex", label: "Image (0-3)", min: 0, max: 3, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#8b5cf6",
+  },
+  {
+    slug: "le-chateliers-principle-pressure",
+    title: "Le Chatelier's Principle (Pressure)",
+    category: "physics",
+    description: "How pressure changes shift chemical equilibrium in the 2NO₂ ⇌ N₂O₄ reaction.",
+    longDescription:
+      "Le Chatelier's Principle states that if a system at equilibrium is disturbed, it shifts to counteract the disturbance. In the reversible reaction 2NO₂ ⇌ N₂O₄, increasing pressure favors the side with fewer gas molecules (N₂O₄), while decreasing pressure favors more molecules (NO₂). The brown color of NO₂ makes the equilibrium shift visually observable.",
+    parameters: [
+      { key: "pressure", label: "Pressure", min: 0.3, max: 2.5, step: 0.1, defaultValue: 1, unit: "atm" },
+      { key: "temperature", label: "Temperature", min: 200, max: 500, step: 10, defaultValue: 300, unit: "K" },
+      { key: "speed", label: "Speed", min: 0.5, max: 3, step: 0.5, defaultValue: 1, unit: "×" },
+    ],
+    thumbnailColor: "#f97316",
+  },
+  {
+    slug: "led",
+    title: "LED",
+    category: "electricity",
+    description: "How LEDs emit light through electron-hole recombination at a p-n junction.",
+    longDescription:
+      "A Light-Emitting Diode (LED) works by passing current through a semiconductor p-n junction under forward bias. Electrons from the n-type region and holes from the p-type region recombine at the junction, releasing energy as photons. The wavelength (color) of emitted light depends on the band gap energy: E = hc/λ. This simulation shows the semiconductor structure, energy bands, and photon emission.",
+    parameters: [
+      { key: "bandGap", label: "Band Gap Energy", min: 1.4, max: 3.4, step: 0.1, defaultValue: 2.0, unit: "eV" },
+      { key: "biasMode", label: "Bias (0=Rev, 1=Fwd, 2=Off)", min: 0, max: 2, step: 1, defaultValue: 1 },
+      { key: "voltage", label: "Applied Voltage", min: 0, max: 5, step: 0.1, defaultValue: 3, unit: "V" },
+    ],
+    thumbnailColor: "#ef4444",
+  },
+  {
+    slug: "lens",
+    title: "Lens",
+    category: "physics",
+    description: "Image formation through convex and concave lenses with ray tracing.",
+    longDescription:
+      "This simulation demonstrates how convex and concave lenses form images using the thin lens equation 1/f = 1/v + 1/u. Three principal rays are traced: a ray parallel to the axis, a ray through the center, and a ray through the focal point. Depending on object distance and lens type, the image may be real or virtual, magnified or diminished, upright or inverted.",
+    parameters: [
+      { key: "focalLength", label: "Focal Length", min: 50, max: 300, step: 10, defaultValue: 150, unit: "px" },
+      { key: "objectDist", label: "Object Distance", min: 50, max: 500, step: 10, defaultValue: 300, unit: "px" },
+      { key: "lensType", label: "Lens Type (0=Convex, 1=Concave)", min: 0, max: 1, step: 1, defaultValue: 0 },
+    ],
+    thumbnailColor: "#06b6d4",
+  },
+  {
+    slug: "leyden-jar",
+    title: "Leyden Jar",
+    category: "electricity",
+    description: "An early capacitor that stores static electricity between conductive foils in a glass jar.",
+    longDescription:
+      "The Leyden jar, invented around 1745, was one of the first devices to store electrical charge. It consists of a glass jar with conductive metal foil on both inner and outer surfaces. The glass acts as a dielectric insulator. Charge accumulates on the inner foil, inducing opposite charge on the outer foil, storing energy according to E = ½CV².",
+    parameters: [
+      { key: "chargeRate", label: "Charge Rate", min: 0.5, max: 5, step: 0.5, defaultValue: 1, unit: "×" },
+      { key: "capacitance", label: "Capacitance", min: 1, max: 20, step: 1, defaultValue: 5, unit: "nF" },
+      { key: "maxVoltage", label: "Max Voltage", min: 10, max: 50, step: 5, defaultValue: 30, unit: "kV" },
+    ],
+    thumbnailColor: "#f59e0b",
+  },
+  {
+    slug: "life-game",
+    title: "Game of Life",
+    category: "physics",
+    description: "Conway's cellular automaton where complex patterns emerge from simple rules.",
+    longDescription:
+      "Conway's Game of Life is a cellular automaton where cells on a grid live or die based on simple rules: underpopulation (< 2 neighbors → dies), survival (2-3 neighbors → lives), overpopulation (> 3 neighbors → dies), and reproduction (dead cell with exactly 3 neighbors → born). Despite these simple rules, extraordinarily complex patterns can emerge, demonstrating emergent behavior.",
+    parameters: [
+      { key: "gridSize", label: "Grid Size", min: 20, max: 128, step: 8, defaultValue: 64 },
+      { key: "speed", label: "Speed", min: 1, max: 30, step: 1, defaultValue: 5, unit: "gen/s" },
+      { key: "initialDensity", label: "Initial Density", min: 0.1, max: 0.6, step: 0.05, defaultValue: 0.3 },
+    ],
+    thumbnailColor: "#10b981",
+  },
+  {
+    slug: "light-interference-on-cd-surface",
+    title: "Light Interference on CD Surface",
+    category: "physics",
+    description: "Rainbow colors from CDs explained by diffraction and constructive interference.",
+    longDescription:
+      "CDs display rainbow colors because their microscopic grooves (spaced ~1600 nm apart) act as a diffraction grating. When light hits the surface, waves reflected from adjacent grooves interfere constructively at specific angles depending on wavelength, described by d·sin(θ) = mλ. Different colors constructively interfere at different angles, producing the characteristic rainbow pattern.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 380, max: 700, step: 10, defaultValue: 550, unit: "nm" },
+      { key: "incidentAngle", label: "Incident Angle", min: 0, max: 80, step: 5, defaultValue: 30, unit: "°" },
+      { key: "gratingSpacing", label: "Track Spacing", min: 800, max: 2400, step: 100, defaultValue: 1600, unit: "nm" },
+    ],
+    thumbnailColor: "#ec4899",
+  },
+  {
+    slug: "light-refraction",
+    title: "Light Refraction",
+    category: "physics",
+    description: "Light bending at the boundary between two media, governed by Snell's Law.",
+    longDescription:
+      "When light passes from one medium to another with a different refractive index, it bends (refracts). Snell's Law relates the angles: n₁sin(θ₁) = n₂sin(θ₂). Light bends toward the normal when entering a denser medium and away from it when entering a less dense one. When the angle exceeds the critical angle (for denser to less dense), total internal reflection occurs.",
+    parameters: [
+      { key: "incidentAngle", label: "Incident Angle", min: 0, max: 89, step: 1, defaultValue: 45, unit: "°" },
+      { key: "n1", label: "Refractive Index n₁", min: 1.0, max: 2.5, step: 0.01, defaultValue: 1.0 },
+      { key: "n2", label: "Refractive Index n₂", min: 1.0, max: 2.5, step: 0.01, defaultValue: 1.5 },
+      { key: "showAngles", label: "Show Angles", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#3b82f6",
+  },
+  {
+    slug: "little-princes-trampoline",
+    title: "Little Prince's Trampoline",
+    category: "physics",
+    description: "Newton's 3rd Law demonstrated through bouncing on a trampoline on a small asteroid.",
+    longDescription:
+      "Inspired by The Little Prince, this simulation demonstrates Newton's Third Law of Motion: for every action, there is an equal and opposite reaction. A character bounces on a trampoline on a small asteroid. The character pushes the trampoline down (action), and the trampoline pushes back up (reaction). The asteroid's radius affects gravity — smaller asteroids have weaker gravity, resulting in higher bounces.",
+    parameters: [
+      { key: "asteroidRadius", label: "Asteroid Radius", min: 10, max: 100, step: 5, defaultValue: 50 },
+      { key: "springConstant", label: "Spring Constant", min: 1, max: 20, step: 1, defaultValue: 5, unit: "N/m" },
+      { key: "characterMass", label: "Character Mass", min: 0.5, max: 5, step: 0.5, defaultValue: 1, unit: "kg" },
+    ],
+    thumbnailColor: "#f59e0b",
+  },
+  {
+    slug: "logic",
+    title: "Logic Gates",
+    category: "physics",
+    description: "Fundamental digital logic gates: AND, OR, NOT, NAND, NOR, XOR with truth tables.",
+    longDescription:
+      "Logic gates are the building blocks of digital circuits and computers. This simulation demonstrates the six fundamental gates: AND (both inputs 1), OR (either input 1), NOT (inverts input), NAND (NOT-AND), NOR (NOT-OR), and XOR (inputs differ). Each gate is shown with its standard symbol, input/output wires with signal flow, and a complete truth table.",
+    parameters: [
+      { key: "gateType", label: "Gate (0=AND..5=XOR)", min: 0, max: 5, step: 1, defaultValue: 0 },
+      { key: "inputA", label: "Input A", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "inputB", label: "Input B", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "showTruthTable", label: "Show Truth Table", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#8b5cf6",
   },
 ];
 
@@ -4316,6 +4522,21 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "koch-curve": () => import("./physics/koch-curve").then((m) => m.default),
   "latitude-of-polaris": () => import("./physics/latitude-of-polaris").then((m) => m.default),
   "law-of-definite-proportions": () => import("./chemistry/law-of-definite-proportions").then((m) => m.default),
+  "law-of-definite-proportions-2": () => import("./chemistry/law-of-definite-proportions-2").then((m) => m.default),
+  "law-of-reflection": () => import("./physics/law-of-reflection").then((m) => m.default),
+  "lc-filter": () => import("./physics/lc-filter").then((m) => m.default),
+  "lc-oscillator": () => import("./physics/lc-oscillator").then((m) => m.default),
+  "lcd-display": () => import("./physics/lcd-display").then((m) => m.default),
+  "lcd-display-2": () => import("./physics/lcd-display-2").then((m) => m.default),
+  "le-chateliers-principle-pressure": () => import("./physics/le-chateliers-principle-pressure").then((m) => m.default),
+  "led": () => import("./electricity/led").then((m) => m.default),
+  "lens": () => import("./physics/lens").then((m) => m.default),
+  "leyden-jar": () => import("./electricity/leyden-jar").then((m) => m.default),
+  "life-game": () => import("./physics/life-game").then((m) => m.default),
+  "light-interference-on-cd-surface": () => import("./physics/light-interference-on-cd-surface").then((m) => m.default),
+  "light-refraction": () => import("./physics/light-refraction").then((m) => m.default),
+  "little-princes-trampoline": () => import("./physics/little-princes-trampoline").then((m) => m.default),
+  "logic": () => import("./physics/logic").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
