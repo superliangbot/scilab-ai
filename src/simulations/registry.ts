@@ -4400,6 +4400,20 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#8b5cf6",
     icon: "bar_chart",
   },
+  {
+    slug: "sound-wave",
+    title: "Sound Wave",
+    category: "physics",
+    description: "Visualize sound as both transverse and longitudinal waves with compressions and rarefactions.",
+    longDescription: "Sound is a longitudinal mechanical wave that propagates through a medium by compression and rarefaction of particles. This simulation shows both the transverse waveform representation (pressure vs. position) and the longitudinal view where air molecules bunch together (compression) and spread apart (rarefaction). The relationship v = fλ connects wave speed, frequency, and wavelength. Adjust frequency, amplitude, wave type, and speed of sound to explore how these parameters affect the wave.",
+    parameters: [
+      { key: "frequency", label: "Frequency", min: 20, max: 2000, step: 10, defaultValue: 440, unit: "Hz" },
+      { key: "amplitude", label: "Amplitude", min: 0.1, max: 1, step: 0.05, defaultValue: 0.8 },
+      { key: "waveType", label: "Wave Type (0-3)", min: 0, max: 3, step: 1, defaultValue: 0 },
+      { key: "speed", label: "Speed of Sound", min: 100, max: 1500, step: 10, defaultValue: 343, unit: "m/s" },
+    ],
+    thumbnailColor: "#06b6d4",
+  },
   // Batch 27
   {
     slug: "speaker",
@@ -5993,6 +6007,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "solar-wind": () => import("./astronomy/solar-wind").then((m) => m.default),
   "sound-analyzing": () => import("./physics/sound-analyzing").then((m) => m.default),
   "sound-fft": () => import("./physics/sound-fft").then((m) => m.default),
+  "sound-wave": () => import("./physics/sound-wave").then((m) => m.default),
   // Batch 27
   "speaker": () => import("./physics/speaker").then((m) => m.default),
   "specific-heat": () => import("./physics/specific-heat").then((m) => m.default),
