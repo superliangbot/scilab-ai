@@ -1,8 +1,4 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
 const InductorAndCapacitorFactory: SimulationFactory = (): SimulationEngine => {
@@ -10,489 +6,315 @@ const InductorAndCapacitorFactory: SimulationFactory = (): SimulationEngine => {
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
-  let inductance = 0.1; // Henries
-  let capacitance = 100; // microfarads
-  let initialVoltage = 5; // Volts
-  let resistance = 0; // Ohms (for damped oscillation)
+  // Circuit parameters
+  let inductance = 0.1; // H
+  let capacitance = 100; // µF
+  let voltage = 5; // V
 
-  // Circuit state
-  let charge = 0; // Coulombs (on capacitor)
-  let current = 0; // Amps
-  let vCapacitor = 0;
-  let vInductor = 0;
-  let eCapacitor = 0;
-  let eInductor = 0;
-  let resonantFreq = 0;
-  let period = 0;
+  // State
+  let switchOn = false;
+  let inductorCurrent = 0;
+  let capacitorVoltage = 0;
+  let capacitorCharge = 0;
+  const inductorHistory: number[] = [];
+  const capacitorHistory: number[] = [];
+  const maxHistory = 200;
 
-  // History for graphs
-  const voltageHistory: Array<{ t: number; vC: number; vL: number }> = [];
-  const currentHistory: Array<{ t: number; i: number }> = [];
-  const energyHistory: Array<{ t: number; eC: number; eL: number }> = [];
-
-  function computeResonance(): void {
-    const C = capacitance * 1e-6; // Convert μF to F
-    resonantFreq = 1 / (2 * Math.PI * Math.sqrt(inductance * C));
-    period = 1 / resonantFreq;
+  function drawWire(x1: number, y1: number, x2: number, y2: number) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = "#aaa";
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 
-  function reset(): void {
-    time = 0;
-    const C = capacitance * 1e-6;
-    charge = initialVoltage * C; // Q = CV
-    current = 0;
-    vCapacitor = initialVoltage;
-    vInductor = -initialVoltage;
-    voltageHistory.length = 0;
-    currentHistory.length = 0;
-    energyHistory.length = 0;
-    computeResonance();
-  }
-
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
-  }
-
-  function update(dt: number, params: Record<string, number>): void {
-    const newL = params.inductance ?? 0.1;
-    const newC = params.capacitance ?? 100;
-    const newV = params.initialVoltage ?? 5;
-    const newR = params.resistance ?? 0;
-
-    if (newL !== inductance || newC !== capacitance || newV !== initialVoltage || newR !== resistance) {
-      inductance = newL;
-      capacitance = newC;
-      initialVoltage = newV;
-      resistance = newR;
-      reset();
+  function drawInductor(cx: number, cy: number, w: number) {
+    ctx.save();
+    ctx.strokeStyle = "#4fc3f7";
+    ctx.lineWidth = 2.5;
+    const coils = 6;
+    const coilW = w / coils;
+    ctx.beginPath();
+    for (let i = 0; i < coils; i++) {
+      const x0 = cx - w / 2 + i * coilW;
+      ctx.arc(x0 + coilW / 2, cy, coilW / 2, Math.PI, 0, false);
     }
+    ctx.stroke();
 
-    time += dt;
-
-    const C = capacitance * 1e-6;
-    const L = inductance;
-    const R = resistance;
-
-    // LC circuit differential equations:
-    // L * dI/dt + R*I + Q/C = 0
-    // dQ/dt = I
-    // Using RK4 integration for accuracy
-    const k1_q = current;
-    const k1_i = (-charge / C - R * current) / L;
-
-    const k2_q = current + 0.5 * dt * k1_i;
-    const k2_i = (-(charge + 0.5 * dt * k1_q) / C - R * (current + 0.5 * dt * k1_i)) / L;
-
-    const k3_q = current + 0.5 * dt * k2_i;
-    const k3_i = (-(charge + 0.5 * dt * k2_q) / C - R * (current + 0.5 * dt * k2_i)) / L;
-
-    const k4_q = current + dt * k3_i;
-    const k4_i = (-(charge + dt * k3_q) / C - R * (current + dt * k3_i)) / L;
-
-    charge += (dt / 6) * (k1_q + 2 * k2_q + 2 * k3_q + k4_q);
-    current += (dt / 6) * (k1_i + 2 * k2_i + 2 * k3_i + k4_i);
-
-    vCapacitor = charge / C;
-    vInductor = -L * ((-charge / C - R * current) / L); // = charge/C + R*current
-    eCapacitor = 0.5 * charge * charge / C;
-    eInductor = 0.5 * L * current * current;
-
-    // Record history
-    if (voltageHistory.length === 0 || time - voltageHistory[voltageHistory.length - 1].t > period * 0.01) {
-      voltageHistory.push({ t: time, vC: vCapacitor, vL: vInductor });
-      currentHistory.push({ t: time, i: current });
-      energyHistory.push({ t: time, eC: eCapacitor, eL: eInductor });
-      if (voltageHistory.length > 300) {
-        voltageHistory.shift();
-        currentHistory.shift();
-        energyHistory.shift();
+    // Magnetic field arrows proportional to current
+    const fieldStrength = Math.min(Math.abs(inductorCurrent) / 2, 1);
+    if (fieldStrength > 0.05) {
+      ctx.fillStyle = `rgba(76, 175, 80, ${fieldStrength})`;
+      for (let i = 0; i < 3; i++) {
+        const ax = cx - 20 + i * 20;
+        const ay = cy - 20;
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax - 5, ay + 8);
+        ctx.lineTo(ax + 5, ay + 8);
+        ctx.fill();
       }
     }
-  }
 
-  function drawCircuit(): void {
-    const cx = W * 0.25;
-    const cy = H * 0.22;
-    const circW = W * 0.35;
-    const circH = H * 0.25;
-
-    // Circuit wires
-    ctx.strokeStyle = "#78909c";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    // Top wire
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + circW, cy);
-    // Right wire
-    ctx.lineTo(cx + circW, cy + circH);
-    // Bottom wire
-    ctx.lineTo(cx, cy + circH);
-    // Left wire
-    ctx.lineTo(cx, cy);
-    ctx.stroke();
-
-    // Capacitor (top center)
-    const capX = cx + circW * 0.5;
-    const capGap = 6;
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "#42a5f5";
-    ctx.beginPath();
-    ctx.moveTo(capX - capGap, cy - 15);
-    ctx.lineTo(capX - capGap, cy + 15);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(capX + capGap, cy - 15);
-    ctx.lineTo(capX + capGap, cy + 15);
-    ctx.stroke();
-
-    // Charge indication on capacitor plates
-    const chargeLevel = Math.min(Math.abs(vCapacitor) / initialVoltage, 1);
-    const chargeColor = vCapacitor >= 0
-      ? `rgba(66, 165, 245, ${chargeLevel * 0.5})`
-      : `rgba(239, 83, 80, ${chargeLevel * 0.5})`;
-    ctx.fillStyle = chargeColor;
-    ctx.fillRect(capX - capGap - 10, cy - 12, 10, 24);
-
-    ctx.fillStyle = "#42a5f5";
-    ctx.font = "bold 10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("C", capX, cy - 20);
-    ctx.font = "9px monospace";
-    ctx.fillText(`${vCapacitor.toFixed(2)}V`, capX, cy + 28);
-
-    // Inductor (bottom center) - coil symbol
-    const indX = cx + circW * 0.5;
-    const indY = cy + circH;
-    ctx.strokeStyle = "#ffa726";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let i = 0; i < 4; i++) {
-      const sx = indX - 24 + i * 12;
-      ctx.arc(sx + 6, indY, 6, Math.PI, 0, false);
-    }
-    ctx.stroke();
-
-    ctx.fillStyle = "#ffa726";
-    ctx.font = "bold 10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("L", indX, indY + 18);
-
-    // Resistor (right side) if R > 0
-    if (resistance > 0) {
-      const resX = cx + circW;
-      const resY = cy + circH * 0.5;
-      ctx.strokeStyle = "#66bb6a";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(resX, resY - 15);
-      for (let i = 0; i < 6; i++) {
-        ctx.lineTo(resX + (i % 2 === 0 ? 6 : -6), resY - 15 + (i + 1) * 5);
-      }
-      ctx.lineTo(resX, resY + 15);
-      ctx.stroke();
-      ctx.fillStyle = "#66bb6a";
-      ctx.font = "bold 10px sans-serif";
-      ctx.fillText("R", resX + 16, resY + 3);
-    }
-
-    // Current arrow
-    const arrowAngle = current >= 0 ? 0 : Math.PI;
-    const arrowX = cx + circW * 0.25;
-    const arrowY = cy;
-    const arrowLen = Math.min(Math.abs(current) * 30, 25);
-    if (arrowLen > 2) {
-      ctx.strokeStyle = "#ffeb3b";
-      ctx.lineWidth = 2;
-      ctx.fillStyle = "#ffeb3b";
-      const ax = Math.cos(arrowAngle) * arrowLen;
-      ctx.beginPath();
-      ctx.moveTo(arrowX - ax * 0.5, arrowY - 8);
-      ctx.lineTo(arrowX + ax * 0.5, arrowY - 8);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(arrowX + ax * 0.5, arrowY - 8);
-      ctx.lineTo(arrowX + ax * 0.5 - Math.cos(arrowAngle) * 5, arrowY - 12);
-      ctx.lineTo(arrowX + ax * 0.5 - Math.cos(arrowAngle) * 5, arrowY - 4);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = "#ffeb3b";
-      ctx.font = "9px monospace";
-      ctx.textAlign = "center";
-      ctx.fillText(`I=${(current * 1000).toFixed(1)}mA`, arrowX, arrowY - 18);
-    }
-  }
-
-  function drawVoltageGraph(): void {
-    const gx = W * 0.03;
-    const gy = H * 0.52;
-    const gw = W * 0.45;
-    const gh = H * 0.22;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Voltage", gx + gw / 2, gy + 14);
-
-    if (voltageHistory.length < 2) return;
-
-    const px = gx + 35;
-    const py = gy + 22;
-    const pw = gw - 50;
-    const ph = gh - 34;
-
-    const maxV = initialVoltage * 1.2;
-    const tMin = voltageHistory[0].t;
-    const tMax = voltageHistory[voltageHistory.length - 1].t;
-    const tRange = Math.max(tMax - tMin, 0.01);
-
-    // Axes
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px, py + ph / 2);
-    ctx.lineTo(px + pw, py + ph / 2);
-    ctx.stroke();
-
-    // Vc
-    ctx.strokeStyle = "#42a5f5";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    for (let i = 0; i < voltageHistory.length; i++) {
-      const x = px + ((voltageHistory[i].t - tMin) / tRange) * pw;
-      const y = py + ph / 2 - (voltageHistory[i].vC / maxV) * (ph / 2);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-
-    // Legend
-    ctx.fillStyle = "#42a5f5";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Vc", px + 3, py + 10);
-  }
-
-  function drawCurrentGraph(): void {
-    const gx = W * 0.5;
-    const gy = H * 0.52;
-    const gw = W * 0.47;
-    const gh = H * 0.22;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Current", gx + gw / 2, gy + 14);
-
-    if (currentHistory.length < 2) return;
-
-    const px = gx + 35;
-    const py = gy + 22;
-    const pw = gw - 50;
-    const ph = gh - 34;
-
-    const maxI = Math.max(...currentHistory.map((d) => Math.abs(d.i)), 0.001) * 1.2;
-    const tMin = currentHistory[0].t;
-    const tMax = currentHistory[currentHistory.length - 1].t;
-    const tRange = Math.max(tMax - tMin, 0.01);
-
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px, py + ph / 2);
-    ctx.lineTo(px + pw, py + ph / 2);
-    ctx.stroke();
-
-    ctx.strokeStyle = "#ffeb3b";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    for (let i = 0; i < currentHistory.length; i++) {
-      const x = px + ((currentHistory[i].t - tMin) / tRange) * pw;
-      const y = py + ph / 2 - (currentHistory[i].i / maxI) * (ph / 2);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-
-    ctx.fillStyle = "#ffeb3b";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("I", px + 3, py + 10);
-  }
-
-  function drawEnergyGraph(): void {
-    const gx = W * 0.03;
-    const gy = H * 0.76;
-    const gw = W * 0.94;
-    const gh = H * 0.22;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Energy Exchange", gx + gw / 2, gy + 14);
-
-    if (energyHistory.length < 2) return;
-
-    const px = gx + 35;
-    const py = gy + 22;
-    const pw = gw - 50;
-    const ph = gh - 36;
-
-    const maxE = Math.max(
-      ...energyHistory.map((d) => d.eC + d.eL),
-      0.0001
-    ) * 1.1;
-    const tMin = energyHistory[0].t;
-    const tMax = energyHistory[energyHistory.length - 1].t;
-    const tRange = Math.max(tMax - tMin, 0.01);
-
-    // Stacked area: capacitor energy + inductor energy
-    // Capacitor energy (bottom)
-    ctx.fillStyle = "rgba(66, 165, 245, 0.4)";
-    ctx.beginPath();
-    ctx.moveTo(px, py + ph);
-    for (let i = 0; i < energyHistory.length; i++) {
-      const x = px + ((energyHistory[i].t - tMin) / tRange) * pw;
-      const y = py + ph - (energyHistory[i].eC / maxE) * ph;
-      ctx.lineTo(x, y);
-    }
-    ctx.lineTo(px + pw, py + ph);
-    ctx.closePath();
-    ctx.fill();
-
-    // Inductor energy (top, on top of capacitor)
-    ctx.fillStyle = "rgba(255, 167, 38, 0.4)";
-    ctx.beginPath();
-    for (let i = 0; i < energyHistory.length; i++) {
-      const x = px + ((energyHistory[i].t - tMin) / tRange) * pw;
-      const y = py + ph - (energyHistory[i].eC / maxE) * ph;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    for (let i = energyHistory.length - 1; i >= 0; i--) {
-      const x = px + ((energyHistory[i].t - tMin) / tRange) * pw;
-      const y = py + ph - ((energyHistory[i].eC + energyHistory[i].eL) / maxE) * ph;
-      ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.fill();
-
-    // Legend
-    ctx.fillStyle = "#42a5f5";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("EC (capacitor)", px + 5, py + 10);
-    ctx.fillStyle = "#ffa726";
-    ctx.fillText("EL (inductor)", px + 100, py + 10);
-    ctx.fillStyle = "#fff";
-    ctx.fillText(`Total: ${((eCapacitor + eInductor) * 1000).toFixed(2)} mJ`, px + 200, py + 10);
-  }
-
-  function drawInfo(): void {
-    const ix = W * 0.65;
-    const iy = H * 0.03;
-    const iw = W * 0.32;
-    const ih = H * 0.45;
-
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.beginPath();
-    ctx.roundRect(ix, iy, iw, ih, 8);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "#4fc3f7";
     ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("LC Circuit", ix + 10, iy + 18);
+    ctx.textAlign = "center";
+    ctx.fillText("L", cx, cy + 30);
+    ctx.restore();
+  }
 
-    ctx.font = "11px monospace";
-    let y = iy + 38;
-    const items = [
-      { label: "L", value: `${inductance} H`, color: "#ffa726" },
-      { label: "C", value: `${capacitance} μF`, color: "#42a5f5" },
-      { label: "R", value: `${resistance} Ω`, color: "#66bb6a" },
-      { label: "V₀", value: `${initialVoltage} V`, color: "#fff" },
-      { label: "f₀", value: `${resonantFreq.toFixed(1)} Hz`, color: "#ab47bc" },
-      { label: "T", value: `${(period * 1000).toFixed(1)} ms`, color: "#ab47bc" },
-      { label: "Vc", value: `${vCapacitor.toFixed(3)} V`, color: "#42a5f5" },
-      { label: "I", value: `${(current * 1000).toFixed(2)} mA`, color: "#ffeb3b" },
-      { label: "Ec", value: `${(eCapacitor * 1000).toFixed(3)} mJ`, color: "#42a5f5" },
-      { label: "EL", value: `${(eInductor * 1000).toFixed(3)} mJ`, color: "#ffa726" },
-    ];
+  function drawCapacitor(cx: number, cy: number, h: number) {
+    ctx.save();
+    const gap = 8;
+    const plateH = h;
+    ctx.strokeStyle = "#ff9800";
+    ctx.lineWidth = 3;
 
-    for (const item of items) {
-      ctx.fillStyle = item.color;
-      ctx.fillText(`${item.label}:`, ix + 10, y);
-      ctx.fillStyle = "#fff";
-      ctx.fillText(item.value, ix + 50, y);
-      y += 17;
+    ctx.beginPath();
+    ctx.moveTo(cx - gap, cy - plateH / 2);
+    ctx.lineTo(cx - gap, cy + plateH / 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(cx + gap, cy - plateH / 2);
+    ctx.lineTo(cx + gap, cy + plateH / 2);
+    ctx.stroke();
+
+    // Charge visualization
+    const chargeLevel = Math.abs(capacitorCharge) / (capacitance * 1e-6 * voltage);
+    const numCharges = Math.floor(chargeLevel * 5);
+    for (let i = 0; i < numCharges; i++) {
+      const yOff = cy - plateH / 3 + (i * plateH * 0.6) / Math.max(numCharges, 1);
+      ctx.fillStyle = "#ef5350";
+      ctx.beginPath();
+      ctx.arc(cx - gap - 8, yOff, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#42a5f5";
+      ctx.beginPath();
+      ctx.arc(cx + gap + 8, yOff, 3, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    y += 10;
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("f₀ = 1/(2π√LC)", ix + 10, y); y += 14;
-    ctx.fillText("½CV² + ½LI² = const", ix + 10, y); y += 14;
-    ctx.fillText("Energy oscillates between", ix + 10, y); y += 12;
-    ctx.fillText("electric (C) ↔ magnetic (L)", ix + 10, y);
+    ctx.fillStyle = "#ff9800";
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("C", cx, cy + plateH / 2 + 20);
+    ctx.restore();
   }
 
-  function render(): void {
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#0d1b2a");
-    grad.addColorStop(1, "#1a2940");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+  function drawBattery(cx: number, cy: number) {
+    ctx.save();
+    ctx.strokeStyle = "#f44336";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 3, cy - 12);
+    ctx.lineTo(cx - 3, cy + 12);
+    ctx.stroke();
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx + 3, cy - 7);
+    ctx.lineTo(cx + 3, cy + 7);
+    ctx.stroke();
 
-    drawCircuit();
-    drawInfo();
-    drawVoltageGraph();
-    drawCurrentGraph();
-    drawEnergyGraph();
+    ctx.fillStyle = "#f44336";
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("+", cx - 10, cy - 8);
+    ctx.fillText("−", cx + 10, cy - 8);
+    ctx.restore();
   }
 
-  function destroy(): void {
-    voltageHistory.length = 0;
-    currentHistory.length = 0;
-    energyHistory.length = 0;
+  function drawSwitch(cx: number, cy: number, closed: boolean) {
+    ctx.save();
+    ctx.fillStyle = "#888";
+    ctx.beginPath();
+    ctx.arc(cx - 15, cy, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx + 15, cy, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = closed ? "#4caf50" : "#f44336";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 15, cy);
+    if (closed) {
+      ctx.lineTo(cx + 15, cy);
+    } else {
+      ctx.lineTo(cx + 10, cy - 15);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
 
-  function getStateDescription(): string {
-    return (
-      `LC Circuit: L=${inductance}H, C=${capacitance}μF, R=${resistance}Ω, V₀=${initialVoltage}V. ` +
-      `Resonant frequency: f₀=${resonantFreq.toFixed(1)}Hz, period=${(period * 1000).toFixed(1)}ms. ` +
-      `Current state: Vc=${vCapacitor.toFixed(3)}V, I=${(current * 1000).toFixed(2)}mA. ` +
-      `Energy: Ec=${(eCapacitor * 1000).toFixed(3)}mJ, EL=${(eInductor * 1000).toFixed(3)}mJ. ` +
-      `Energy oscillates between capacitor (electric field) and inductor (magnetic field). ` +
-      `${resistance > 0 ? "With resistance, oscillations are damped (RLC circuit)." : "No resistance — undamped oscillations."}`
-    );
+  function drawGraph(gx: number, gy: number, gw: number, gh: number, data: number[], color: string, label: string, maxVal: number) {
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.fillRect(gx, gy, gw, gh);
+    ctx.strokeStyle = "#555";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(gx, gy, gw, gh);
+
+    // Zero line
+    ctx.strokeStyle = "#666";
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(gx, gy + gh / 2);
+    ctx.lineTo(gx + gw, gy + gh / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    if (data.length > 1) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < data.length; i++) {
+        const x = gx + (i / maxHistory) * gw;
+        const y = gy + gh / 2 - (data[i] / maxVal) * (gh / 2);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = color;
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(label, gx + 5, gy + 15);
+    ctx.restore();
   }
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
-  }
+  const engine: SimulationEngine = {
+    config,
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      engine.reset();
+    },
+    update(dt: number, params: Record<string, number>) {
+      inductance = params.inductance ?? 0.1;
+      capacitance = params.capacitance ?? 100;
+      voltage = params.voltage ?? 5;
+      switchOn = (params.switchOn ?? 1) > 0.5;
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+      if (!switchOn) {
+        // Discharge: LC oscillation
+        const C = capacitance * 1e-6;
+        const omega = 1 / Math.sqrt(inductance * C);
+        inductorCurrent *= Math.cos(omega * dt);
+        capacitorVoltage = -inductance * omega * inductorCurrent * Math.sin(omega * dt) + capacitorVoltage * Math.cos(omega * dt);
+        capacitorCharge = C * capacitorVoltage;
+      } else {
+        // Charging: inductor current rises, capacitor charges
+        const C = capacitance * 1e-6;
+        const omega = 1 / Math.sqrt(inductance * C);
+        const dI = ((voltage - capacitorVoltage) / inductance) * dt;
+        inductorCurrent += dI;
+        capacitorCharge += inductorCurrent * dt;
+        capacitorVoltage = capacitorCharge / C;
+      }
+
+      inductorHistory.push(inductorCurrent);
+      capacitorHistory.push(capacitorVoltage);
+      if (inductorHistory.length > maxHistory) inductorHistory.shift();
+      if (capacitorHistory.length > maxHistory) capacitorHistory.shift();
+
+      time += dt;
+    },
+    render() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Background
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#1a1a2e");
+      bg.addColorStop(1, "#16213e");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      // Title
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Inductor and Capacitor Circuit", width / 2, 25);
+
+      const circuitY = height * 0.3;
+      const circuitW = width * 0.6;
+      const left = width * 0.2;
+      const right = left + circuitW;
+      const top = circuitY - 40;
+      const bottom = circuitY + 40;
+
+      // Draw circuit
+      drawWire(left, top, left + circuitW * 0.2, top);
+      drawSwitch(left + circuitW * 0.3, top, switchOn);
+      drawWire(left + circuitW * 0.4, top, right, top);
+      drawWire(right, top, right, circuitY - 10);
+      drawCapacitor(right, circuitY, 30);
+      drawWire(right, circuitY + 25, right, bottom);
+      drawWire(right, bottom, left + circuitW * 0.6, bottom);
+      drawInductor(left + circuitW * 0.35, bottom, circuitW * 0.3);
+      drawWire(left + circuitW * 0.1, bottom, left, bottom);
+      drawWire(left, bottom, left, circuitY + 5);
+      drawBattery(left, circuitY);
+      drawWire(left, circuitY - 12, left, top);
+
+      // Current arrow
+      if (Math.abs(inductorCurrent) > 0.01) {
+        const arrowDir = inductorCurrent > 0 ? 1 : -1;
+        ctx.fillStyle = "#ffeb3b";
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(arrowDir > 0 ? "→ I" : "← I", width / 2, top - 8);
+      }
+
+      // Graphs
+      const graphW = width * 0.38;
+      const graphH = height * 0.25;
+      const graphY = height * 0.55;
+
+      drawGraph(width * 0.05, graphY, graphW, graphH, inductorHistory, "#4fc3f7", "Inductor Current (A)", 3);
+      drawGraph(width * 0.55, graphY, graphW, graphH, capacitorHistory, "#ff9800", "Capacitor Voltage (V)", voltage * 1.5);
+
+      // Info panel
+      ctx.fillStyle = "rgba(255,255,255,0.1)";
+      const infoY = graphY + graphH + 15;
+      ctx.fillRect(width * 0.1, infoY, width * 0.8, 50);
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "13px sans-serif";
+      ctx.textAlign = "center";
+      const freq = 1 / (2 * Math.PI * Math.sqrt(inductance * capacitance * 1e-6));
+      ctx.fillText(`L = ${inductance.toFixed(2)} H | C = ${capacitance.toFixed(0)} µF | V = ${voltage.toFixed(1)} V`, width / 2, infoY + 18);
+      ctx.fillText(`Resonant freq = ${freq.toFixed(1)} Hz | I = ${inductorCurrent.toFixed(3)} A | Vc = ${capacitorVoltage.toFixed(2)} V`, width / 2, infoY + 38);
+    },
+    reset() {
+      time = 0;
+      inductorCurrent = 0;
+      capacitorVoltage = 0;
+      capacitorCharge = 0;
+      inductorHistory.length = 0;
+      capacitorHistory.length = 0;
+      switchOn = true;
+    },
+    destroy() {},
+    getStateDescription(): string {
+      const C = capacitance * 1e-6;
+      const freq = 1 / (2 * Math.PI * Math.sqrt(inductance * C));
+      return `LC Circuit: L=${inductance}H, C=${capacitance}µF. Switch ${switchOn ? "ON" : "OFF"}. Current=${inductorCurrent.toFixed(3)}A, Cap voltage=${capacitorVoltage.toFixed(2)}V. Resonant frequency=${freq.toFixed(1)}Hz. The inductor resists sudden current changes while the capacitor stores charge.`;
+    },
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+    },
+  };
+
+  return engine;
 };
 
 export default InductorAndCapacitorFactory;

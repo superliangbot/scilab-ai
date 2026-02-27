@@ -1,7 +1,7 @@
 import { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
-const InductorCapacitor2Factory: SimulationFactory = (): SimulationEngine => {
+const InductorAndCapacitor2Factory: SimulationFactory = (): SimulationEngine => {
   const config = getSimConfig("inductor-and-capacitor-2") as SimulationConfig;
 
   let canvas: HTMLCanvasElement;
@@ -11,118 +11,281 @@ const InductorCapacitor2Factory: SimulationFactory = (): SimulationEngine => {
   let time = 0;
 
   // Parameters
-  let frequency = 100; // Hz
-  let inductance = 0.1; // H
+  let frequency = 5; // kHz
+  let inductance = 0.01; // H
   let capacitance = 10; // µF
-  let resistance = 50; // Ω
+  let amplitude = 5; // V
+  let waveform = 0; // 0 = sine, 1 = square
 
-  // Waveform history
-  const historyLen = 300;
-  let voltageHistory: number[] = [];
-  let inductorCurrentHistory: number[] = [];
-  let capacitorCurrentHistory: number[] = [];
-  let totalCurrentHistory: number[] = [];
+  // State
+  let supplyVoltage = 0;
+  let inductorCurrent = 0;
+  let capacitorCurrent = 0;
 
-  function calcReactance() {
-    const omega = 2 * Math.PI * frequency;
-    const xL = omega * inductance;
-    const xC = 1 / (omega * (capacitance * 1e-6));
-    return { xL, xC, omega };
+  const supplyHistory: number[] = [];
+  const inductorHistory: number[] = [];
+  const capacitorHistory: number[] = [];
+  const maxHistory = 300;
+
+  function getSupplyVoltage(t: number): number {
+    const omega = 2 * Math.PI * frequency * 1000;
+    if (waveform < 0.5) {
+      return amplitude * Math.sin(omega * t);
+    } else {
+      return amplitude * Math.sign(Math.sin(omega * t));
+    }
   }
 
-  return {
+  function drawGraph(gx: number, gy: number, gw: number, gh: number, datasets: { data: number[]; color: string; label: string }[], maxVal: number) {
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillRect(gx, gy, gw, gh);
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(gx, gy, gw, gh);
+
+    // Zero line
+    ctx.strokeStyle = "#555";
+    ctx.setLineDash([2, 4]);
+    ctx.beginPath();
+    ctx.moveTo(gx, gy + gh / 2);
+    ctx.lineTo(gx + gw, gy + gh / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    datasets.forEach((ds) => {
+      if (ds.data.length > 1) {
+        ctx.strokeStyle = ds.color;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        for (let i = 0; i < ds.data.length; i++) {
+          const x = gx + (i / maxHistory) * gw;
+          const y = gy + gh / 2 - (ds.data[i] / maxVal) * (gh / 2 - 5);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    });
+
+    // Legend
+    let lx = gx + 5;
+    datasets.forEach((ds) => {
+      ctx.fillStyle = ds.color;
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("■ " + ds.label, lx, gy + 14);
+      lx += ctx.measureText("■ " + ds.label).width + 12;
+    });
+
+    ctx.restore();
+  }
+
+  function drawInductorSymbol(cx: number, cy: number) {
+    ctx.save();
+    ctx.strokeStyle = "#4fc3f7";
+    ctx.lineWidth = 2;
+    const coils = 5;
+    const w = 50;
+    const coilW = w / coils;
+    ctx.beginPath();
+    for (let i = 0; i < coils; i++) {
+      ctx.arc(cx - w / 2 + i * coilW + coilW / 2, cy, coilW / 2, Math.PI, 0, false);
+    }
+    ctx.stroke();
+
+    // Magnetic field arrows
+    const strength = Math.min(Math.abs(inductorCurrent) / 3, 1);
+    if (strength > 0.05) {
+      for (let i = 0; i < 4; i++) {
+        const ax = cx - 25 + i * 17;
+        const ay = cy - 18;
+        ctx.fillStyle = `rgba(76, 175, 80, ${strength})`;
+        ctx.beginPath();
+        ctx.moveTo(ax, ay - 6);
+        ctx.lineTo(ax - 4, ay);
+        ctx.lineTo(ax + 4, ay);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawCapacitorSymbol(cx: number, cy: number) {
+    ctx.save();
+    ctx.strokeStyle = "#ff9800";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 6, cy - 15);
+    ctx.lineTo(cx - 6, cy + 15);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + 6, cy - 15);
+    ctx.lineTo(cx + 6, cy + 15);
+    ctx.stroke();
+
+    // Charge dots
+    const charge = Math.abs(capacitorCurrent) / 3;
+    const n = Math.floor(Math.min(charge, 1) * 4);
+    for (let i = 0; i < n; i++) {
+      ctx.fillStyle = "#ef5350";
+      ctx.beginPath();
+      ctx.arc(cx - 14, cy - 10 + i * 7, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#42a5f5";
+      ctx.beginPath();
+      ctx.arc(cx + 14, cy - 10 + i * 7, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      time = 0;
-      voltageHistory = [];
-      inductorCurrentHistory = [];
-      capacitorCurrentHistory = [];
-      totalCurrentHistory = [];
+      engine.reset();
     },
     update(dt: number, params: Record<string, number>) {
-      frequency = params.frequency ?? 100;
-      inductance = params.inductance ?? 0.1;
+      frequency = params.frequency ?? 5;
+      inductance = params.inductance ?? 0.01;
       capacitance = params.capacitance ?? 10;
-      resistance = params.resistance ?? 50;
+      amplitude = params.amplitude ?? 5;
+      waveform = params.waveform ?? 0;
 
       time += dt;
-      const { xL, xC, omega } = calcReactance();
-      const V0 = 10; // peak voltage
-      const V = V0 * Math.sin(omega * time);
-      // Inductor current lags voltage by 90°
-      const iL = (V0 / Math.sqrt(resistance * resistance + xL * xL)) *
-        Math.sin(omega * time - Math.atan2(xL, resistance));
-      // Capacitor current leads voltage by 90°
-      const iC = (V0 / Math.sqrt(resistance * resistance + xC * xC)) *
-        Math.sin(omega * time + Math.atan2(xC, resistance));
 
-      voltageHistory.push(V);
-      inductorCurrentHistory.push(iL);
-      capacitorCurrentHistory.push(iC);
-      totalCurrentHistory.push(iL + iC);
+      const omega = 2 * Math.PI * frequency * 1000;
+      const C = capacitance * 1e-6;
+      const XL = omega * inductance;
+      const XC = 1 / (omega * C);
 
-      if (voltageHistory.length > historyLen) {
-        voltageHistory.shift();
-        inductorCurrentHistory.shift();
-        capacitorCurrentHistory.shift();
-        totalCurrentHistory.shift();
+      supplyVoltage = getSupplyVoltage(time);
+
+      // Inductor: current lags voltage by 90°
+      inductorCurrent = (amplitude / XL) * Math.sin(omega * time - Math.PI / 2);
+      if (waveform >= 0.5) {
+        inductorCurrent = (amplitude / XL) * Math.cos(omega * time);
       }
+
+      // Capacitor: current leads voltage by 90°
+      capacitorCurrent = (amplitude / XC) * Math.sin(omega * time + Math.PI / 2);
+      if (waveform >= 0.5) {
+        capacitorCurrent = -(amplitude / XC) * Math.cos(omega * time);
+      }
+
+      supplyHistory.push(supplyVoltage);
+      inductorHistory.push(inductorCurrent);
+      capacitorHistory.push(capacitorCurrent);
+      if (supplyHistory.length > maxHistory) supplyHistory.shift();
+      if (inductorHistory.length > maxHistory) inductorHistory.shift();
+      if (capacitorHistory.length > maxHistory) capacitorHistory.shift();
     },
     render() {
-      ctx.fillStyle = "#0f172a";
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#1a1a2e");
+      bg.addColorStop(1, "#16213e");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      const { xL, xC } = calcReactance();
-      const panelH = height * 0.12;
-
-      // Title and info panel
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Inductor & Capacitor in AC Circuit", width / 2, 25);
+      ctx.fillText("Inductor & Capacitor in AC Circuit", width / 2, 22);
 
-      // Reactance info
-      ctx.font = `${Math.max(11, width * 0.016)}px monospace`;
-      ctx.textAlign = "left";
-      const infoY = 50;
-      ctx.fillStyle = "#60a5fa";
-      ctx.fillText(`X_L = 2πfL = ${xL.toFixed(1)} Ω`, 15, infoY);
-      ctx.fillStyle = "#f59e0b";
-      ctx.fillText(`X_C = 1/(2πfC) = ${xC.toFixed(1)} Ω`, 15, infoY + 18);
-      ctx.fillStyle = "#10b981";
-      ctx.fillText(`f = ${frequency} Hz  L = ${inductance} H  C = ${capacitance} µF`, 15, infoY + 36);
+      // Circuit diagram area
+      const circTop = 40;
+      const circH = height * 0.25;
+      const mid = width / 2;
 
-      // Draw circuit schematic at top
-      const schY = panelH + 30;
-      const schH = height * 0.18;
-      drawCircuitSchematic(schY, schH);
+      // AC source
+      ctx.strokeStyle = "#4caf50";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(mid, circTop + circH / 2, 15, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.font = "12px sans-serif";
+      ctx.fillStyle = "#4caf50";
+      ctx.textAlign = "center";
+      ctx.fillText("~", mid, circTop + circH / 2 + 4);
+      ctx.fillText("AC", mid, circTop + circH / 2 + 28);
 
-      // Draw waveforms
-      const graphTop = schY + schH + 20;
-      const graphH = height - graphTop - 20;
-      drawWaveforms(graphTop, graphH);
+      // Inductor branch (left)
+      drawInductorSymbol(mid - 100, circTop + circH / 2);
+      ctx.fillStyle = "#4fc3f7";
+      ctx.font = "11px sans-serif";
+      ctx.fillText("Inductor", mid - 100, circTop + circH / 2 + 30);
+
+      // Capacitor branch (right)
+      drawCapacitorSymbol(mid + 100, circTop + circH / 2);
+      ctx.fillStyle = "#ff9800";
+      ctx.font = "11px sans-serif";
+      ctx.fillText("Capacitor", mid + 100, circTop + circH / 2 + 30);
+
+      // Wires
+      ctx.strokeStyle = "#777";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(mid - 15, circTop + circH / 2);
+      ctx.lineTo(mid - 75, circTop + circH / 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mid + 15, circTop + circH / 2);
+      ctx.lineTo(mid + 94, circTop + circH / 2);
+      ctx.stroke();
+
+      // Graphs
+      const graphW = width * 0.42;
+      const graphH = height * 0.25;
+      const graphY1 = circTop + circH + 20;
+      const graphY2 = graphY1 + graphH + 15;
+
+      const omega = 2 * Math.PI * frequency * 1000;
+      const C = capacitance * 1e-6;
+      const XL = omega * inductance;
+      const XC = 1 / (omega * C);
+      const maxI = Math.max(amplitude / XL, amplitude / XC, amplitude) * 1.2;
+
+      drawGraph(width * 0.04, graphY1, graphW, graphH, [
+        { data: supplyHistory, color: "#4caf50", label: "V supply" },
+        { data: inductorHistory, color: "#e040fb", label: "I inductor" },
+      ], maxI);
+
+      drawGraph(width * 0.54, graphY1, graphW, graphH, [
+        { data: supplyHistory, color: "#4caf50", label: "V supply" },
+        { data: capacitorHistory, color: "#ff9800", label: "I capacitor" },
+      ], maxI);
+
+      // Info
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(width * 0.05, graphY2, width * 0.9, 45);
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`f = ${(frequency * 1000).toFixed(0)} Hz | XL = ${XL.toFixed(1)} Ω | XC = ${XC.toFixed(1)} Ω | Waveform: ${waveform < 0.5 ? "Sine" : "Square"}`, width / 2, graphY2 + 18);
+      ctx.fillText(`Inductor current lags voltage by 90° | Capacitor current leads voltage by 90°`, width / 2, graphY2 + 35);
     },
     reset() {
       time = 0;
-      voltageHistory = [];
-      inductorCurrentHistory = [];
-      capacitorCurrentHistory = [];
-      totalCurrentHistory = [];
+      inductorCurrent = 0;
+      capacitorCurrent = 0;
+      supplyVoltage = 0;
+      supplyHistory.length = 0;
+      inductorHistory.length = 0;
+      capacitorHistory.length = 0;
     },
     destroy() {},
     getStateDescription(): string {
-      const { xL, xC } = calcReactance();
-      const resonantF = 1 / (2 * Math.PI * Math.sqrt(inductance * (capacitance * 1e-6)));
-      return `AC circuit with f=${frequency}Hz, L=${inductance}H, C=${capacitance}µF, R=${resistance}Ω. ` +
-        `Inductive reactance X_L=${xL.toFixed(1)}Ω, Capacitive reactance X_C=${xC.toFixed(1)}Ω. ` +
-        `Resonant frequency=${resonantF.toFixed(1)}Hz. ` +
-        (Math.abs(xL - xC) < 5 ? "Near resonance — reactances nearly cancel." :
-          xL > xC ? "Inductive: X_L > X_C, net impedance is inductive." :
-          "Capacitive: X_C > X_L, net impedance is capacitive.");
+      const omega = 2 * Math.PI * frequency * 1000;
+      const C = capacitance * 1e-6;
+      const XL = omega * inductance;
+      const XC = 1 / (omega * C);
+      return `AC circuit at ${(frequency * 1000).toFixed(0)}Hz. Inductive reactance XL=${XL.toFixed(1)}Ω, Capacitive reactance XC=${XC.toFixed(1)}Ω. Inductor current lags voltage by 90°, capacitor current leads by 90°. Waveform: ${waveform < 0.5 ? "Sine" : "Square"}.`;
     },
     resize(w: number, h: number) {
       width = w;
@@ -130,176 +293,7 @@ const InductorCapacitor2Factory: SimulationFactory = (): SimulationEngine => {
     },
   };
 
-  function drawCircuitSchematic(y: number, h: number) {
-    const cx = width / 2;
-    const boxW = width * 0.7;
-    const left = cx - boxW / 2;
-    const right = cx + boxW / 2;
-
-    ctx.strokeStyle = "#475569";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(left - 5, y - 5, boxW + 10, h + 10);
-
-    // AC source on left
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 2;
-    const srcX = left + 30;
-    const srcY = y + h / 2;
-    ctx.beginPath();
-    ctx.arc(srcX, srcY, 15, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = "#e2e8f0";
-    ctx.textAlign = "center";
-    ctx.fillText("~", srcX, srcY + 4);
-
-    // Inductor branch (top)
-    const branchTop = y + h * 0.25;
-    const branchBot = y + h * 0.75;
-    const midX = cx;
-
-    // Wire from source to split
-    ctx.beginPath();
-    ctx.moveTo(srcX + 15, srcY);
-    ctx.lineTo(left + 60, srcY);
-    ctx.lineTo(left + 60, branchTop);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(left + 60, srcY);
-    ctx.lineTo(left + 60, branchBot);
-    ctx.stroke();
-
-    // Inductor coil (top branch)
-    ctx.strokeStyle = "#60a5fa";
-    ctx.beginPath();
-    ctx.moveTo(left + 60, branchTop);
-    ctx.lineTo(midX - 40, branchTop);
-    ctx.stroke();
-    for (let i = 0; i < 4; i++) {
-      ctx.beginPath();
-      ctx.arc(midX - 30 + i * 20, branchTop, 8, Math.PI, 0);
-      ctx.stroke();
-    }
-    ctx.beginPath();
-    ctx.moveTo(midX + 40, branchTop);
-    ctx.lineTo(right - 30, branchTop);
-    ctx.stroke();
-
-    ctx.fillStyle = "#60a5fa";
-    ctx.font = "11px sans-serif";
-    ctx.fillText("L (Inductor)", midX, branchTop - 14);
-
-    // Capacitor (bottom branch)
-    ctx.strokeStyle = "#f59e0b";
-    ctx.beginPath();
-    ctx.moveTo(left + 60, branchBot);
-    ctx.lineTo(midX - 8, branchBot);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(midX - 5, branchBot - 12);
-    ctx.lineTo(midX - 5, branchBot + 12);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(midX + 5, branchBot - 12);
-    ctx.lineTo(midX + 5, branchBot + 12);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(midX + 8, branchBot);
-    ctx.lineTo(right - 30, branchBot);
-    ctx.stroke();
-
-    ctx.fillStyle = "#f59e0b";
-    ctx.fillText("C (Capacitor)", midX, branchBot + 24);
-
-    // Join branches on right
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.beginPath();
-    ctx.moveTo(right - 30, branchTop);
-    ctx.lineTo(right - 30, branchBot);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(right - 30, srcY);
-    ctx.lineTo(srcX - 15, srcY);
-    ctx.stroke();
-
-    // Animated current arrows
-    const phase = time * 2 * Math.PI * frequency;
-    const { xL, xC } = calcReactance();
-    const iLnorm = Math.sin(phase) / Math.max(xL, 1);
-    const iCnorm = Math.sin(phase) / Math.max(xC, 1);
-
-    drawCurrentArrow(midX - 50, branchTop, iLnorm > 0 ? 1 : -1, Math.abs(iLnorm), "#60a5fa");
-    drawCurrentArrow(midX - 50, branchBot, iCnorm > 0 ? -1 : 1, Math.abs(iCnorm), "#f59e0b");
-  }
-
-  function drawCurrentArrow(x: number, y: number, dir: number, mag: number, color: string) {
-    const len = 12 * Math.min(mag * 10, 1);
-    if (len < 2) return;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(x + dir * len, y);
-    ctx.lineTo(x - dir * 4, y - 4);
-    ctx.lineTo(x - dir * 4, y + 4);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  function drawWaveforms(top: number, h: number) {
-    const margin = 40;
-    const gw = width - margin * 2;
-    const gh = h;
-    const cy = top + gh / 2;
-
-    // Grid
-    ctx.strokeStyle = "#1e293b";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(margin, top);
-    ctx.lineTo(margin, top + gh);
-    ctx.moveTo(margin, cy);
-    ctx.lineTo(margin + gw, cy);
-    ctx.stroke();
-
-    // Labels
-    ctx.fillStyle = "#64748b";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "right";
-    ctx.fillText("Time →", margin + gw, top + gh - 2);
-
-    // Find max for scaling
-    const allVals = [...voltageHistory, ...inductorCurrentHistory, ...capacitorCurrentHistory];
-    const maxVal = Math.max(1, ...allVals.map(Math.abs)) * 1.2;
-
-    const drawLine = (data: number[], color: string, label: string, labelY: number) => {
-      if (data.length < 2) return;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      for (let i = 0; i < data.length; i++) {
-        const x = margin + (i / historyLen) * gw;
-        const y = cy - (data[i] / maxVal) * (gh / 2) * 0.9;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      ctx.fillStyle = color;
-      ctx.font = "11px sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillText(label, margin + gw + 5, labelY);
-    };
-
-    drawLine(voltageHistory, "#e2e8f0", "V(t)", cy - 30);
-    drawLine(inductorCurrentHistory, "#60a5fa", "I_L(t)", cy - 14);
-    drawLine(capacitorCurrentHistory, "#f59e0b", "I_C(t)", cy + 2);
-    drawLine(totalCurrentHistory, "#10b981", "I_total", cy + 18);
-
-    // Legend
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Voltage & Current Waveforms", width / 2, top + gh + 14);
-  }
+  return engine;
 };
 
-export default InductorCapacitor2Factory;
+export default InductorAndCapacitor2Factory;

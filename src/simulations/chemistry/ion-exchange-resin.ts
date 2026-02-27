@@ -1,14 +1,14 @@
 import { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
-interface Ion {
+interface IonParticle {
   x: number;
   y: number;
   vx: number;
   vy: number;
   type: "Ca" | "Mg" | "Na";
-  radius: number;
-  exchanged: boolean;
+  trapped: boolean;
+  attachedTo: number; // resin index, -1 if free
 }
 
 interface ResinBead {
@@ -28,270 +28,276 @@ const IonExchangeResinFactory: SimulationFactory = (): SimulationEngine => {
   let time = 0;
 
   let flowRate = 1;
-  let ionCount = 15;
-  let resinCapacity = 1; // 0=depleted, 1=full
+  let numParticles = 20;
+  let resinCount = 12;
 
-  let ions: Ion[] = [];
-  let resinBeads: ResinBead[] = [];
-  let releasedNa: Ion[] = [];
+  const ions: IonParticle[] = [];
+  const resins: ResinBead[] = [];
   let exchangeCount = 0;
+  let totalNaReleased = 0;
 
-  const COLORS = {
-    Ca: "#22c55e",
-    Mg: "#a855f7",
-    Na: "#f59e0b",
-  };
-  const LABELS = {
-    Ca: "Ca²⁺",
-    Mg: "Mg²⁺",
-    Na: "Na⁺",
-  };
+  function initResins() {
+    resins.length = 0;
+    const colW = width * 0.5;
+    const colLeft = width * 0.25;
+    const colTop = height * 0.2;
+    const colH = height * 0.55;
 
-  function initResinBeads() {
-    resinBeads = [];
-    const cols = 4;
-    const rows = 5;
-    const regionTop = 0.3;
-    const regionBot = 0.75;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = width * (0.25 + (c / (cols - 1)) * 0.5);
-        const y = height * (regionTop + (r / (rows - 1)) * (regionBot - regionTop));
-        resinBeads.push({
-          x: x + (Math.random() - 0.5) * 20,
-          y: y + (Math.random() - 0.5) * 15,
-          radius: 14 + Math.random() * 4,
-          naCount: 3,
-        });
-      }
-    }
-  }
-
-  function spawnIons() {
-    ions = [];
-    for (let i = 0; i < ionCount; i++) {
-      const type = Math.random() < 0.5 ? "Ca" : "Mg";
-      ions.push({
-        x: width * (0.2 + Math.random() * 0.6),
-        y: height * 0.05 + Math.random() * height * 0.15,
-        vx: (Math.random() - 0.5) * 30,
-        vy: 20 + Math.random() * 20,
-        type,
-        radius: 6,
-        exchanged: false,
+    for (let i = 0; i < resinCount; i++) {
+      const row = Math.floor(i / 3);
+      const col = i % 3;
+      resins.push({
+        x: colLeft + colW * 0.2 + col * colW * 0.3,
+        y: colTop + colH * 0.15 + row * colH * 0.2,
+        radius: 14,
+        naCount: 2,
       });
     }
-    releasedNa = [];
-    exchangeCount = 0;
   }
 
-  return {
+  function spawnIon(): IonParticle {
+    const colLeft = width * 0.25;
+    const colW = width * 0.5;
+    const type = Math.random() < 0.5 ? "Ca" : "Mg";
+    return {
+      x: colLeft + Math.random() * colW,
+      y: height * 0.12,
+      vx: (Math.random() - 0.5) * 20,
+      vy: 15 + Math.random() * 20 * flowRate,
+      type,
+      trapped: false,
+      attachedTo: -1,
+    };
+  }
+
+  function spawnNaIon(rx: number, ry: number): IonParticle {
+    return {
+      x: rx + (Math.random() - 0.5) * 10,
+      y: ry,
+      vx: (Math.random() - 0.5) * 30,
+      vy: 20 + Math.random() * 30,
+      type: "Na",
+      trapped: false,
+      attachedTo: -1,
+    };
+  }
+
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      initResinBeads();
-      spawnIons();
+      engine.reset();
     },
     update(dt: number, params: Record<string, number>) {
-      const newFlowRate = params.flowRate ?? 1;
-      const newIonCount = Math.round(params.ionCount ?? 15);
-      resinCapacity = params.resinCapacity ?? 1;
+      flowRate = params.flowRate ?? 1;
+      numParticles = Math.round(params.numParticles ?? 20);
+      resinCount = Math.round(params.resinCount ?? 12);
 
-      if (newIonCount !== ionCount) {
-        ionCount = newIonCount;
-        spawnIons();
+      time += dt;
+
+      // Spawn new ions
+      const freeHardWater = ions.filter((p) => !p.trapped && (p.type === "Ca" || p.type === "Mg"));
+      if (freeHardWater.length < numParticles && Math.random() < 0.3 * flowRate) {
+        ions.push(spawnIon());
       }
-      flowRate = newFlowRate;
 
-      const dtc = Math.min(dt, 0.05);
-      time += dtc;
+      const colLeft = width * 0.25;
+      const colRight = colLeft + width * 0.5;
+      const colTop = height * 0.15;
+      const colBottom = height * 0.8;
 
-      const containerLeft = width * 0.15;
-      const containerRight = width * 0.85;
+      for (let i = ions.length - 1; i >= 0; i--) {
+        const ion = ions[i];
+        if (ion.trapped) continue;
 
-      // Move ions downward through column
-      for (const ion of ions) {
-        ion.vy += 10 * flowRate * dtc;
-        ion.x += ion.vx * dtc;
-        ion.y += ion.vy * dtc * flowRate;
+        ion.x += ion.vx * dt;
+        ion.y += ion.vy * dt;
 
-        // Brownian motion
-        ion.vx += (Math.random() - 0.5) * 60 * dtc;
-        ion.vy += (Math.random() - 0.5) * 20 * dtc;
+        // Bounce off column walls
+        if (ion.x < colLeft + 8) { ion.x = colLeft + 8; ion.vx = Math.abs(ion.vx); }
+        if (ion.x > colRight - 8) { ion.x = colRight - 8; ion.vx = -Math.abs(ion.vx); }
 
-        // Wall bouncing
-        if (ion.x < containerLeft + ion.radius) { ion.x = containerLeft + ion.radius; ion.vx = Math.abs(ion.vx); }
-        if (ion.x > containerRight - ion.radius) { ion.x = containerRight - ion.radius; ion.vx = -Math.abs(ion.vx); }
+        // Remove if below column
+        if (ion.y > colBottom + 30) {
+          ions.splice(i, 1);
+          continue;
+        }
 
-        // Check collision with resin beads
-        if (!ion.exchanged && (ion.type === "Ca" || ion.type === "Mg")) {
-          for (const bead of resinBeads) {
-            if (bead.naCount <= 0) continue;
-            const dx = ion.x - bead.x;
-            const dy = ion.y - bead.y;
+        // Check collision with resin beads (only Ca/Mg)
+        if (ion.type === "Ca" || ion.type === "Mg") {
+          for (let j = 0; j < resins.length; j++) {
+            const r = resins[j];
+            if (r.naCount <= 0) continue;
+            const dx = ion.x - r.x;
+            const dy = ion.y - r.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < bead.radius + ion.radius + 2) {
-              // Exchange: remove Ca/Mg, release Na
-              ion.exchanged = true;
-              ion.type = "Na";
-              bead.naCount--;
+            if (dist < r.radius + 6) {
+              // Exchange!
+              ion.trapped = true;
+              ion.attachedTo = j;
+              ion.x = r.x + (Math.random() - 0.5) * r.radius;
+              ion.y = r.y + (Math.random() - 0.5) * r.radius;
+              r.naCount--;
               exchangeCount++;
 
-              // Release a sodium ion
-              releasedNa.push({
-                x: bead.x + (Math.random() - 0.5) * 10,
-                y: bead.y + bead.radius,
-                vx: (Math.random() - 0.5) * 40,
-                vy: 30 + Math.random() * 20,
-                type: "Na",
-                radius: 5,
-                exchanged: true,
-              });
+              // Release Na+ ions
+              ions.push(spawnNaIon(r.x, r.y));
+              ions.push(spawnNaIon(r.x, r.y));
+              totalNaReleased += 2;
               break;
             }
           }
         }
-
-        // Reset at bottom
-        if (ion.y > height + 20) {
-          ion.y = -10;
-          ion.x = width * (0.2 + Math.random() * 0.6);
-          ion.vy = 20 + Math.random() * 20;
-          ion.vx = (Math.random() - 0.5) * 30;
-          if (!ion.exchanged) {
-            ion.type = Math.random() < 0.5 ? "Ca" : "Mg";
-          }
-          ion.exchanged = false;
-        }
       }
-
-      // Move released Na ions
-      for (const na of releasedNa) {
-        na.y += na.vy * dtc * flowRate;
-        na.x += na.vx * dtc;
-        if (na.x < containerLeft) na.vx = Math.abs(na.vx);
-        if (na.x > containerRight) na.vx = -Math.abs(na.vx);
-      }
-      releasedNa = releasedNa.filter((n) => n.y < height + 30);
     },
     render() {
-      // Background
-      ctx.fillStyle = "#f0f9ff";
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#1a1a2e");
+      bg.addColorStop(1, "#16213e");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      // Title
-      ctx.fillStyle = "#1e293b";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Ion Exchange Resin — Water Softening", width / 2, 24);
+      ctx.fillText("Ion Exchange Resin — Water Softening", width / 2, 22);
 
-      const containerLeft = width * 0.15;
-      const containerRight = width * 0.85;
-      const containerTop = height * 0.08;
-      const containerBot = height * 0.88;
+      const colLeft = width * 0.25;
+      const colW = width * 0.5;
+      const colTop = height * 0.15;
+      const colH = height * 0.65;
 
-      // Column container
-      ctx.fillStyle = "rgba(186, 230, 253, 0.3)";
-      ctx.fillRect(containerLeft, containerTop, containerRight - containerLeft, containerBot - containerTop);
-      ctx.strokeStyle = "#0284c7";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(containerLeft, containerTop, containerRight - containerLeft, containerBot - containerTop);
+      // Column body
+      ctx.fillStyle = "rgba(200, 230, 255, 0.08)";
+      ctx.fillRect(colLeft, colTop, colW, colH);
+      ctx.strokeStyle = "#4fc3f7";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(colLeft, colTop, colW, colH);
 
       // Labels
-      ctx.fillStyle = "#0284c7";
-      ctx.font = `${Math.max(10, width * 0.014)}px sans-serif`;
+      ctx.fillStyle = "#4fc3f7";
+      ctx.font = "11px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Hard Water In ↓", width / 2, containerTop + 14);
-      ctx.fillText("↓ Soft Water Out", width / 2, containerBot - 4);
+      ctx.fillText("Hard Water In ↓", width / 2, colTop - 5);
+      ctx.fillText("↓ Soft Water Out", width / 2, colTop + colH + 15);
 
-      // Resin beads
-      for (const bead of resinBeads) {
-        const brightness = bead.naCount / 3;
-        ctx.fillStyle = `rgba(251, 146, 60, ${0.3 + brightness * 0.5})`;
+      // Draw resin beads
+      for (let i = 0; i < resins.length; i++) {
+        const r = resins[i];
+        const grad = ctx.createRadialGradient(r.x - 3, r.y - 3, 0, r.x, r.y, r.radius);
+        grad.addColorStop(0, r.naCount > 0 ? "#66bb6a" : "#795548");
+        grad.addColorStop(1, r.naCount > 0 ? "#2e7d32" : "#4e342e");
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(bead.x, bead.y, bead.radius, 0, Math.PI * 2);
+        ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = "#ea580c";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
 
-        // Na count indicator
-        if (bead.naCount > 0) {
-          ctx.fillStyle = "#92400e";
-          ctx.font = "9px sans-serif";
-          ctx.fillText(`Na×${bead.naCount}`, bead.x, bead.y + 3);
+        // Show Na+ count
+        if (r.naCount > 0) {
+          ctx.fillStyle = "#ffeb3b";
+          ctx.font = "bold 9px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`Na⁺×${r.naCount}`, r.x, r.y + 3);
+        } else {
+          ctx.fillStyle = "#ef5350";
+          ctx.font = "bold 9px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("full", r.x, r.y + 3);
         }
       }
 
       // Draw ions
-      const drawIon = (ion: Ion) => {
-        ctx.fillStyle = COLORS[ion.type];
+      for (const ion of ions) {
+        let color = "#ffeb3b";
+        let label = "Na⁺";
+        let radius = 5;
+
+        if (ion.type === "Ca") {
+          color = "#e040fb";
+          label = "Ca²⁺";
+          radius = 6;
+        } else if (ion.type === "Mg") {
+          color = "#42a5f5";
+          label = "Mg²⁺";
+          radius = 5.5;
+        }
+
+        if (ion.trapped) {
+          ctx.globalAlpha = 0.6;
+        }
+
+        ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(ion.x, ion.y, ion.radius, 0, Math.PI * 2);
+        ctx.arc(ion.x, ion.y, radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = "#1e293b";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.fillStyle = "#ffffff";
-        ctx.font = `bold ${ion.radius}px sans-serif`;
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 8px sans-serif";
         ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(ion.type === "Ca" ? "Ca" : ion.type === "Mg" ? "Mg" : "Na", ion.x, ion.y);
-        ctx.textBaseline = "alphabetic";
-      };
+        ctx.fillText(label, ion.x, ion.y - radius - 2);
 
-      for (const ion of ions) drawIon(ion);
-      for (const na of releasedNa) drawIon(na);
-
-      // Legend
-      const legendY = height - 40;
-      ctx.font = `${Math.max(11, width * 0.015)}px sans-serif`;
-      ctx.textAlign = "left";
-      const legendItems = [
-        { color: COLORS.Ca, label: "Ca²⁺ (hard)" },
-        { color: COLORS.Mg, label: "Mg²⁺ (hard)" },
-        { color: COLORS.Na, label: "Na⁺ (soft)" },
-        { color: "#fb923c", label: "Resin bead" },
-      ];
-      let lx = width * 0.1;
-      for (const item of legendItems) {
-        ctx.fillStyle = item.color;
-        ctx.beginPath();
-        ctx.arc(lx, legendY, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#475569";
-        ctx.fillText(item.label, lx + 10, legendY + 4);
-        lx += width * 0.22;
+        ctx.globalAlpha = 1;
       }
 
-      // Exchange counter
-      ctx.fillStyle = "#1e293b";
-      ctx.font = `bold ${Math.max(11, width * 0.015)}px sans-serif`;
-      ctx.textAlign = "right";
-      ctx.fillText(`Exchanges: ${exchangeCount}`, width * 0.9, height - 10);
+      // Legend
+      const legY = colTop + colH + 30;
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "left";
+
+      ctx.fillStyle = "#e040fb";
+      ctx.beginPath();
+      ctx.arc(width * 0.15, legY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ccc";
+      ctx.fillText("Ca²⁺ (calcium)", width * 0.15 + 10, legY + 4);
+
+      ctx.fillStyle = "#42a5f5";
+      ctx.beginPath();
+      ctx.arc(width * 0.42, legY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ccc";
+      ctx.fillText("Mg²⁺ (magnesium)", width * 0.42 + 10, legY + 4);
+
+      ctx.fillStyle = "#ffeb3b";
+      ctx.beginPath();
+      ctx.arc(width * 0.72, legY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ccc";
+      ctx.fillText("Na⁺ (sodium)", width * 0.72 + 10, legY + 4);
+
+      // Stats
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(width * 0.1, legY + 18, width * 0.8, 30);
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`Exchanges: ${exchangeCount} | Na⁺ released: ${totalNaReleased} | Hard water ions removed and replaced with sodium`, width / 2, legY + 37);
     },
     reset() {
       time = 0;
-      initResinBeads();
-      spawnIons();
+      ions.length = 0;
+      exchangeCount = 0;
+      totalNaReleased = 0;
+      initResins();
     },
     destroy() {},
     getStateDescription(): string {
-      const totalNa = resinBeads.reduce((s, b) => s + b.naCount, 0);
-      const maxNa = resinBeads.length * 3;
-      return `Ion exchange resin simulation: ${ionCount} ions flowing through column at rate ${flowRate.toFixed(1)}×. ` +
-        `${exchangeCount} exchanges completed. Resin sodium remaining: ${totalNa}/${maxNa}. ` +
-        `Hard water ions (Ca²⁺, Mg²⁺) are captured by resin beads and replaced with Na⁺ ions.`;
+      const activeResins = resins.filter((r) => r.naCount > 0).length;
+      return `Ion exchange resin simulation: ${exchangeCount} exchanges completed. ${totalNaReleased} Na⁺ ions released. ${activeResins}/${resins.length} resin beads still active. Ca²⁺ and Mg²⁺ ions from hard water are captured by resin beads and replaced with Na⁺ ions, softening the water.`;
     },
     resize(w: number, h: number) {
       width = w;
       height = h;
-      initResinBeads();
+      initResins();
     },
   };
+
+  return engine;
 };
 
 export default IonExchangeResinFactory;

@@ -1,14 +1,13 @@
 import { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
-interface IonParticle {
+interface Ion {
   x: number;
   y: number;
+  charge: number; // +1 or -1
   symbol: string;
-  charge: number;
-  color: string;
   radius: number;
-  placed: boolean;
+  color: string;
 }
 
 const IonModelFactory: SimulationFactory = (): SimulationEngine => {
@@ -18,82 +17,47 @@ const IonModelFactory: SimulationFactory = (): SimulationEngine => {
   let ctx: CanvasRenderingContext2D;
   let width = 0;
   let height = 0;
+  let time = 0;
 
-  let compoundType = 0; // 0=NaCl, 1=MgO, 2=CaCl2, 3=MgF2
-  let showCharges = 1;
+  let compoundType = 0; // 0=NaCl, 1=KCl, 2=MgO, 3=CaF2
+  let gridSize = 5;
   let showLabels = 1;
-  let gridSize = 3; // grid dimension
+  let rotationSpeed = 0.3;
 
-  interface CompoundDef {
-    name: string;
-    formula: string;
-    cation: { symbol: string; charge: number; color: string };
-    anion: { symbol: string; charge: number; color: string };
-    ratio: [number, number]; // cation:anion
-  }
-
-  const compounds: CompoundDef[] = [
-    { name: "Sodium Chloride", formula: "NaCl", cation: { symbol: "Na", charge: 1, color: "#818cf8" }, anion: { symbol: "Cl", charge: -1, color: "#34d399" }, ratio: [1, 1] },
-    { name: "Magnesium Oxide", formula: "MgO", cation: { symbol: "Mg", charge: 2, color: "#f472b6" }, anion: { symbol: "O", charge: -2, color: "#f87171" }, ratio: [1, 1] },
-    { name: "Calcium Chloride", formula: "CaCl₂", cation: { symbol: "Ca", charge: 2, color: "#fbbf24" }, anion: { symbol: "Cl", charge: -1, color: "#34d399" }, ratio: [1, 2] },
-    { name: "Magnesium Fluoride", formula: "MgF₂", cation: { symbol: "Mg", charge: 2, color: "#f472b6" }, anion: { symbol: "F", charge: -1, color: "#38bdf8" }, ratio: [1, 2] },
+  const compounds = [
+    { name: "NaCl", cation: "Na⁺", anion: "Cl⁻", cColor: "#7e57c2", aColor: "#66bb6a", cRadius: 12, aRadius: 16 },
+    { name: "KCl", cation: "K⁺", anion: "Cl⁻", cColor: "#ef5350", aColor: "#66bb6a", cRadius: 14, aRadius: 16 },
+    { name: "MgO", cation: "Mg²⁺", anion: "O²⁻", cColor: "#ff9800", aColor: "#ef5350", cRadius: 10, aRadius: 14 },
+    { name: "CaF₂", cation: "Ca²⁺", anion: "F⁻", cColor: "#42a5f5", aColor: "#ffeb3b", cRadius: 13, aRadius: 11 },
   ];
 
-  let particles: IonParticle[] = [];
-  let animTime = 0;
+  let ions: Ion[] = [];
+  let angle = 0;
 
   function buildLattice() {
-    particles = [];
-    const comp = compounds[compoundType];
-    const spacing = Math.min(width, height) * 0.7 / gridSize;
-    const startX = width / 2 - (gridSize - 1) * spacing / 2;
-    const startY = height / 2 - (gridSize - 1) * spacing / 2;
+    ions = [];
+    const comp = compounds[Math.round(compoundType)] || compounds[0];
+    const n = Math.round(gridSize);
+    const spacing = Math.min(width, height) * 0.7 / n;
+    const offsetX = width / 2 - (n - 1) * spacing / 2;
+    const offsetY = height * 0.45 - (n - 1) * spacing / 2;
 
-    for (let row = 0; row < gridSize; row++) {
-      for (let col = 0; col < gridSize; col++) {
-        const isCation = (row + col) % 2 === 0;
-        // For 1:2 ratios, alternate anions more
-        if (comp.ratio[0] === 1 && comp.ratio[1] === 2) {
-          // Place cation at even positions, anions everywhere else
-          if ((row + col) % 3 === 0) {
-            particles.push({
-              x: startX + col * spacing,
-              y: startY + row * spacing,
-              symbol: comp.cation.symbol,
-              charge: comp.cation.charge,
-              color: comp.cation.color,
-              radius: 22,
-              placed: true,
-            });
-          } else {
-            particles.push({
-              x: startX + col * spacing,
-              y: startY + row * spacing,
-              symbol: comp.anion.symbol,
-              charge: comp.anion.charge,
-              color: comp.anion.color,
-              radius: 18,
-              placed: true,
-            });
-          }
-        } else {
-          // 1:1 ratio — alternating pattern
-          const ion = isCation ? comp.cation : comp.anion;
-          particles.push({
-            x: startX + col * spacing,
-            y: startY + row * spacing,
-            symbol: ion.symbol,
-            charge: ion.charge,
-            color: ion.color,
-            radius: isCation ? 22 : 18,
-            placed: true,
-          });
-        }
+    for (let row = 0; row < n; row++) {
+      for (let col = 0; col < n; col++) {
+        const isPositive = (row + col) % 2 === 0;
+        ions.push({
+          x: offsetX + col * spacing,
+          y: offsetY + row * spacing,
+          charge: isPositive ? 1 : -1,
+          symbol: isPositive ? comp.cation : comp.anion,
+          radius: isPositive ? comp.cRadius : comp.aRadius,
+          color: isPositive ? comp.cColor : comp.aColor,
+        });
       }
     }
   }
 
-  return {
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
@@ -103,125 +67,158 @@ const IonModelFactory: SimulationFactory = (): SimulationEngine => {
       buildLattice();
     },
     update(dt: number, params: Record<string, number>) {
-      const newType = Math.round(params.compoundType ?? 0);
-      const newGrid = Math.max(2, Math.min(6, Math.round(params.gridSize ?? 3)));
-      showCharges = params.showCharges ?? 1;
+      const oldCompound = Math.round(compoundType);
+      const oldGrid = Math.round(gridSize);
+      compoundType = params.compoundType ?? 0;
+      gridSize = params.gridSize ?? 5;
       showLabels = params.showLabels ?? 1;
+      rotationSpeed = params.rotationSpeed ?? 0.3;
 
-      if (newType !== compoundType || newGrid !== gridSize) {
-        compoundType = newType;
-        gridSize = newGrid;
+      if (Math.round(compoundType) !== oldCompound || Math.round(gridSize) !== oldGrid) {
         buildLattice();
       }
 
-      animTime += dt;
+      angle += rotationSpeed * dt;
+      time += dt;
     },
     render() {
-      ctx.fillStyle = "#0f172a";
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#1a1a2e");
+      bg.addColorStop(1, "#16213e");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      const comp = compounds[compoundType];
+      const comp = compounds[Math.round(compoundType)] || compounds[0];
 
-      // Title
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`Ionic Compound Model: ${comp.name} (${comp.formula})`, width / 2, 28);
+      ctx.fillText(`Ionic Crystal Lattice — ${comp.name}`, width / 2, 22);
 
-      // Draw bonds between adjacent particles
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const spacing = Math.min(width, height) * 0.7 / gridSize;
-          if (dist < spacing * 1.2 && particles[i].charge * particles[j].charge < 0) {
-            // Attractive bond
-            ctx.strokeStyle = `rgba(148, 163, 184, ${0.3 + 0.1 * Math.sin(animTime * 2)})`;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([4, 4]);
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-            ctx.setLineDash([]);
-          }
+      // Apply pseudo-3D rotation
+      const cx = width / 2;
+      const cy = height * 0.45;
+      const cosA = Math.cos(angle);
+      const depth = 0.15;
+
+      // Draw bonds first (behind ions)
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.lineWidth = 1;
+      const n = Math.round(gridSize);
+      const spacing = Math.min(width, height) * 0.7 / n;
+
+      for (let i = 0; i < ions.length; i++) {
+        const ion = ions[i];
+        const dx = ion.x - cx;
+        const rx = cx + dx * cosA;
+        const ry = ion.y + dx * depth * Math.sin(angle);
+
+        // Connect to right neighbor
+        if (i + 1 < ions.length && Math.floor(i / n) === Math.floor((i + 1) / n)) {
+          const next = ions[i + 1];
+          const ndx = next.x - cx;
+          const nrx = cx + ndx * cosA;
+          const nry = next.y + ndx * depth * Math.sin(angle);
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(nrx, nry);
+          ctx.stroke();
+        }
+
+        // Connect to bottom neighbor
+        if (i + n < ions.length) {
+          const next = ions[i + n];
+          const ndx = next.x - cx;
+          const nrx = cx + ndx * cosA;
+          const nry = next.y + ndx * depth * Math.sin(angle);
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(nrx, nry);
+          ctx.stroke();
         }
       }
 
-      // Draw particles
-      for (const p of particles) {
+      // Draw ions
+      for (const ion of ions) {
+        const dx = ion.x - cx;
+        const rx = cx + dx * cosA;
+        const ry = ion.y + dx * depth * Math.sin(angle);
+        const scale = 1 + dx * depth * Math.cos(angle) * 0.001;
+        const r = ion.radius * Math.max(0.7, scale);
+
         // Glow
-        const glow = ctx.createRadialGradient(p.x, p.y, p.radius * 0.5, p.x, p.y, p.radius * 1.5);
-        glow.addColorStop(0, p.color);
+        const glow = ctx.createRadialGradient(rx, ry, 0, rx, ry, r * 2);
+        glow.addColorStop(0, ion.color + "40");
         glow.addColorStop(1, "transparent");
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+        ctx.arc(rx, ry, r * 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Body
-        ctx.fillStyle = p.color;
+        // Ion sphere
+        const grad = ctx.createRadialGradient(rx - r * 0.3, ry - r * 0.3, 0, rx, ry, r);
+        grad.addColorStop(0, ion.color);
+        grad.addColorStop(1, "#222");
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.arc(rx, ry, r, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = "#e2e8f0";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
 
-        // Symbol
-        if (showLabels) {
-          ctx.fillStyle = "#ffffff";
-          ctx.font = `bold ${p.radius * 0.7}px sans-serif`;
+        // Highlight
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.beginPath();
+        ctx.arc(rx - r * 0.25, ry - r * 0.25, r * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Label
+        if (showLabels > 0.5) {
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 9px sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText(p.symbol, p.x, p.y);
+          ctx.fillText(ion.symbol, rx, ry);
           ctx.textBaseline = "alphabetic";
-        }
-
-        // Charge
-        if (showCharges) {
-          const chargeStr = p.charge > 0
-            ? (p.charge > 1 ? `${p.charge}+` : "+")
-            : (p.charge < -1 ? `${Math.abs(p.charge)}−` : "−");
-          ctx.fillStyle = p.charge > 0 ? "#fbbf24" : "#f87171";
-          ctx.font = `bold ${p.radius * 0.5}px sans-serif`;
-          ctx.textAlign = "left";
-          ctx.fillText(chargeStr, p.x + p.radius * 0.5, p.y - p.radius * 0.5);
         }
       }
 
-      // Info panel
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = `${Math.max(11, width * 0.015)}px sans-serif`;
-      ctx.textAlign = "center";
-      const infoY = height - 30;
-      ctx.fillText(`Ionic lattice structure — oppositely charged ions attract and form a crystal`, width / 2, infoY);
-
       // Legend
+      const legY = height * 0.82;
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(width * 0.1, legY, width * 0.8, 55);
+
+      ctx.fillStyle = comp.cColor;
+      ctx.beginPath();
+      ctx.arc(width * 0.2, legY + 18, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px sans-serif";
       ctx.textAlign = "left";
-      ctx.font = `${Math.max(10, width * 0.014)}px sans-serif`;
-      const lx = 15;
-      let ly = height - 70;
-      ctx.fillStyle = comp.cation.color;
-      ctx.fillText(`● ${comp.cation.symbol}${comp.cation.charge > 0 ? "⁺".repeat(comp.cation.charge) : ""} (cation)`, lx, ly);
-      ly += 18;
-      ctx.fillStyle = comp.anion.color;
-      ctx.fillText(`● ${comp.anion.symbol}${Math.abs(comp.anion.charge) > 1 ? "²" : ""}⁻ (anion)`, lx, ly);
+      ctx.fillText(`${comp.cation} (cation)`, width * 0.2 + 14, legY + 22);
+
+      ctx.fillStyle = comp.aColor;
+      ctx.beginPath();
+      ctx.arc(width * 0.55, legY + 18, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#e0e0e0";
+      ctx.fillText(`${comp.anion} (anion)`, width * 0.55 + 14, legY + 22);
+
+      ctx.fillStyle = "#aaa";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Each ion is surrounded by oppositely charged neighbors — this is the basis of ionic crystal structure", width / 2, legY + 48);
     },
     reset() {
-      animTime = 0;
+      time = 0;
+      angle = 0;
       buildLattice();
     },
     destroy() {},
     getStateDescription(): string {
-      const comp = compounds[compoundType];
-      const totalCations = particles.filter((p) => p.charge > 0).length;
-      const totalAnions = particles.filter((p) => p.charge < 0).length;
-      return `Ionic compound model: ${comp.name} (${comp.formula}). ` +
-        `${gridSize}×${gridSize} lattice with ${totalCations} cations and ${totalAnions} anions. ` +
-        `Cation: ${comp.cation.symbol}${"⁺".repeat(comp.cation.charge)}, Anion: ${comp.anion.symbol} with charge ${comp.anion.charge}. ` +
-        `Ionic bonds form due to electrostatic attraction between oppositely charged ions.`;
+      const comp = compounds[Math.round(compoundType)] || compounds[0];
+      const n = Math.round(gridSize);
+      return `Ionic lattice model of ${comp.name}: ${n}×${n} grid with alternating ${comp.cation} and ${comp.anion} ions. Each cation is surrounded by anions and vice versa, held together by electrostatic attraction. This regular arrangement minimizes energy and is characteristic of ionic crystals.`;
     },
     resize(w: number, h: number) {
       width = w;
@@ -229,6 +226,8 @@ const IonModelFactory: SimulationFactory = (): SimulationEngine => {
       buildLattice();
     },
   };
+
+  return engine;
 };
 
 export default IonModelFactory;

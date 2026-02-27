@@ -3,9 +3,20 @@ import { getSimConfig } from "../registry";
 
 interface Electron {
   angle: number;
-  orbitRadius: number;
+  shell: number;
   speed: number;
-  transferProgress: number; // 0=on atom1, 1=on atom2
+  transferring: boolean;
+  transferT: number;
+}
+
+interface Atom {
+  x: number;
+  y: number;
+  symbol: string;
+  protons: number;
+  electrons: Electron[];
+  shellConfig: number[];
+  color: string;
 }
 
 const IonicBond2Factory: SimulationFactory = (): SimulationEngine => {
@@ -17,332 +28,299 @@ const IonicBond2Factory: SimulationFactory = (): SimulationEngine => {
   let height = 0;
   let time = 0;
 
-  // Parameters
-  let compoundIdx = 0; // 0=NaCl, 1=LiCl, 2=MgO, 3=CaCl2
+  let compoundType = 0; // 0=NaCl, 1=LiCl, 2=NaF, 3=MgO
   let showSymbols = 1;
-  let animating = false;
-  let animProgress = 0; // 0=separated, 1=bonded
+  let ionize = 0;
 
-  interface CompoundDef {
-    name: string;
-    formula: string;
-    metal: { symbol: string; protons: number; color: string; valence: number };
-    nonmetal: { symbol: string; protons: number; color: string; valence: number; needed: number };
-    electronsTransferred: number;
-  }
-
-  const compounds: CompoundDef[] = [
+  const compounds = [
     {
-      name: "Sodium Chloride",
-      formula: "NaCl",
-      metal: { symbol: "Na", protons: 11, color: "#818cf8", valence: 1 },
-      nonmetal: { symbol: "Cl", protons: 17, color: "#4ade80", valence: 7, needed: 1 },
-      electronsTransferred: 1,
+      name: "NaCl",
+      metal: { symbol: "Na", protons: 11, shells: [2, 8, 1], color: "#7e57c2" },
+      nonmetal: { symbol: "Cl", protons: 17, shells: [2, 8, 7], color: "#66bb6a" },
+      transferCount: 1,
     },
     {
-      name: "Lithium Chloride",
-      formula: "LiCl",
-      metal: { symbol: "Li", protons: 3, color: "#f472b6", valence: 1 },
-      nonmetal: { symbol: "Cl", protons: 17, color: "#4ade80", valence: 7, needed: 1 },
-      electronsTransferred: 1,
+      name: "LiCl",
+      metal: { symbol: "Li", protons: 3, shells: [2, 1], color: "#ef5350" },
+      nonmetal: { symbol: "Cl", protons: 17, shells: [2, 8, 7], color: "#66bb6a" },
+      transferCount: 1,
     },
     {
-      name: "Magnesium Oxide",
-      formula: "MgO",
-      metal: { symbol: "Mg", protons: 12, color: "#fbbf24", valence: 2 },
-      nonmetal: { symbol: "O", protons: 8, color: "#f87171", valence: 6, needed: 2 },
-      electronsTransferred: 2,
+      name: "NaF",
+      metal: { symbol: "Na", protons: 11, shells: [2, 8, 1], color: "#7e57c2" },
+      nonmetal: { symbol: "F", protons: 9, shells: [2, 7], color: "#ffeb3b" },
+      transferCount: 1,
     },
     {
-      name: "Calcium Chloride",
-      formula: "CaCl₂",
-      metal: { symbol: "Ca", protons: 20, color: "#22d3ee", valence: 2 },
-      nonmetal: { symbol: "Cl", protons: 17, color: "#4ade80", valence: 7, needed: 1 },
-      electronsTransferred: 2,
+      name: "MgO",
+      metal: { symbol: "Mg", protons: 12, shells: [2, 8, 2], color: "#ff9800" },
+      nonmetal: { symbol: "O", protons: 8, shells: [2, 6], color: "#ef5350" },
+      transferCount: 2,
     },
   ];
 
-  let electrons: Electron[] = [];
+  let metalAtom: Atom;
+  let nonmetalAtom: Atom;
+  let ionized = false;
+  let ionizeProgress = 0;
+  let bondFormed = false;
 
-  function initElectrons() {
-    electrons = [];
-    const comp = compounds[compoundIdx];
-    for (let i = 0; i < comp.electronsTransferred; i++) {
-      electrons.push({
-        angle: (i / comp.electronsTransferred) * Math.PI * 2 + Math.PI,
-        orbitRadius: 28 + i * 6,
-        speed: 2 + Math.random(),
-        transferProgress: 0,
-      });
+  function createAtom(data: { symbol: string; protons: number; shells: number[]; color: string }, x: number): Atom {
+    const electrons: Electron[] = [];
+    for (let s = 0; s < data.shells.length; s++) {
+      for (let e = 0; e < data.shells[s]; e++) {
+        electrons.push({
+          angle: (e / data.shells[s]) * Math.PI * 2 + Math.random() * 0.3,
+          shell: s,
+          speed: 1.5 + Math.random() * 0.5,
+          transferring: false,
+          transferT: 0,
+        });
+      }
     }
+    return { x, y: height * 0.4, symbol: data.symbol, protons: data.protons, electrons, shellConfig: [...data.shells], color: data.color };
   }
 
-  return {
+  function initAtoms() {
+    const comp = compounds[Math.round(compoundType)] || compounds[0];
+    metalAtom = createAtom(comp.metal, width * 0.3);
+    nonmetalAtom = createAtom(comp.nonmetal, width * 0.7);
+    ionized = false;
+    ionizeProgress = 0;
+    bondFormed = false;
+  }
+
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      initElectrons();
+      initAtoms();
     },
     update(dt: number, params: Record<string, number>) {
-      const newIdx = Math.round(params.compoundIdx ?? 0);
+      const oldComp = Math.round(compoundType);
+      compoundType = params.compoundType ?? 0;
       showSymbols = params.showSymbols ?? 1;
+      ionize = params.ionize ?? 0;
 
-      if (newIdx !== compoundIdx) {
-        compoundIdx = newIdx;
-        animProgress = 0;
-        animating = false;
-        initElectrons();
+      if (Math.round(compoundType) !== oldComp) {
+        initAtoms();
       }
 
-      const dtc = Math.min(dt, 0.05);
-      time += dtc;
+      time += dt;
 
-      // Auto-animate the transfer
-      if (animProgress < 1) {
-        animProgress += dtc * 0.3;
-        if (animProgress > 1) animProgress = 1;
+      // Handle ionization animation
+      if (ionize > 0.5 && !ionized) {
+        ionizeProgress = Math.min(1, ionizeProgress + dt * 0.8);
+        if (ionizeProgress >= 1) {
+          ionized = true;
+          // Transfer electrons
+          const comp = compounds[Math.round(compoundType)] || compounds[0];
+          const toTransfer = comp.transferCount;
+          let transferred = 0;
+          for (let i = metalAtom.electrons.length - 1; i >= 0 && transferred < toTransfer; i--) {
+            const e = metalAtom.electrons[i];
+            if (e.shell === metalAtom.shellConfig.length - 1) {
+              metalAtom.electrons.splice(i, 1);
+              nonmetalAtom.electrons.push({
+                angle: Math.random() * Math.PI * 2,
+                shell: nonmetalAtom.shellConfig.length - 1,
+                speed: 1.5 + Math.random() * 0.5,
+                transferring: false,
+                transferT: 0,
+              });
+              transferred++;
+            }
+          }
+          bondFormed = true;
+        }
+      } else if (ionize <= 0.5 && ionized) {
+        initAtoms();
       }
 
-      // Update electron transfer progress
-      for (const e of electrons) {
-        e.angle += e.speed * dtc;
-        e.transferProgress = animProgress;
-      }
-    },
-    render() {
-      ctx.fillStyle = "#0f172a";
-      ctx.fillRect(0, 0, width, height);
-
-      const comp = compounds[compoundIdx];
-
-      // Title
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.fillText(`Ionic Bond Formation: ${comp.name} (${comp.formula})`, width / 2, 26);
-
-      const cy = height * 0.45;
-      const atomSep = width * 0.3;
-      const metalX = width / 2 - atomSep / 2;
-      const nonmetalX = width / 2 + atomSep / 2;
-
-      // Draw atoms
-      drawAtom(metalX, cy, comp.metal, true);
-      drawAtom(nonmetalX, cy, comp.nonmetal, false);
-
-      // Draw transferring electrons
-      for (const e of electrons) {
-        const fromX = metalX;
-        const toX = nonmetalX;
-        const progress = e.transferProgress;
-
-        // Position interpolates from metal to nonmetal orbit
-        const centerX = fromX + (toX - fromX) * progress;
-        const orbitR = e.orbitRadius;
-        const ex = centerX + orbitR * Math.cos(e.angle);
-        const ey = cy + orbitR * Math.sin(e.angle);
-
-        // Electron
-        ctx.fillStyle = "#fbbf24";
-        ctx.beginPath();
-        ctx.arc(ex, ey, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-
-        // Trail
-        if (progress > 0 && progress < 1) {
-          ctx.strokeStyle = "rgba(251, 191, 36, 0.3)";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(centerX, cy, orbitR, e.angle - 0.5, e.angle);
-          ctx.stroke();
+      // Move atoms closer when bonded
+      if (bondFormed) {
+        const targetSep = width * 0.12;
+        const currentSep = nonmetalAtom.x - metalAtom.x;
+        if (currentSep > targetSep) {
+          metalAtom.x += 30 * dt;
+          nonmetalAtom.x -= 30 * dt;
         }
       }
 
-      // Arrow showing electron transfer
-      if (animProgress > 0.1) {
-        const arrowY = cy - 60;
-        ctx.strokeStyle = `rgba(251, 191, 36, ${Math.min(animProgress, 0.7)})`;
-        ctx.lineWidth = 2;
+      // Orbit electrons
+      for (const atom of [metalAtom, nonmetalAtom]) {
+        for (const e of atom.electrons) {
+          e.angle += e.speed * dt;
+        }
+      }
+    },
+    render() {
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#1a1a2e");
+      bg.addColorStop(1, "#16213e");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      const comp = compounds[Math.round(compoundType)] || compounds[0];
+
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`Ionic Bond Formation — ${comp.name}`, width / 2, 22);
+
+      // Draw atom
+      const drawAtom = (atom: Atom, chargeLabel: string) => {
+        // Nucleus
+        const grad = ctx.createRadialGradient(atom.x - 3, atom.y - 3, 0, atom.x, atom.y, 16);
+        grad.addColorStop(0, atom.color);
+        grad.addColorStop(1, "#333");
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.moveTo(metalX + 30, arrowY);
-        ctx.lineTo(nonmetalX - 30, arrowY);
-        ctx.stroke();
-        // Arrowhead
-        ctx.fillStyle = `rgba(251, 191, 36, ${Math.min(animProgress, 0.7)})`;
-        ctx.beginPath();
-        ctx.moveTo(nonmetalX - 30, arrowY);
-        ctx.lineTo(nonmetalX - 38, arrowY - 5);
-        ctx.lineTo(nonmetalX - 38, arrowY + 5);
-        ctx.closePath();
+        ctx.arc(atom.x, atom.y, 16, 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${atom.protons}+`, atom.x, atom.y);
+        ctx.textBaseline = "alphabetic";
+
+        // Electron shells
+        const shellRadii = [28, 44, 60, 76];
+        for (let s = 0; s < atom.shellConfig.length; s++) {
+          ctx.strokeStyle = "rgba(255,255,255,0.15)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(atom.x, atom.y, shellRadii[s], 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Electrons
+        for (const e of atom.electrons) {
+          const r = shellRadii[e.shell] || shellRadii[0];
+          const ex = atom.x + r * Math.cos(e.angle);
+          const ey = atom.y + r * Math.sin(e.angle);
+
+          ctx.fillStyle = "#42a5f5";
+          ctx.beginPath();
+          ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "rgba(66, 165, 245, 0.3)";
+          ctx.beginPath();
+          ctx.arc(ex, ey, 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Symbol and charge
+        if (showSymbols > 0.5) {
+          ctx.fillStyle = "#e0e0e0";
+          ctx.font = "bold 14px sans-serif";
+          ctx.textAlign = "center";
+          const maxShell = shellRadii[atom.shellConfig.length - 1] || 60;
+          ctx.fillText(atom.symbol, atom.x, atom.y - maxShell - 12);
+          if (ionized) {
+            ctx.fillStyle = "#ffeb3b";
+            ctx.font = "12px sans-serif";
+            ctx.fillText(chargeLabel, atom.x, atom.y - maxShell - 26);
+          }
+        }
+      };
+
+      // Compute charge labels
+      const metalCharge = ionized ? `${comp.transferCount}+` : "";
+      const nonmetalCharge = ionized ? `${comp.transferCount}−` : "";
+
+      drawAtom(metalAtom, metalCharge);
+      drawAtom(nonmetalAtom, nonmetalCharge);
+
+      // Transfer animation
+      if (ionizeProgress > 0 && ionizeProgress < 1) {
+        const startX = metalAtom.x + 60;
+        const endX = nonmetalAtom.x - 60;
+        const transferX = startX + (endX - startX) * ionizeProgress;
+        const transferY = metalAtom.y - 30 * Math.sin(ionizeProgress * Math.PI);
+
+        for (let i = 0; i < comp.transferCount; i++) {
+          ctx.fillStyle = "#ffeb3b";
+          ctx.beginPath();
+          ctx.arc(transferX + i * 8, transferY, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "rgba(255, 235, 59, 0.4)";
+          ctx.beginPath();
+          ctx.arc(transferX + i * 8, transferY, 10, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = "#ffeb3b";
         ctx.font = "11px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText(`${comp.electronsTransferred}e⁻ transfer`, width / 2, arrowY - 8);
+        ctx.fillText(`e⁻ transfer ×${comp.transferCount}`, transferX, transferY - 18);
       }
 
-      // Charge labels after transfer
-      if (animProgress > 0.8) {
-        ctx.font = `bold ${Math.max(14, width * 0.02)}px sans-serif`;
+      // Bond indicator
+      if (bondFormed) {
+        ctx.strokeStyle = "rgba(255, 235, 59, 0.4)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(metalAtom.x + 18, metalAtom.y);
+        ctx.lineTo(nonmetalAtom.x - 18, nonmetalAtom.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#4caf50";
+        ctx.font = "bold 13px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillStyle = "#60a5fa";
-        ctx.fillText(`${comp.metal.symbol}${comp.electronsTransferred > 1 ? comp.electronsTransferred : ""}⁺`, metalX, cy + 55);
-        ctx.fillStyle = "#f87171";
-        const anionCharge = comp.nonmetal.needed > 1 ? comp.nonmetal.needed : "";
-        ctx.fillText(`${comp.nonmetal.symbol}${anionCharge}⁻`, nonmetalX, cy + 55);
+        ctx.fillText("Ionic Bond Formed!", width / 2, height * 0.72);
       }
 
-      // Energy diagram at bottom
-      drawEnergyDiagram();
+      // Info
+      const infoY = height * 0.78;
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(width * 0.05, infoY, width * 0.9, 65);
 
-      // Info text
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = `${Math.max(10, width * 0.014)}px sans-serif`;
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Metal atoms lose electrons → cations | Nonmetals gain electrons → anions", width / 2, height - 12);
+      if (!ionized) {
+        ctx.fillText(`${comp.metal.symbol}: ${comp.metal.shells.join(",")} electrons | ${comp.nonmetal.symbol}: ${comp.nonmetal.shells.join(",")} electrons`, width / 2, infoY + 18);
+        ctx.fillStyle = "#aaa";
+        ctx.fillText(`Toggle "Ionize" to transfer ${comp.transferCount} electron(s) from ${comp.metal.symbol} to ${comp.nonmetal.symbol}`, width / 2, infoY + 38);
+      } else {
+        ctx.fillText(`${comp.metal.symbol}${metalCharge}: lost ${comp.transferCount} e⁻ → cation | ${comp.nonmetal.symbol}${nonmetalCharge}: gained ${comp.transferCount} e⁻ → anion`, width / 2, infoY + 18);
+        ctx.fillStyle = "#aaa";
+        ctx.fillText("The electrostatic attraction between cation and anion forms the ionic bond", width / 2, infoY + 38);
+      }
+      ctx.fillStyle = "#888";
+      ctx.fillText("Metal atoms lose valence electrons; nonmetal atoms gain them to achieve stable octets", width / 2, infoY + 55);
     },
     reset() {
       time = 0;
-      animProgress = 0;
-      animating = false;
-      initElectrons();
+      initAtoms();
     },
     destroy() {},
     getStateDescription(): string {
-      const comp = compounds[compoundIdx];
-      const phase = animProgress < 0.3 ? "separated atoms" :
-        animProgress < 0.7 ? "electron transfer in progress" : "ionic bond formed";
-      return `Ionic bond formation: ${comp.name} (${comp.formula}). Phase: ${phase}. ` +
-        `${comp.metal.symbol} loses ${comp.electronsTransferred} electron(s) to become ${comp.metal.symbol}⁺. ` +
-        `${comp.nonmetal.symbol} gains electron(s) to become ${comp.nonmetal.symbol}⁻. ` +
-        `The resulting electrostatic attraction between cation and anion forms the ionic bond.`;
+      const comp = compounds[Math.round(compoundType)] || compounds[0];
+      if (!ionized) {
+        return `Ionic bond formation for ${comp.name}: ${comp.metal.symbol} (${comp.metal.shells.join(",")}) and ${comp.nonmetal.symbol} (${comp.nonmetal.shells.join(",")}). Ready for electron transfer. ${comp.metal.symbol} will lose ${comp.transferCount} electron(s) to ${comp.nonmetal.symbol}.`;
+      }
+      return `Ionic bond formed in ${comp.name}: ${comp.metal.symbol}⁺ (cation) lost ${comp.transferCount} electron(s), ${comp.nonmetal.symbol}⁻ (anion) gained them. The oppositely charged ions attract each other through electrostatic force, forming the ionic bond.`;
     },
     resize(w: number, h: number) {
       width = w;
       height = h;
+      initAtoms();
     },
   };
 
-  function drawAtom(x: number, y: number, atom: { symbol: string; color: string; valence: number }, isMetal: boolean) {
-    const r = 30;
-
-    // Electron shells (faint)
-    ctx.strokeStyle = `${atom.color}30`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(x, y, r + 10, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Nucleus
-    const grad = ctx.createRadialGradient(x - 3, y - 3, 2, x, y, r);
-    grad.addColorStop(0, atom.color);
-    grad.addColorStop(1, atom.color + "80");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Symbol
-    if (showSymbols) {
-      ctx.fillStyle = "#ffffff";
-      ctx.font = `bold ${r * 0.7}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(atom.symbol, x, y);
-      ctx.textBaseline = "alphabetic";
-    }
-
-    // Valence electrons (dots on outer shell)
-    const shellR = r + 10;
-    const numE = atom.valence;
-    const startAngle = isMetal ? Math.PI : 0;
-    for (let i = 0; i < numE; i++) {
-      const angle = startAngle + (i / numE) * Math.PI * 2;
-      if (isMetal && animProgress > 0.5) continue; // electrons transferred away
-      if (!isMetal && animProgress > 0.8) {
-        // Show gained electrons too
-      }
-      ctx.fillStyle = "#fbbf24";
-      ctx.beginPath();
-      ctx.arc(x + shellR * Math.cos(angle), y + shellR * Math.sin(angle), 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Label below
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(isMetal ? "Metal" : "Nonmetal", x, y + r + 28);
-  }
-
-  function drawEnergyDiagram() {
-    const gx = width * 0.15;
-    const gy = height * 0.72;
-    const gw = width * 0.7;
-    const gh = height * 0.18;
-
-    ctx.fillStyle = "#111827";
-    ctx.fillRect(gx, gy, gw, gh);
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(gx, gy, gw, gh);
-
-    // Energy level diagram
-    const midY = gy + gh / 2;
-    const topY = gy + 10;
-    const botY = gy + gh - 10;
-
-    // Before: separated atoms (higher energy)
-    const beforeX = gx + gw * 0.2;
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(beforeX - 30, topY + 10);
-    ctx.lineTo(beforeX + 30, topY + 10);
-    ctx.stroke();
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Separated atoms", beforeX, topY + 24);
-
-    // After: ionic compound (lower energy)
-    const afterX = gx + gw * 0.8;
-    ctx.strokeStyle = "#10b981";
-    ctx.beginPath();
-    ctx.moveTo(afterX - 30, botY - 10);
-    ctx.lineTo(afterX + 30, botY - 10);
-    ctx.stroke();
-    ctx.fillStyle = "#10b981";
-    ctx.fillText("Ionic compound", afterX, botY + 4);
-
-    // Arrow
-    const arrowProgress = Math.min(animProgress * 1.2, 1);
-    const curX = beforeX + (afterX - beforeX) * arrowProgress;
-    const curY = topY + 10 + (botY - 10 - topY - 10) * arrowProgress;
-    ctx.strokeStyle = "#fbbf24";
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 3]);
-    ctx.beginPath();
-    ctx.moveTo(beforeX, topY + 10);
-    ctx.lineTo(curX, curY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // ΔE label
-    ctx.fillStyle = "#f87171";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("← ΔE (energy released)", gx + gw * 0.4, midY);
-    ctx.fillText("Energy →", gx + 5, gy + 12);
-  }
+  return engine;
 };
 
 export default IonicBond2Factory;

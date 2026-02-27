@@ -10,75 +10,330 @@ const LatitudeOfPolarisFactory: SimulationFactory = (): SimulationEngine => {
   let height = 0;
   let time = 0;
 
-  let latitude = 40; // degrees N
-  let showAngleLines = 1;
-  let rotation = 0; // Earth rotation for visual
+  let latitude = 45; // degrees
+  let showGrid = 1;
+  let showAngles = 1;
 
-  // Stars for background
-  let stars: { x: number; y: number; brightness: number }[] = [];
-
-  function generateStars() {
-    stars = [];
-    for (let i = 0; i < 100; i++) {
-      stars.push({
-        x: Math.random(),
-        y: Math.random(),
-        brightness: 0.3 + Math.random() * 0.7,
-      });
-    }
-  }
-
-  return {
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      generateStars();
     },
     update(dt: number, params: Record<string, number>) {
-      latitude = params.latitude ?? 40;
-      showAngleLines = params.showAngleLines ?? 1;
+      latitude = params.latitude ?? 45;
+      showGrid = params.showGrid ?? 1;
+      showAngles = params.showAngles ?? 1;
       time += dt;
-      rotation += dt * 0.3;
     },
     render() {
-      ctx.fillStyle = "#0a0a1a";
+      ctx.clearRect(0, 0, width, height);
+
+      // Night sky background
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#050520");
+      bg.addColorStop(0.6, "#0a0a30");
+      bg.addColorStop(1, "#1a3a1a");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      // Title
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
+      // Stars
+      ctx.fillStyle = "rgba(255,255,255,0.4)";
+      for (let i = 0; i < 80; i++) {
+        const sx = (Math.sin(i * 127.1 + 311.7) * 0.5 + 0.5) * width;
+        const sy = (Math.sin(i * 269.5 + 183.3) * 0.5 + 0.5) * height * 0.65;
+        const sr = 0.3 + Math.random() * 0.7;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Latitude of Polaris (North Star)", width / 2, 24);
+      ctx.fillText("Altitude of Polaris = Observer's Latitude", width / 2, 22);
 
-      // Left: Earth diagram
-      const earthCx = width * 0.3;
-      const earthCy = height * 0.5;
-      const earthR = Math.min(width * 0.2, height * 0.28);
-      drawEarthDiagram(earthCx, earthCy, earthR);
+      // === LEFT PANEL: Observer's sky view ===
+      const panelW = width * 0.48;
+      const skyViewX = width * 0.02;
+      const skyViewCY = height * 0.5;
 
-      // Right: Observer's sky view
-      const skyCx = width * 0.72;
-      const skyCy = height * 0.5;
-      const skyR = Math.min(width * 0.2, height * 0.28);
-      drawSkyView(skyCx, skyCy, skyR);
+      // Ground
+      const groundY = height * 0.7;
+      ctx.fillStyle = "#1a3a1a";
+      ctx.fillRect(skyViewX, groundY, panelW, height - groundY);
+      ctx.strokeStyle = "#2e7d32";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(skyViewX, groundY);
+      ctx.lineTo(skyViewX + panelW, groundY);
+      ctx.stroke();
+
+      // Horizon label
+      ctx.fillStyle = "#4caf50";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Horizon", skyViewX + 5, groundY + 15);
+
+      // Observer
+      const obsX = skyViewX + panelW * 0.3;
+      const obsY = groundY;
+
+      // Observer figure
+      ctx.fillStyle = "#ffcc80";
+      ctx.beginPath();
+      ctx.arc(obsX, obsY - 25, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#ffcc80";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(obsX, obsY - 17);
+      ctx.lineTo(obsX, obsY - 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(obsX, obsY - 2);
+      ctx.lineTo(obsX - 6, obsY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(obsX, obsY - 2);
+      ctx.lineTo(obsX + 6, obsY);
+      ctx.stroke();
+
+      // Zenith line
+      ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      ctx.setLineDash([3, 5]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(obsX, obsY - 30);
+      ctx.lineTo(obsX, height * 0.08);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#aaa";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Zenith", obsX, height * 0.07);
+
+      // Polaris position
+      const altRad = (latitude * Math.PI) / 180;
+      const polarisAngle = Math.PI / 2 - altRad; // from vertical
+      const lineLen = groundY - height * 0.1;
+
+      // Line of sight to Polaris
+      const polarisEndX = obsX + lineLen * Math.sin(polarisAngle);
+      const polarisEndY = obsY - 30 - lineLen * Math.cos(polarisAngle);
+
+      ctx.strokeStyle = "#ffeb3b";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(obsX, obsY - 30);
+      ctx.lineTo(polarisEndX, Math.max(polarisEndY, height * 0.05));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Polaris star
+      const starX = polarisEndX;
+      const starY = Math.max(polarisEndY, height * 0.05);
+      ctx.fillStyle = "#ffeb3b";
+      ctx.beginPath();
+      ctx.arc(starX, starY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Star glow
+      const starGlow = ctx.createRadialGradient(starX, starY, 0, starX, starY, 15);
+      starGlow.addColorStop(0, "rgba(255, 235, 59, 0.4)");
+      starGlow.addColorStop(1, "transparent");
+      ctx.fillStyle = starGlow;
+      ctx.beginPath();
+      ctx.arc(starX, starY, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffeb3b";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Polaris ★", starX + 10, starY + 4);
+
+      // Altitude angle arc
+      if (showAngles > 0.5) {
+        ctx.strokeStyle = "#e040fb";
+        ctx.lineWidth = 2;
+        const arcR = 50;
+        ctx.beginPath();
+        // Arc from horizon to line of sight
+        const horizonAngle = 0;
+        ctx.arc(obsX, obsY - 30, arcR, -Math.PI / 2, -Math.PI / 2 + altRad, false);
+        ctx.stroke();
+
+        // Angle label
+        const midAngle = -Math.PI / 2 + altRad / 2;
+        ctx.fillStyle = "#e040fb";
+        ctx.font = "bold 13px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`${latitude.toFixed(1)}°`, obsX + (arcR + 18) * Math.cos(midAngle), obsY - 30 + (arcR + 18) * Math.sin(midAngle));
+
+        // Horizontal reference line
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(obsX, obsY - 30);
+        ctx.lineTo(obsX + arcR + 30, obsY - 30);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#ccc";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Observer's Sky View", skyViewX + panelW / 2, height * 0.04 + 30);
+
+      // === RIGHT PANEL: Earth diagram ===
+      const earthCX = width * 0.75;
+      const earthCY = height * 0.45;
+      const earthR = Math.min(width * 0.18, height * 0.28);
+
+      // Earth
+      const earthGrad = ctx.createRadialGradient(earthCX - earthR * 0.2, earthCY - earthR * 0.2, 0, earthCX, earthCY, earthR);
+      earthGrad.addColorStop(0, "#1565c0");
+      earthGrad.addColorStop(0.5, "#0d47a1");
+      earthGrad.addColorStop(1, "#01579b");
+      ctx.fillStyle = earthGrad;
+      ctx.beginPath();
+      ctx.arc(earthCX, earthCY, earthR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#42a5f5";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Earth grid
+      if (showGrid > 0.5) {
+        ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        ctx.lineWidth = 0.5;
+        // Latitude lines
+        for (let lat = -60; lat <= 60; lat += 30) {
+          const r = (lat * Math.PI) / 180;
+          const y = earthCY - earthR * Math.sin(r);
+          const xW = earthR * Math.cos(r);
+          ctx.beginPath();
+          ctx.ellipse(earthCX, y, xW, xW * 0.1, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        // Equator
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.beginPath();
+        ctx.ellipse(earthCX, earthCY, earthR, earthR * 0.1, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Earth axis
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(earthCX, earthCY - earthR - 25);
+      ctx.lineTo(earthCX, earthCY + earthR + 25);
+      ctx.stroke();
+
+      // N and S labels
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("N", earthCX, earthCY - earthR - 30);
+      ctx.fillText("S", earthCX, earthCY + earthR + 35);
+
+      // Observer on Earth
+      const obsAngle = ((90 - latitude) * Math.PI) / 180;
+      const obsEX = earthCX + earthR * Math.sin(obsAngle) * 0.0;
+      const obsEY = earthCY - earthR * Math.cos(obsAngle);
+      const obsSurfX = earthCX + earthR * Math.sin((90 - latitude) * Math.PI / 180);
+      const obsSurfY = earthCY - earthR * Math.cos((90 - latitude) * Math.PI / 180);
+
+      // Actually place on right side of earth
+      const latRad = (latitude * Math.PI) / 180;
+      const osx = earthCX + earthR * Math.cos(latRad);
+      const osy = earthCY - earthR * Math.sin(latRad);
+
+      // Observer dot
+      ctx.fillStyle = "#ff9800";
+      ctx.beginPath();
+      ctx.arc(osx, osy, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ff9800";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Observer", osx + 8, osy + 4);
+
+      // Line to Polaris (upward, parallel to axis since Polaris is very far)
+      ctx.strokeStyle = "#ffeb3b";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(osx, osy);
+      ctx.lineTo(osx, osy - earthR * 1.5);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // The line to Polaris should be parallel to Earth's axis
+      ctx.strokeStyle = "rgba(255, 235, 59, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(osx, osy);
+      ctx.lineTo(earthCX, earthCY - earthR - 25);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Horizon line (tangent at observer's position)
+      const tangentAngle = latRad + Math.PI / 2;
+      const tangentLen = earthR * 0.7;
+      ctx.strokeStyle = "#4caf50";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(osx - tangentLen * Math.cos(tangentAngle), osy + tangentLen * Math.sin(tangentAngle));
+      ctx.lineTo(osx + tangentLen * Math.cos(tangentAngle), osy - tangentLen * Math.sin(tangentAngle));
+      ctx.stroke();
+
+      // Latitude angle at center
+      if (showAngles > 0.5) {
+        ctx.strokeStyle = "#ff9800";
+        ctx.lineWidth = 1.5;
+        const latArcR = earthR * 0.4;
+        ctx.beginPath();
+        ctx.arc(earthCX, earthCY, latArcR, -Math.PI / 2, -Math.PI / 2 + (Math.PI / 2 - latRad), false);
+        ctx.stroke();
+        ctx.fillStyle = "#ff9800";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`φ=${latitude.toFixed(1)}°`, earthCX + latArcR * 0.8, earthCY - latArcR * 0.4);
+      }
+
+      ctx.fillStyle = "#ccc";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Earth Diagram", earthCX, height * 0.04 + 30);
+
+      // Arrow to Polaris at top
+      ctx.fillStyle = "#ffeb3b";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("↑ To Polaris (∞ far away)", earthCX, earthCY - earthR - 45);
 
       // Info panel
-      drawInfo();
+      const infoY = height * 0.84;
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(width * 0.05, infoY, width * 0.9, 50);
+
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`Latitude = ${latitude.toFixed(1)}° → Polaris altitude = ${latitude.toFixed(1)}°`, width / 2, infoY + 18);
+      ctx.fillStyle = "#aaa";
+      ctx.fillText("Since Polaris is extremely far, its light arrives parallel to Earth's axis → altitude = latitude", width / 2, infoY + 38);
     },
     reset() {
       time = 0;
-      rotation = 0;
     },
     destroy() {},
     getStateDescription(): string {
-      return `Latitude of Polaris: Observer at ${latitude.toFixed(1)}°N latitude. ` +
-        `Polaris appears at ${latitude.toFixed(1)}° above the horizon. ` +
-        `At the North Pole (90°N), Polaris is directly overhead. ` +
-        `At the Equator (0°), Polaris is on the horizon. ` +
-        `The altitude of Polaris equals the observer's latitude because Earth's rotation axis points at Polaris.`;
+      return `Latitude of Polaris: Observer at latitude ${latitude.toFixed(1)}°N sees Polaris at an altitude of ${latitude.toFixed(1)}° above the horizon. This works because Polaris is so far away that its light arrives nearly parallel to Earth's rotation axis. At the equator (0°), Polaris is on the horizon. At the North Pole (90°), Polaris is directly overhead.`;
     },
     resize(w: number, h: number) {
       width = w;
@@ -86,213 +341,7 @@ const LatitudeOfPolarisFactory: SimulationFactory = (): SimulationEngine => {
     },
   };
 
-  function drawEarthDiagram(cx: number, cy: number, r: number) {
-    // Earth circle
-    const earthGrad = ctx.createRadialGradient(cx - r * 0.2, cy - r * 0.2, r * 0.1, cx, cy, r);
-    earthGrad.addColorStop(0, "#1e6091");
-    earthGrad.addColorStop(0.7, "#1e3a5f");
-    earthGrad.addColorStop(1, "#0f172a");
-    ctx.fillStyle = earthGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#38bdf8";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Latitude lines
-    ctx.strokeStyle = "#38bdf830";
-    ctx.lineWidth = 1;
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const yOff = r * Math.sin(lat * Math.PI / 180);
-      const rAt = r * Math.cos(lat * Math.PI / 180);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy - yOff, rAt, rAt * 0.15, 0, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
-    // Equator
-    ctx.strokeStyle = "#fbbf2450";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, r, r * 0.15, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Earth's axis
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - r - 25);
-    ctx.lineTo(cx, cy + r + 25);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // N/S labels
-    ctx.fillStyle = "#e2e8f0";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("N", cx, cy - r - 30);
-    ctx.fillText("S", cx, cy + r + 38);
-
-    // Observer position
-    const latRad = latitude * Math.PI / 180;
-    const obsX = cx + r * Math.cos(latRad) * Math.sin(rotation * 0.3);
-    const obsY = cy - r * Math.sin(latRad);
-
-    // Observer on surface (simplified: just show on the front of earth at correct latitude)
-    const obsFrontX = cx + r * Math.cos(latRad) * 0.2;
-    const obsFrontY = cy - r * Math.sin(latRad);
-
-    ctx.fillStyle = "#ef4444";
-    ctx.beginPath();
-    ctx.arc(obsFrontX, obsFrontY, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Latitude arc from equator to observer
-    if (showAngleLines) {
-      ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.4, -Math.PI / 2 + (90 - latitude) * Math.PI / 180, Math.PI / 2 - 0.01, true);
-      ctx.stroke();
-
-      // Latitude angle label
-      ctx.fillStyle = "#fbbf24";
-      ctx.font = `bold ${Math.max(12, width * 0.017)}px sans-serif`;
-      ctx.textAlign = "left";
-      ctx.fillText(`${latitude.toFixed(1)}°N`, cx + r * 0.45, cy - r * Math.sin(latRad / 2) + 5);
-    }
-
-    // Polaris direction (parallel light from top)
-    ctx.strokeStyle = "#fef08a";
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([6, 3]);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - r - 25);
-    ctx.lineTo(cx, cy - r - 80);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Polaris star
-    drawStar(cx, cy - r - 90, 6, "#fef08a");
-    ctx.fillStyle = "#fef08a";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Polaris", cx, cy - r - 100);
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Earth Diagram", cx, cy + r + 52);
-  }
-
-  function drawSkyView(cx: number, cy: number, r: number) {
-    // Sky dome background
-    const skyGrad = ctx.createRadialGradient(cx, cy + r, r * 0.3, cx, cy, r);
-    skyGrad.addColorStop(0, "#1e3a5f");
-    skyGrad.addColorStop(1, "#0a0a1a");
-    ctx.fillStyle = skyGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Stars
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, r - 1, 0, Math.PI * 2);
-    ctx.clip();
-
-    for (const s of stars) {
-      const sx = cx + (s.x - 0.5) * r * 2;
-      const sy = cy + (s.y - 0.5) * r * 2;
-      const twinkle = 0.5 + 0.5 * Math.sin(time * 2 + s.x * 100);
-      ctx.fillStyle = `rgba(255,255,255,${s.brightness * twinkle * 0.5})`;
-      ctx.fillRect(sx, sy, 1.5, 1.5);
-    }
-    ctx.restore();
-
-    // Horizon line
-    ctx.strokeStyle = "#64748b";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - r, cy + r * 0.7);
-    ctx.lineTo(cx + r, cy + r * 0.7);
-    ctx.stroke();
-    ctx.fillStyle = "#475569";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Horizon", cx, cy + r * 0.7 + 12);
-
-    // Zenith
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("Zenith", cx, cy - r + 12);
-
-    // Polaris position in sky
-    // Altitude of Polaris = observer's latitude
-    const horizonY = cy + r * 0.7;
-    const zenithY = cy - r * 0.7;
-    const polarisAltFrac = latitude / 90;
-    const polarisY = horizonY - polarisAltFrac * (horizonY - zenithY);
-
-    drawStar(cx, polarisY, 8, "#fef08a");
-    ctx.fillStyle = "#fef08a";
-    ctx.font = "bold 10px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Polaris ★", cx + 12, polarisY + 3);
-
-    // Angle arc from horizon to Polaris
-    if (showAngleLines) {
-      ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 2;
-      ctx.setLineDash([3, 3]);
-      // Vertical line from horizon to polaris
-      ctx.beginPath();
-      ctx.moveTo(cx, horizonY);
-      ctx.lineTo(cx, polarisY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Angle label
-      ctx.fillStyle = "#fbbf24";
-      ctx.font = `bold ${Math.max(12, width * 0.018)}px sans-serif`;
-      ctx.textAlign = "right";
-      ctx.fillText(`${latitude.toFixed(1)}°`, cx - 8, (horizonY + polarisY) / 2 + 5);
-    }
-
-    // Cardinal directions
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("N", cx, cy + r * 0.7 + 24);
-    ctx.fillText("Observer's Sky", cx, cy + r + 16);
-  }
-
-  function drawStar(x: number, y: number, size: number, color: string) {
-    ctx.fillStyle = color;
-    const spikes = 4;
-    ctx.beginPath();
-    for (let i = 0; i < spikes * 2; i++) {
-      const angle = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
-      const r = i % 2 === 0 ? size : size * 0.4;
-      const sx = x + r * Math.cos(angle);
-      const sy = y + r * Math.sin(angle);
-      if (i === 0) ctx.moveTo(sx, sy);
-      else ctx.lineTo(sx, sy);
-    }
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  function drawInfo() {
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = `${Math.max(10, width * 0.014)}px sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillText(`At latitude ${latitude.toFixed(1)}°N, Polaris appears ${latitude.toFixed(1)}° above the horizon`, width / 2, height - 30);
-    ctx.fillText("Altitude of Polaris = Observer's Latitude (parallel starlight on a spherical Earth)", width / 2, height - 12);
-  }
+  return engine;
 };
 
 export default LatitudeOfPolarisFactory;

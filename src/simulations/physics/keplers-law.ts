@@ -3,14 +3,12 @@ import { getSimConfig } from "../registry";
 
 interface Planet {
   name: string;
+  a: number; // semi-major axis (AU)
+  e: number; // eccentricity
+  T: number; // period (years)
   color: string;
-  semiMajorAU: number;
-  eccentricity: number;
-  periodYears: number;
-  drawRadius: number;
-  angle: number; // true anomaly
-  trailX: number[];
-  trailY: number[];
+  radius: number;
+  angle: number; // current true anomaly
 }
 
 const KeplersLawFactory: SimulationFactory = (): SimulationEngine => {
@@ -22,299 +20,324 @@ const KeplersLawFactory: SimulationFactory = (): SimulationEngine => {
   let height = 0;
   let time = 0;
 
-  // Parameters
-  let timeScale = 2;
+  let speed = 1;
   let eccentricity = 0.5;
-  let showAreas = 1;
-  let lawSelect = 0; // 0=all, 1=first, 2=second, 3=third
+  let lawDisplay = 0; // 0=first law, 1=second law, 2=third law
+  let showOrbits = 1;
 
   const planets: Planet[] = [
-    { name: "Mercury", color: "#a3a3a3", semiMajorAU: 0.39, eccentricity: 0.206, periodYears: 0.24, drawRadius: 3, angle: 0, trailX: [], trailY: [] },
-    { name: "Venus", color: "#fbbf24", semiMajorAU: 0.72, eccentricity: 0.007, periodYears: 0.615, drawRadius: 4, angle: Math.PI / 3, trailX: [], trailY: [] },
-    { name: "Earth", color: "#3b82f6", semiMajorAU: 1.0, eccentricity: 0.017, periodYears: 1.0, drawRadius: 5, angle: Math.PI / 2, trailX: [], trailY: [] },
-    { name: "Mars", color: "#ef4444", semiMajorAU: 1.52, eccentricity: 0.093, periodYears: 1.88, drawRadius: 4, angle: Math.PI, trailX: [], trailY: [] },
+    { name: "Mercury", a: 0.387, e: 0.206, T: 0.241, color: "#b0bec5", radius: 3, angle: 0 },
+    { name: "Venus", a: 0.723, e: 0.007, T: 0.615, color: "#ffcc80", radius: 5, angle: Math.PI * 0.5 },
+    { name: "Earth", a: 1.0, e: 0.017, T: 1.0, color: "#42a5f5", radius: 5, angle: Math.PI },
+    { name: "Mars", a: 1.524, e: 0.093, T: 1.881, color: "#ef5350", radius: 4, angle: Math.PI * 1.5 },
+    { name: "Jupiter", a: 5.203, e: 0.049, T: 11.86, color: "#ff9800", radius: 9, angle: 0.3 },
   ];
 
-  // Area sweep tracking for 2nd law
-  let areaAngle1 = 0;
-  let areaAngle2 = 0;
-  let areaTimer = 0;
-  const areaDuration = 0.3; // years
+  // Swept area tracking for 2nd law
+  const sweepAngles: number[] = [];
+  let sweepStartAngle = 0;
+  let sweepTimer = 0;
+  const sweepInterval = 0.5; // years
 
   function solveKepler(M: number, e: number): number {
-    // Solve Kepler's equation M = E - e*sin(E) using Newton's method
+    // Solve M = E - e*sin(E) for E using Newton's method
     let E = M;
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
     }
     return E;
   }
 
-  function trueAnomaly(M: number, e: number): number {
-    const E = solveKepler(M, e);
+  function trueAnomaly(E: number, e: number): number {
     return 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
   }
 
-  function orbitRadius(theta: number, a: number, e: number): number {
+  function orbitRadius(a: number, e: number, theta: number): number {
     return a * (1 - e * e) / (1 + e * Math.cos(theta));
   }
 
-  let centerX = 0;
-  let centerY = 0;
-  let scale = 1;
-
-  function auToPixel(au: number): number {
-    return au * scale;
+  function toCanvas(ax: number, ay: number, scale: number): { x: number; y: number } {
+    const cx = width * 0.45;
+    const cy = height * 0.45;
+    return { x: cx + ax * scale, y: cy - ay * scale };
   }
 
-  return {
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      centerX = width * 0.45;
-      centerY = height * 0.48;
-      scale = Math.min(width, height) * 0.22;
-      // Reset trails
-      for (const p of planets) { p.trailX = []; p.trailY = []; }
     },
     update(dt: number, params: Record<string, number>) {
-      timeScale = params.timeScale ?? 2;
+      speed = params.speed ?? 1;
       eccentricity = params.eccentricity ?? 0.5;
-      showAreas = params.showAreas ?? 1;
-      lawSelect = Math.round(params.lawSelect ?? 0);
+      lawDisplay = params.lawDisplay ?? 0;
+      showOrbits = params.showOrbits ?? 1;
 
-      const dtYears = dt * timeScale;
-      time += dtYears;
-      areaTimer += dtYears;
+      time += dt * speed;
 
-      // Override Earth's eccentricity with parameter for demonstration
-      planets[2].eccentricity = eccentricity;
-
+      // Update planet angles
       for (const p of planets) {
-        const M = (2 * Math.PI / p.periodYears) * time;
-        p.angle = trueAnomaly(M % (2 * Math.PI), p.eccentricity);
-
-        const r = orbitRadius(p.angle, p.semiMajorAU, p.eccentricity);
-        const px = centerX + auToPixel(r * Math.cos(p.angle));
-        const py = centerY - auToPixel(r * Math.sin(p.angle));
-
-        p.trailX.push(px);
-        p.trailY.push(py);
-        if (p.trailX.length > 500) { p.trailX.shift(); p.trailY.shift(); }
+        const M = (2 * Math.PI * time) / p.T;
+        const E = solveKepler(M % (2 * Math.PI), p.e);
+        p.angle = trueAnomaly(E, p.e);
       }
 
-      // Reset area sweep periodically
-      if (areaTimer > areaDuration * 3) {
-        areaAngle1 = planets[2].angle;
-        areaTimer = 0;
+      // Custom orbit for 1st law demo
+      sweepTimer += dt * speed;
+      if (sweepTimer >= sweepInterval) {
+        sweepAngles.push(planets[2].angle); // track Earth's angle
+        if (sweepAngles.length > 20) sweepAngles.shift();
+        sweepTimer = 0;
       }
-      areaAngle2 = planets[2].angle;
     },
     render() {
-      ctx.fillStyle = "#0a0a1a";
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#0a0a1a");
+      bg.addColorStop(1, "#1a1a2e");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
       // Stars
-      const rng = (seed: number) => {
-        const x = Math.sin(seed) * 43758.5453;
-        return x - Math.floor(x);
-      };
-      for (let i = 0; i < 80; i++) {
-        ctx.fillStyle = `rgba(255,255,255,${0.2 + rng(i * 7) * 0.6})`;
-        ctx.fillRect(rng(i * 3) * width, rng(i * 5) * height, 1.5, 1.5);
+      ctx.fillStyle = "rgba(255,255,255,0.3)";
+      for (let i = 0; i < 50; i++) {
+        const sx = (Math.sin(i * 127.1 + 311.7) * 0.5 + 0.5) * width;
+        const sy = (Math.sin(i * 269.5 + 183.3) * 0.5 + 0.5) * height;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 0.5 + Math.random() * 0.5, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // Title
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Kepler's Laws of Planetary Motion", width / 2, 24);
+      const lawNames = ["1st Law: Elliptical Orbits", "2nd Law: Equal Areas", "3rd Law: T² ∝ a³"];
+      ctx.fillText(`Kepler's Laws — ${lawNames[Math.round(lawDisplay)] || lawNames[0]}`, width / 2, 22);
+
+      const scale = Math.min(width, height) * 0.06;
 
       // Sun
-      const sunGrad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, 18);
-      sunGrad.addColorStop(0, "#fef08a");
-      sunGrad.addColorStop(0.6, "#fbbf24");
-      sunGrad.addColorStop(1, "#f59e0b00");
+      const sun = toCanvas(0, 0, scale);
+      const sunGrad = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, 15);
+      sunGrad.addColorStop(0, "#ffeb3b");
+      sunGrad.addColorStop(0.7, "#ff9800");
+      sunGrad.addColorStop(1, "rgba(255, 152, 0, 0)");
       ctx.fillStyle = sunGrad;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+      ctx.arc(sun.x, sun.y, 15, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#fef08a";
+
+      ctx.fillStyle = "#ffeb3b";
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+      ctx.arc(sun.x, sun.y, 8, 0, Math.PI * 2);
       ctx.fill();
+
+      const law = Math.round(lawDisplay);
 
       // Draw orbits and planets
       for (const p of planets) {
-        drawOrbit(p);
-        drawPlanet(p);
+        if (p.a * scale > Math.max(width, height) * 0.5) continue; // skip if too large
+
+        // Orbit path
+        if (showOrbits > 0.5) {
+          ctx.strokeStyle = `${p.color}40`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (let i = 0; i <= 100; i++) {
+            const theta = (i / 100) * Math.PI * 2;
+            const r = orbitRadius(p.a, p.e, theta);
+            const ox = r * Math.cos(theta);
+            const oy = r * Math.sin(theta);
+            const cp = toCanvas(ox, oy, scale);
+            if (i === 0) ctx.moveTo(cp.x, cp.y); else ctx.lineTo(cp.x, cp.y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+
+        // Planet position
+        const r = orbitRadius(p.a, p.e, p.angle);
+        const px = r * Math.cos(p.angle);
+        const py = r * Math.sin(p.angle);
+        const pp = toCanvas(px, py, scale);
+
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(pp.x, pp.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Planet label
+        ctx.fillStyle = p.color;
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(p.name, pp.x + p.radius + 3, pp.y - 3);
       }
 
-      // Law-specific visualization
-      if (lawSelect === 0 || lawSelect === 1) drawFirstLaw();
-      if (lawSelect === 0 || lawSelect === 2) drawSecondLaw();
-      if (lawSelect === 0 || lawSelect === 3) drawThirdLaw();
+      // Law-specific visualizations
+      if (law === 0) {
+        // First law: Show foci
+        const demoE = eccentricity;
+        const demoA = 3;
+        const c = demoA * demoE;
 
-      // Legend
-      drawLegend();
+        // Custom orbit with adjustable eccentricity
+        ctx.strokeStyle = "#e040fb";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i <= 100; i++) {
+          const theta = (i / 100) * Math.PI * 2;
+          const r = orbitRadius(demoA, demoE, theta);
+          const ox = r * Math.cos(theta);
+          const oy = r * Math.sin(theta);
+          const cp = toCanvas(ox, oy, scale);
+          if (i === 0) ctx.moveTo(cp.x, cp.y); else ctx.lineTo(cp.x, cp.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Second focus
+        const f2 = toCanvas(-2 * c, 0, scale);
+        ctx.fillStyle = "#e040fb";
+        ctx.beginPath();
+        ctx.arc(f2.x, f2.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#e040fb";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("F₂", f2.x, f2.y - 8);
+        ctx.fillText("F₁ (Sun)", sun.x, sun.y + 22);
+
+        ctx.fillStyle = "#aaa";
+        ctx.font = "11px sans-serif";
+        ctx.fillText(`e = ${demoE.toFixed(2)} | The orbit is an ellipse with the Sun at one focus`, width / 2, height * 0.82);
+      } else if (law === 1) {
+        // Second law: Equal area swept
+        const p = planets[2]; // Earth
+        const sweepDuration = 0.15; // fraction of orbit
+        const rCurrent = orbitRadius(p.a, p.e, p.angle);
+
+        // Draw swept area wedge
+        ctx.fillStyle = "rgba(76, 175, 80, 0.3)";
+        ctx.beginPath();
+        ctx.moveTo(sun.x, sun.y);
+        const startAngle = p.angle - sweepDuration * Math.PI * 2;
+        for (let i = 0; i <= 30; i++) {
+          const t = startAngle + (i / 30) * sweepDuration * Math.PI * 2;
+          const rr = orbitRadius(p.a, p.e, t);
+          const cp = toCanvas(rr * Math.cos(t), rr * Math.sin(t), scale);
+          ctx.lineTo(cp.x, cp.y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw another wedge at different position for comparison
+        ctx.fillStyle = "rgba(255, 152, 0, 0.3)";
+        ctx.beginPath();
+        ctx.moveTo(sun.x, sun.y);
+        const start2 = p.angle + Math.PI - sweepDuration * Math.PI * 2;
+        for (let i = 0; i <= 30; i++) {
+          const t = start2 + (i / 30) * sweepDuration * Math.PI * 2;
+          const rr = orbitRadius(p.a, p.e, t);
+          const cp = toCanvas(rr * Math.cos(t), rr * Math.sin(t), scale);
+          ctx.lineTo(cp.x, cp.y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#aaa";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Equal areas (green & orange wedges) are swept in equal time intervals", width / 2, height * 0.82);
+      } else if (law === 2) {
+        // Third law: T² ∝ a³ graph
+        const gx = width * 0.55;
+        const gy = height * 0.35;
+        const gw = width * 0.4;
+        const gh = height * 0.4;
+
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillRect(gx, gy, gw, gh);
+        ctx.strokeStyle = "#555";
+        ctx.strokeRect(gx, gy, gw, gh);
+
+        // Plot T² vs a³
+        const maxA3 = 150;
+        const maxT2 = 150;
+
+        // Theoretical line
+        ctx.strokeStyle = "rgba(255,235,59,0.5)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(gx, gy + gh);
+        ctx.lineTo(gx + gw, gy);
+        ctx.stroke();
+
+        for (const p of planets) {
+          const a3 = Math.pow(p.a, 3);
+          const t2 = Math.pow(p.T, 2);
+          const px = gx + (a3 / maxA3) * gw;
+          const py = gy + gh - (t2 / maxT2) * gh;
+
+          if (px > gx && px < gx + gw && py > gy && py < gy + gh) {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(px, py, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = "9px sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText(p.name, px + 7, py + 3);
+          }
+        }
+
+        ctx.fillStyle = "#aaa";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("a³ (AU³)", gx + gw / 2, gy + gh + 14);
+        ctx.save();
+        ctx.translate(gx - 10, gy + gh / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText("T² (yr²)", 0, 0);
+        ctx.restore();
+
+        ctx.fillStyle = "#aaa";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("T² = a³: orbital period squared proportional to semi-major axis cubed", width / 2, height * 0.82);
+      }
+
+      // Time display
+      ctx.fillStyle = "#888";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(`Time: ${(time).toFixed(1)} yr | Speed: ${speed.toFixed(1)}×`, 10, height - 10);
     },
     reset() {
       time = 0;
-      areaTimer = 0;
-      for (const p of planets) { p.trailX = []; p.trailY = []; p.angle = 0; }
+      sweepAngles.length = 0;
+      sweepTimer = 0;
+      for (const p of planets) p.angle = 0;
     },
     destroy() {},
     getStateDescription(): string {
-      const earth = planets[2];
-      const r = orbitRadius(earth.angle, earth.semiMajorAU, earth.eccentricity);
-      return `Kepler's Laws: Showing ${planets.length} planets. Earth eccentricity=${eccentricity.toFixed(3)}. ` +
-        `1st Law: Elliptical orbits with Sun at one focus. ` +
-        `2nd Law: Equal areas swept in equal times. ` +
-        `3rd Law: T²∝a³ (Mercury T=${planets[0].periodYears}yr a=${planets[0].semiMajorAU}AU, ` +
-        `Earth T=${planets[2].periodYears}yr a=${planets[2].semiMajorAU}AU). ` +
-        `Earth current radius: ${r.toFixed(3)} AU.`;
+      const law = Math.round(lawDisplay);
+      const lawDescs = [
+        "1st Law: Planets move in elliptical orbits with the Sun at one focus.",
+        "2nd Law: A line from Sun to planet sweeps equal areas in equal times (planet moves faster near Sun).",
+        "3rd Law: T²=a³ — the square of the orbital period is proportional to the cube of the semi-major axis.",
+      ];
+      return `Kepler's Laws visualization: ${lawDescs[law]} Currently showing ${planets.length} planets. Time=${time.toFixed(1)} years. Eccentricity=${eccentricity.toFixed(2)}.`;
     },
     resize(w: number, h: number) {
       width = w;
       height = h;
-      centerX = width * 0.45;
-      centerY = height * 0.48;
-      scale = Math.min(width, height) * 0.22;
     },
   };
 
-  function drawOrbit(p: Planet) {
-    ctx.strokeStyle = p.color + "40";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let theta = 0; theta <= Math.PI * 2; theta += 0.02) {
-      const r = orbitRadius(theta, p.semiMajorAU, p.eccentricity);
-      const x = centerX + auToPixel(r * Math.cos(theta));
-      const y = centerY - auToPixel(r * Math.sin(theta));
-      if (theta === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.stroke();
-  }
-
-  function drawPlanet(p: Planet) {
-    const r = orbitRadius(p.angle, p.semiMajorAU, p.eccentricity);
-    const px = centerX + auToPixel(r * Math.cos(p.angle));
-    const py = centerY - auToPixel(r * Math.sin(p.angle));
-
-    // Glow
-    const glow = ctx.createRadialGradient(px, py, 1, px, py, p.drawRadius * 3);
-    glow.addColorStop(0, p.color);
-    glow.addColorStop(1, "transparent");
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(px, py, p.drawRadius * 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Body
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(px, py, p.drawRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Label
-    ctx.fillStyle = p.color;
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(p.name, px + p.drawRadius + 4, py + 3);
-  }
-
-  function drawFirstLaw() {
-    // Show foci of Earth's orbit
-    const earth = planets[2];
-    const c = earth.semiMajorAU * earth.eccentricity;
-    const f1x = centerX; // Sun is at one focus
-    const f2x = centerX + auToPixel(2 * c);
-    const f2y = centerY;
-
-    ctx.fillStyle = "#ffffff40";
-    ctx.beginPath();
-    ctx.arc(f2x, f2y, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("F₂", f2x, f2y + 14);
-    ctx.fillText("F₁ (Sun)", f1x, centerY + 26);
-  }
-
-  function drawSecondLaw() {
-    if (!showAreas) return;
-    const earth = planets[2];
-    const e = earth.eccentricity;
-    const a = earth.semiMajorAU;
-
-    // Draw swept area
-    ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY);
-    const startA = areaAngle1;
-    const endA = areaAngle2;
-    const step = (endA - startA) / 30;
-    if (Math.abs(step) > 0.001) {
-      for (let theta = startA; theta <= endA || (step < 0 && theta >= endA); theta += step) {
-        const r = orbitRadius(theta, a, e);
-        const x = centerX + auToPixel(r * Math.cos(theta));
-        const y = centerY - auToPixel(r * Math.sin(theta));
-        ctx.lineTo(x, y);
-      }
-    }
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
-
-  function drawThirdLaw() {
-    // Info box showing T²/a³ ratios
-    const bx = width - 170;
-    const by = 50;
-    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-    ctx.fillRect(bx, by, 160, 20 + planets.length * 18);
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(bx, by, 160, 20 + planets.length * 18);
-
-    ctx.fillStyle = "#e2e8f0";
-    ctx.font = "bold 10px monospace";
-    ctx.textAlign = "left";
-    ctx.fillText("T²/a³ (Kepler's 3rd)", bx + 8, by + 14);
-
-    ctx.font = "9px monospace";
-    for (let i = 0; i < planets.length; i++) {
-      const p = planets[i];
-      const ratio = (p.periodYears * p.periodYears) / (p.semiMajorAU ** 3);
-      ctx.fillStyle = p.color;
-      ctx.fillText(`${p.name.padEnd(8)} T²/a³ = ${ratio.toFixed(3)}`, bx + 8, by + 32 + i * 18);
-    }
-  }
-
-  function drawLegend() {
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = `${Math.max(10, width * 0.013)}px sans-serif`;
-    ctx.textAlign = "center";
-    const laws = [
-      "1st: Orbits are ellipses with the Sun at one focus",
-      "2nd: Equal areas are swept in equal times",
-      "3rd: T² ∝ a³ (period² ∝ semi-major axis³)",
-    ];
-    const ly = height - 40;
-    for (let i = 0; i < laws.length; i++) {
-      const highlight = lawSelect === 0 || lawSelect === i + 1;
-      ctx.fillStyle = highlight ? "#e2e8f0" : "#475569";
-      ctx.fillText(laws[i], width / 2, ly + i * 14);
-    }
-  }
+  return engine;
 };
 
 export default KeplersLawFactory;

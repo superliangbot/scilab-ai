@@ -1,7 +1,7 @@
 import { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
-const IrisCiliaryBodyFactory: SimulationFactory = (): SimulationEngine => {
+const IrisAndCiliaryBodyFactory: SimulationFactory = (): SimulationEngine => {
   const config = getSimConfig("iris-and-ciliary-body") as SimulationConfig;
 
   let canvas: HTMLCanvasElement;
@@ -11,12 +11,12 @@ const IrisCiliaryBodyFactory: SimulationFactory = (): SimulationEngine => {
   let time = 0;
 
   // Parameters
-  let pupilSize = 50; // 0=constricted, 100=dilated
-  let ciliaryContraction = 50; // 0=relaxed(thin lens), 100=contracted(thick lens)
-  let showLightRays = 1;
-  let brightness = 50; // ambient light
+  let irisConstriction = 50; // 0-100, sphincter muscle
+  let ciliaryContraction = 50; // 0-100, ciliary body
+  let showLightPath = 1;
+  let showMuscleForce = 1;
 
-  return {
+  const engine: SimulationEngine = {
     config,
     init(c: HTMLCanvasElement) {
       canvas = c;
@@ -25,43 +25,294 @@ const IrisCiliaryBodyFactory: SimulationFactory = (): SimulationEngine => {
       height = canvas.height;
     },
     update(dt: number, params: Record<string, number>) {
-      pupilSize = params.pupilSize ?? 50;
+      irisConstriction = params.irisConstriction ?? 50;
       ciliaryContraction = params.ciliaryContraction ?? 50;
-      showLightRays = params.showLightRays ?? 1;
-      brightness = params.brightness ?? 50;
+      showLightPath = params.showLightPath ?? 1;
+      showMuscleForce = params.showMuscleForce ?? 1;
       time += dt;
     },
     render() {
-      // Background
-      ctx.fillStyle = "#fef3c7";
+      ctx.clearRect(0, 0, width, height);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0, "#1a1a2e");
+      bg.addColorStop(1, "#16213e");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      // Title
-      ctx.fillStyle = "#1e293b";
-      ctx.font = `bold ${Math.max(14, width * 0.022)}px sans-serif`;
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Iris & Ciliary Body — Eye Accommodation", width / 2, 25);
+      ctx.fillText("Iris and Ciliary Body — Eye Accommodation", width / 2, 22);
 
-      const eyeCx = width * 0.5;
-      const eyeCy = height * 0.48;
-      const eyeRadiusX = Math.min(width * 0.35, height * 0.3);
-      const eyeRadiusY = eyeRadiusX * 0.7;
+      // Eye cross-section
+      const eyeCX = width * 0.5;
+      const eyeCY = height * 0.45;
+      const eyeRX = Math.min(width * 0.38, 200);
+      const eyeRY = Math.min(height * 0.3, 150);
 
-      drawEyeCrossSection(eyeCx, eyeCy, eyeRadiusX, eyeRadiusY);
-      drawLabels(eyeCx, eyeCy, eyeRadiusX, eyeRadiusY);
-      drawInfoPanel();
+      // Eyeball outline (sclera)
+      ctx.fillStyle = "#f5f5f5";
+      ctx.beginPath();
+      ctx.ellipse(eyeCX, eyeCY, eyeRX, eyeRY, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#90a4ae";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Retina (inner layer)
+      ctx.fillStyle = "#ffccbc";
+      ctx.beginPath();
+      ctx.ellipse(eyeCX, eyeCY, eyeRX - 5, eyeRY - 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Vitreous humor
+      ctx.fillStyle = "rgba(220, 237, 255, 0.4)";
+      ctx.beginPath();
+      ctx.ellipse(eyeCX, eyeCY, eyeRX - 10, eyeRY - 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pupil size based on iris constriction
+      const pupilMaxR = eyeRY * 0.35;
+      const pupilMinR = eyeRY * 0.08;
+      const pupilR = pupilMaxR - (irisConstriction / 100) * (pupilMaxR - pupilMinR);
+
+      // Iris position
+      const irisX = eyeCX - eyeRX * 0.55;
+
+      // Lens
+      const lensX = irisX + 15;
+      const lensFlatness = 1 - (ciliaryContraction / 100) * 0.6; // 1 = flat, 0.4 = fat
+      const lensRX = 12 + (1 - lensFlatness) * 15;
+      const lensRY = pupilMaxR * 0.85;
+
+      // Ciliary body
+      const ciliaryY1 = eyeCY - eyeRY * 0.45;
+      const ciliaryY2 = eyeCY + eyeRY * 0.45;
+
+      ctx.fillStyle = "#8d6e63";
+      // Top ciliary
+      ctx.beginPath();
+      ctx.ellipse(lensX, ciliaryY1, 18, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Bottom ciliary
+      ctx.beginPath();
+      ctx.ellipse(lensX, ciliaryY2, 18, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Zonule fibers (suspensory ligaments)
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+      ctx.lineWidth = 1;
+      const numFibers = 4;
+      for (let i = 0; i < numFibers; i++) {
+        const t = (i / (numFibers - 1)) * 0.6 + 0.2;
+        // Top fibers
+        ctx.beginPath();
+        ctx.moveTo(lensX, ciliaryY1 + 5);
+        ctx.lineTo(lensX + (t - 0.5) * lensRX * 1.5, eyeCY - lensRY * 0.7);
+        ctx.stroke();
+        // Bottom fibers
+        ctx.beginPath();
+        ctx.moveTo(lensX, ciliaryY2 - 5);
+        ctx.lineTo(lensX + (t - 0.5) * lensRX * 1.5, eyeCY + lensRY * 0.7);
+        ctx.stroke();
+      }
+
+      // Lens
+      ctx.fillStyle = "rgba(200, 230, 255, 0.6)";
+      ctx.strokeStyle = "#64b5f6";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(lensX, eyeCY, lensRX, lensRY * 0.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Iris (ring around pupil)
+      ctx.fillStyle = "#5d4037";
+      ctx.beginPath();
+      ctx.ellipse(irisX, eyeCY, 5, eyeRY * 0.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Top iris flap
+      ctx.fillStyle = "#6d4c41";
+      ctx.beginPath();
+      ctx.moveTo(irisX, eyeCY - pupilR);
+      ctx.lineTo(irisX - 3, eyeCY - eyeRY * 0.4);
+      ctx.lineTo(irisX + 3, eyeCY - eyeRY * 0.4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Bottom iris flap
+      ctx.beginPath();
+      ctx.moveTo(irisX, eyeCY + pupilR);
+      ctx.lineTo(irisX - 3, eyeCY + eyeRY * 0.4);
+      ctx.lineTo(irisX + 3, eyeCY + eyeRY * 0.4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Pupil
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.ellipse(irisX, eyeCY, 4, pupilR, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cornea
+      ctx.strokeStyle = "#90caf9";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(irisX - 15, eyeCY, 20, eyeRY * 0.5, 0, -Math.PI * 0.4, Math.PI * 0.4);
+      ctx.stroke();
+
+      // Fovea (on retina, back of eye)
+      ctx.fillStyle = "#ff8a65";
+      ctx.beginPath();
+      ctx.arc(eyeCX + eyeRX - 12, eyeCY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = "9px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Fovea", eyeCX + eyeRX - 5, eyeCY - 8);
+
+      // Optic nerve
+      ctx.strokeStyle = "#ffcc80";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(eyeCX + eyeRX - 5, eyeCY + 12);
+      ctx.lineTo(eyeCX + eyeRX + 20, eyeCY + 30);
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.font = "9px sans-serif";
+      ctx.fillText("Optic nerve", eyeCX + eyeRX + 5, eyeCY + 45);
+
+      // Light rays
+      if (showLightPath > 0.5) {
+        ctx.strokeStyle = "rgba(255, 235, 59, 0.5)";
+        ctx.lineWidth = 1.5;
+
+        const focalLength = 20 + (1 - ciliaryContraction / 100) * 40; // shorter focal for more contraction
+        const focalX = lensX + focalLength;
+        const focusY = eyeCY;
+
+        // Rays entering through pupil
+        const numRays = 5;
+        for (let i = 0; i < numRays; i++) {
+          const entryY = eyeCY - pupilR + (i / (numRays - 1)) * pupilR * 2;
+          const startX = irisX - 60;
+
+          // Ray to lens
+          ctx.beginPath();
+          ctx.moveTo(startX, entryY);
+          ctx.lineTo(lensX, entryY);
+          ctx.stroke();
+
+          // Ray from lens to focus
+          ctx.beginPath();
+          ctx.moveTo(lensX, entryY);
+          ctx.lineTo(Math.min(focalX, eyeCX + eyeRX - 15), focusY + (entryY - eyeCY) * (1 - focalLength / (eyeRX * 1.2)));
+          ctx.stroke();
+        }
+      }
+
+      // Muscle force indicators
+      if (showMuscleForce > 0.5) {
+        // Iris sphincter
+        const sphincterForce = irisConstriction / 100;
+        ctx.strokeStyle = `rgba(244, 67, 54, ${0.3 + sphincterForce * 0.7})`;
+        ctx.lineWidth = 2;
+        const irisArrowLen = sphincterForce * 15;
+        ctx.beginPath();
+        ctx.moveTo(irisX, eyeCY - pupilR - 5);
+        ctx.lineTo(irisX, eyeCY - pupilR - 5 - irisArrowLen);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(irisX, eyeCY + pupilR + 5);
+        ctx.lineTo(irisX, eyeCY + pupilR + 5 + irisArrowLen);
+        ctx.stroke();
+
+        // Ciliary
+        const ciliaryForce = ciliaryContraction / 100;
+        ctx.strokeStyle = `rgba(33, 150, 243, ${0.3 + ciliaryForce * 0.7})`;
+        ctx.lineWidth = 2;
+        const cArrowLen = ciliaryForce * 12;
+        ctx.beginPath();
+        ctx.moveTo(lensX, ciliaryY1 + 10);
+        ctx.lineTo(lensX, ciliaryY1 + 10 + cArrowLen);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(lensX, ciliaryY2 - 10);
+        ctx.lineTo(lensX, ciliaryY2 - 10 - cArrowLen);
+        ctx.stroke();
+      }
+
+      // Labels
+      ctx.font = "10px sans-serif";
+      ctx.fillStyle = "#90caf9";
+      ctx.textAlign = "center";
+      ctx.fillText("Cornea", irisX - 15, eyeCY - eyeRY * 0.55);
+      ctx.fillStyle = "#a1887f";
+      ctx.fillText("Iris", irisX, eyeCY + eyeRY * 0.5 + 10);
+      ctx.fillStyle = "#64b5f6";
+      ctx.fillText("Lens", lensX, eyeCY + lensRY + 15);
+      ctx.fillStyle = "#8d6e63";
+      ctx.fillText("Ciliary", lensX + 25, ciliaryY1);
+      ctx.fillStyle = "#f5f5f5";
+      ctx.fillText("Sclera", eyeCX + eyeRX * 0.3, eyeCY - eyeRY - 8);
+
+      // Front view of pupil (small inset)
+      const insetX = width * 0.85;
+      const insetY = height * 0.2;
+      const insetR = 35;
+
+      // Sclera
+      ctx.fillStyle = "#f5f5f5";
+      ctx.beginPath();
+      ctx.ellipse(insetX, insetY, insetR, insetR * 0.7, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Iris
+      const irisGrad = ctx.createRadialGradient(insetX, insetY, pupilR * 0.6, insetX, insetY, insetR * 0.7);
+      irisGrad.addColorStop(0, "#5d4037");
+      irisGrad.addColorStop(0.5, "#795548");
+      irisGrad.addColorStop(1, "#4e342e");
+      ctx.fillStyle = irisGrad;
+      ctx.beginPath();
+      ctx.ellipse(insetX, insetY, insetR * 0.7, insetR * 0.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pupil
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(insetX, insetY, pupilR * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#ccc";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Front view", insetX, insetY + insetR * 0.8 + 12);
+
+      // Info panel
+      const infoY = height * 0.78;
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(width * 0.05, infoY, width * 0.9, 65);
+
+      ctx.fillStyle = "#e0e0e0";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`Iris sphincter: ${irisConstriction.toFixed(0)}% → pupil ${pupilR < pupilMaxR * 0.5 ? "constricted" : "dilated"} | Ciliary: ${ciliaryContraction.toFixed(0)}% → lens ${ciliaryContraction > 50 ? "thicker (near focus)" : "flatter (far focus)"}`, width / 2, infoY + 18);
+      ctx.fillStyle = "#aaa";
+      ctx.fillText("Iris controls light intake by adjusting pupil size | Ciliary body changes lens shape for focusing", width / 2, infoY + 38);
+      ctx.fillText("Bright light → constricted pupil | Near objects → ciliary contracts, lens thickens", width / 2, infoY + 55);
     },
     reset() {
       time = 0;
     },
     destroy() {},
     getStateDescription(): string {
-      const pupilDesc = pupilSize > 70 ? "dilated" : pupilSize < 30 ? "constricted" : "moderate";
-      const lensDesc = ciliaryContraction > 70 ? "thick (near focus)" : ciliaryContraction < 30 ? "thin (far focus)" : "moderate";
-      return `Eye anatomy: Pupil is ${pupilDesc} (${pupilSize.toFixed(0)}%). ` +
-        `Ciliary body contraction: ${ciliaryContraction.toFixed(0)}%, lens is ${lensDesc}. ` +
-        `When ciliary muscles contract, zonular fibers relax and the elastic lens becomes thicker for near vision. ` +
-        `The iris sphincter muscle constricts the pupil in bright light; the dilator muscle enlarges it in dim light.`;
+      const pupilMaxR = 50;
+      const pupilMinR = 10;
+      const pupilR = pupilMaxR - (irisConstriction / 100) * (pupilMaxR - pupilMinR);
+      const lensFocus = ciliaryContraction > 50 ? "near objects (thick lens)" : "distant objects (flat lens)";
+      return `Eye accommodation: Iris sphincter at ${irisConstriction}%, pupil radius ~${pupilR.toFixed(0)} (${irisConstriction > 50 ? "constricted" : "dilated"}). Ciliary body at ${ciliaryContraction}%, lens focused on ${lensFocus}. The iris controls light entry; the ciliary body changes lens curvature for focusing at different distances.`;
     },
     resize(w: number, h: number) {
       width = w;
@@ -69,222 +320,7 @@ const IrisCiliaryBodyFactory: SimulationFactory = (): SimulationEngine => {
     },
   };
 
-  function drawEyeCrossSection(cx: number, cy: number, rx: number, ry: number) {
-    // Sclera (white outer layer)
-    ctx.fillStyle = "#f8fafc";
-    ctx.strokeStyle = "#475569";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Choroid (thin dark layer inside)
-    ctx.strokeStyle = "#7c2d12";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx * 0.95, ry * 0.95, 0, 0.3, Math.PI * 2 - 0.3);
-    ctx.stroke();
-
-    // Retina (inner lining)
-    ctx.strokeStyle = "#fbbf24";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx * 0.9, ry * 0.9, 0, 0.4, Math.PI * 2 - 0.4);
-    ctx.stroke();
-
-    // Vitreous humor (fill inside)
-    ctx.fillStyle = "rgba(186, 230, 253, 0.15)";
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx * 0.88, ry * 0.88, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Cornea (front bulge)
-    const corneaX = cx - rx;
-    ctx.strokeStyle = "#0ea5e9";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(corneaX + rx * 0.08, cy, rx * 0.15, ry * 0.5, 0, -Math.PI / 2, Math.PI / 2);
-    ctx.stroke();
-
-    // Iris
-    const irisX = cx - rx * 0.7;
-    const pupilRadius = ry * (0.08 + (pupilSize / 100) * 0.25); // 8% to 33% of ry
-    const irisOuterR = ry * 0.42;
-
-    // Iris body (colored ring)
-    ctx.fillStyle = "#4f7b58"; // greenish iris
-    ctx.beginPath();
-    ctx.arc(irisX, cy, irisOuterR, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Pupil (black hole)
-    ctx.fillStyle = "#0f172a";
-    ctx.beginPath();
-    ctx.arc(irisX, cy, pupilRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Iris sphincter muscle (ring around pupil)
-    ctx.strokeStyle = "#b45309";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(irisX, cy, pupilRadius + 3, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Iris dilator muscle (radial lines)
-    ctx.strokeStyle = "#92400e";
-    ctx.lineWidth = 1;
-    for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
-      ctx.beginPath();
-      ctx.moveTo(irisX + (pupilRadius + 5) * Math.cos(a), cy + (pupilRadius + 5) * Math.sin(a));
-      ctx.lineTo(irisX + (irisOuterR - 3) * Math.cos(a), cy + (irisOuterR - 3) * Math.sin(a));
-      ctx.stroke();
-    }
-
-    // Lens
-    const lensX = irisX + 20;
-    const lensThickness = 8 + (ciliaryContraction / 100) * 18; // 8 to 26 px
-    const lensHeight = ry * 0.35;
-
-    ctx.fillStyle = "rgba(251, 191, 36, 0.3)";
-    ctx.strokeStyle = "#d97706";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(lensX, cy, lensThickness, lensHeight, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Ciliary body (above and below lens)
-    ctx.fillStyle = "#b45309";
-    const cbSize = 10;
-    // Top ciliary body
-    ctx.beginPath();
-    ctx.ellipse(lensX, cy - lensHeight - 8, cbSize * 1.5, cbSize, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Bottom ciliary body
-    ctx.beginPath();
-    ctx.ellipse(lensX, cy + lensHeight + 8, cbSize * 1.5, cbSize, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Zonular fibers (suspensory ligaments)
-    const zonuleTension = 1 - (ciliaryContraction / 100); // relaxed when ciliary contracts
-    ctx.strokeStyle = `rgba(180, 83, 9, ${0.3 + zonuleTension * 0.5})`;
-    ctx.lineWidth = 1;
-    for (let i = -2; i <= 2; i++) {
-      const yOff = i * 8;
-      // Top fibers
-      ctx.beginPath();
-      ctx.moveTo(lensX, cy - lensHeight + yOff);
-      ctx.lineTo(lensX + 5, cy - lensHeight - 8 + yOff * 0.3);
-      ctx.stroke();
-      // Bottom fibers
-      ctx.beginPath();
-      ctx.moveTo(lensX, cy + lensHeight + yOff);
-      ctx.lineTo(lensX + 5, cy + lensHeight + 8 + yOff * 0.3);
-      ctx.stroke();
-    }
-
-    // Optic nerve (back of eye)
-    const nerveX = cx + rx * 0.85;
-    ctx.fillStyle = "#fbbf24";
-    ctx.beginPath();
-    ctx.arc(nerveX, cy, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#d97706";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(nerveX + 4, cy);
-    ctx.lineTo(cx + rx + 15, cy);
-    ctx.stroke();
-
-    // Fovea
-    ctx.fillStyle = "#ef4444";
-    ctx.beginPath();
-    ctx.arc(cx + rx * 0.7, cy, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Light rays
-    if (showLightRays) {
-      drawLightRays(irisX, cy, pupilRadius, lensX, lensThickness, lensHeight, cx, rx);
-    }
-  }
-
-  function drawLightRays(irisX: number, cy: number, pupilR: number,
-    lensX: number, lensT: number, lensH: number, eyeCx: number, eyeRx: number) {
-    const numRays = 5;
-    const sourceX = irisX - 80;
-    const focalLength = 30 + (1 - ciliaryContraction / 100) * 40; // thicker lens = shorter focal
-    const focalX = lensX + focalLength;
-
-    ctx.strokeStyle = `rgba(250, 204, 21, ${0.3 + brightness / 200})`;
-    ctx.lineWidth = 1.5;
-
-    for (let i = 0; i < numRays; i++) {
-      const yOffset = ((i - (numRays - 1) / 2) / (numRays - 1)) * pupilR * 1.5;
-      const entryY = cy + yOffset;
-
-      // Only draw rays that pass through the pupil
-      if (Math.abs(yOffset) > pupilR) continue;
-
-      // Ray from source to lens
-      ctx.beginPath();
-      ctx.moveTo(sourceX, entryY);
-      ctx.lineTo(lensX, entryY);
-
-      // Refract through lens toward focal point
-      const exitY = entryY;
-      const slope = (cy - exitY) / focalLength;
-      const endX = Math.min(eyeCx + eyeRx * 0.7, lensX + focalLength * 2);
-      const endY = exitY + slope * (endX - lensX);
-
-      ctx.lineTo(endX, endY);
-      ctx.stroke();
-    }
-  }
-
-  function drawLabels(cx: number, cy: number, rx: number, ry: number) {
-    ctx.font = `${Math.max(9, width * 0.013)}px sans-serif`;
-    ctx.textAlign = "left";
-
-    const labels = [
-      { text: "Cornea", x: cx - rx * 0.85, y: cy - ry * 0.55, color: "#0ea5e9" },
-      { text: "Iris", x: cx - rx * 0.75, y: cy + ry * 0.55, color: "#4f7b58" },
-      { text: "Pupil", x: cx - rx * 0.72, y: cy + 4, color: "#475569" },
-      { text: "Lens", x: cx - rx * 0.45, y: cy - ry * 0.45, color: "#d97706" },
-      { text: "Ciliary body", x: cx - rx * 0.45, y: cy + ry * 0.55, color: "#b45309" },
-      { text: "Retina", x: cx + rx * 0.4, y: cy - ry * 0.7, color: "#fbbf24" },
-      { text: "Fovea", x: cx + rx * 0.6, y: cy + 16, color: "#ef4444" },
-      { text: "Optic nerve", x: cx + rx * 0.7, y: cy + ry * 0.3, color: "#d97706" },
-    ];
-
-    for (const l of labels) {
-      ctx.fillStyle = l.color;
-      ctx.fillText(l.text, l.x, l.y);
-    }
-  }
-
-  function drawInfoPanel() {
-    const px = 10;
-    const py = height - 80;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.fillRect(px, py, width - 20, 70);
-    ctx.strokeStyle = "#cbd5e1";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(px, py, width - 20, 70);
-
-    ctx.font = `${Math.max(10, width * 0.014)}px sans-serif`;
-    ctx.textAlign = "left";
-
-    const pupilDesc = pupilSize > 70 ? "Dilated (dim light)" : pupilSize < 30 ? "Constricted (bright light)" : "Normal";
-    const lensDesc = ciliaryContraction > 70 ? "Thick — near focus (accommodation)" :
-      ciliaryContraction < 30 ? "Thin — far focus (relaxed)" : "Moderate";
-
-    ctx.fillStyle = "#1e293b";
-    ctx.fillText(`Pupil: ${pupilDesc} (${pupilSize.toFixed(0)}%)`, px + 10, py + 18);
-    ctx.fillText(`Ciliary body: ${ciliaryContraction.toFixed(0)}% contraction → Lens: ${lensDesc}`, px + 10, py + 36);
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("Sphincter muscle constricts pupil | Dilator muscle enlarges pupil | Ciliary contraction thickens lens", px + 10, py + 56);
-  }
+  return engine;
 };
 
-export default IrisCiliaryBodyFactory;
+export default IrisAndCiliaryBodyFactory;
