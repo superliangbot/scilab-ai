@@ -28,7 +28,7 @@ const EnzymeKineticsFactory: SimulationFactory = () => {
     age?: number;
   }> = [];
 
-  let reactionHistory: Array<{ time: number; velocity: number; substrate: number }> = [];
+  let reactionHistory: Array<{ time: number; velocity: number; [S]: number }> = [];
   let currentVelocity = 0;
 
   function initMolecules() {
@@ -152,7 +152,7 @@ const EnzymeKineticsFactory: SimulationFactory = () => {
       reactionHistory.push({
         time: time,
         velocity: currentVelocity,
-        substrate: currentS
+        [Symbol.for('S')]: currentS
       });
       
       // Keep only recent history
@@ -245,16 +245,116 @@ const EnzymeKineticsFactory: SimulationFactory = () => {
         else if (mol.type === 'product') ctx.fillText("P", mol.x, mol.y);
       }
 
-      // Current velocity display
-      ctx.font = "14px Arial";
-      ctx.fillStyle = "#10b981";
-      ctx.textAlign = "left";
-      ctx.fillText(`Current velocity: ${currentVelocity.toFixed(3)} mM/s`, 20, H - 40);
+      // Draw kinetics graph
+      const graphX = W - 280;
+      const graphY = 60;
+      const graphW = 260;
+      const graphH = 180;
+
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.fillRect(graphX, graphY, graphW, graphH);
+      ctx.strokeStyle = "#64748b";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(graphX, graphY, graphW, graphH);
+
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText("Reaction Velocity vs Time", graphX + graphW / 2, graphY - 5);
+
+      // Plot velocity over time
+      if (reactionHistory.length > 1) {
+        ctx.strokeStyle = "#10b981";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        const maxVel = Math.max(vmax, Math.max(...reactionHistory.map(h => h.velocity)));
+        
+        for (let i = 0; i < reactionHistory.length; i++) {
+          const point = reactionHistory[i];
+          const x = graphX + (i / (reactionHistory.length - 1)) * graphW;
+          const y = graphY + graphH - (point.velocity / maxVel) * graphH;
+          
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      // Axes labels
+      ctx.font = "10px Arial";
+      ctx.fillStyle = "#94a3b8";
+      ctx.textAlign = "center";
+      ctx.fillText("Time", graphX + graphW / 2, graphY + graphH + 15);
       
-      // Michaelis-Menten equation
+      ctx.save();
+      ctx.translate(graphX - 15, graphY + graphH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("Velocity (mM/s)", 0, 0);
+      ctx.restore();
+
+      // Info panel
+      const panelX = 20;
+      const panelY = H - 160;
+      const panelW = 300;
+      const panelH = 140;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(panelX, panelY, panelW, panelH);
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(panelX, panelY, panelW, panelH);
+
+      let infoY = panelY + 20;
+      ctx.font = "bold 12px Arial";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.textAlign = "left";
+      ctx.fillText("Michaelis-Menten Parameters", panelX + 10, infoY);
+      infoY += 20;
+
+      ctx.font = "11px Arial";
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillText(`[S] = ${substrateConc.toFixed(2)} mM`, panelX + 10, infoY);
+      ctx.fillText(`[E] = ${enzymeConc.toFixed(2)} mM`, panelX + 160, infoY);
+      infoY += 16;
+      
+      ctx.fillText(`Km = ${km.toFixed(2)} mM`, panelX + 10, infoY);
+      ctx.fillText(`Vmax = ${vmax.toFixed(2)} mM/s`, panelX + 160, infoY);
+      infoY += 16;
+
+      ctx.fillStyle = "#10b981";
+      ctx.fillText(`Current v = ${currentVelocity.toFixed(3)} mM/s`, panelX + 10, infoY);
+      infoY += 20;
+
+      // Equation
       ctx.font = "12px Arial";
       ctx.fillStyle = "#f59e0b";
-      ctx.fillText("v = (Vmax × [S]) / (Km + [S])", 20, H - 20);
+      ctx.fillText("v = (Vmax × [S]) / (Km + [S])", panelX + 10, infoY);
+
+      // Legend
+      const legendY = panelY + panelH + 20;
+      const items = [
+        { color: "#3b82f6", label: "Substrate (S)" },
+        { color: "#ef4444", label: "Enzyme (E)" },
+        { color: "#a855f7", label: "Complex (ES)" },
+        { color: "#10b981", label: "Product (P)" }
+      ];
+
+      ctx.font = "11px Arial";
+      items.forEach((item, i) => {
+        const x = panelX + (i % 2) * 150;
+        const y = legendY + Math.floor(i / 2) * 20;
+        
+        ctx.fillStyle = item.color;
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = "#e2e8f0";
+        ctx.textAlign = "left";
+        ctx.fillText(item.label, x + 12, y + 4);
+      });
     },
 
     reset() {

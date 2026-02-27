@@ -1,288 +1,630 @@
 import type { SimulationEngine, SimulationFactory } from "../types";
 import { getSimConfig } from "../registry";
 
-const earthsMagneticFieldFactory: SimulationFactory = () => {
+const EarthsMagneticFieldFactory: SimulationFactory = () => {
   const config = getSimConfig("earths-magnetic-field")!;
-  let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, W = 800, H = 600, time = 0;
 
-  let fieldStrength = 1;
-  let solarWindStrength = 1;
-  let showAurora = 1;
-  let dipoleTilt = 11.5;
+  let canvas: HTMLCanvasElement;
+  let ctx: CanvasRenderingContext2D;
+  let W = 800;
+  let H = 600;
+  let time = 0;
 
-  // Solar wind particles
-  interface WindParticle { x: number; y: number; vx: number; vy: number; trapped: boolean; life: number; }
-  let solarParticles: WindParticle[] = [];
+  // Parameters
+  let fieldStrength = 1.0;      // Relative magnetic field strength
+  let solarWindStrength = 1.0;  // Solar wind intensity
+  let showAurora = 1;           // Show aurora borealis/australis
+  let dipoleTilt = 11.5;        // Magnetic dipole tilt in degrees
 
-  // Dipole field: B_r = (2M cos θ)/r³, B_θ = (M sin θ)/r³
-  function fieldLine(startTheta: number, steps: number): { x: number; y: number }[] {
-    const points: { x: number; y: number }[] = [];
-    const tiltRad = (dipoleTilt * Math.PI) / 180;
-    // Parametric dipole field line: r = L * cos²(λ), where L is the L-shell
-    const L = 3.0;
-    for (let i = 0; i <= steps; i++) {
-      const lambda = -Math.PI / 2 + (i / steps) * Math.PI; // -90° to +90°
-      const r = L * Math.cos(lambda) * Math.cos(lambda);
-      if (r < 0.3) continue;
-      const x = r * Math.cos(lambda + tiltRad + startTheta);
-      const y = r * Math.sin(lambda + tiltRad + startTheta);
-      points.push({ x, y });
+  // Earth properties
+  const earthRadius = 80;
+  const earthX = W * 0.5;
+  const earthY = H * 0.5;
+
+  // Magnetic field lines and solar wind
+  let fieldLines: Array<Array<{ x: number; y: number; strength: number }>> = [];
+  let solarWindParticles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    charge: number; // +1 for protons, -1 for electrons
+    energy: number;
+    trapped: boolean;
+  }> = [];
+
+  let auroraParticles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    intensity: number;
+    color: string;
+    age: number;
+  }> = [];
+
+  // Magnetospheric boundaries
+  let magnetopause: Array<{ x: number; y: number }> = [];
+  let bowShock: Array<{ x: number; y: number }> = [];
+  
+  function calculateMagneticField(x: number, y: number): { Bx: number; By: number; strength: number } {
+    // Relative to Earth's center
+    const dx = x - earthX;
+    const dy = y - earthY;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    
+    if (r < earthRadius) {
+      // Inside Earth - simplified internal field
+      return { Bx: 0, By: fieldStrength * 0.5, strength: fieldStrength * 0.5 };
     }
-    return points;
-  }
-
-  function drawEarth(cx: number, cy: number, r: number) {
-    // Earth
-    const grad = ctx.createRadialGradient(cx - r * 0.2, cy - r * 0.2, 0, cx, cy, r);
-    grad.addColorStop(0, "#3b82f6");
-    grad.addColorStop(0.4, "#2563eb");
-    grad.addColorStop(0.7, "#1d4ed8");
-    grad.addColorStop(1, "#1e3a8a");
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    // Continents hint (simple green patches)
-    ctx.fillStyle = "rgba(34, 197, 94, 0.4)";
-    ctx.beginPath();
-    ctx.arc(cx - r * 0.15, cy - r * 0.1, r * 0.25, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(cx + r * 0.2, cy + r * 0.15, r * 0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Rotation axis
+    
+    // Magnetic dipole field in 2D (simplified)
     const tiltRad = (dipoleTilt * Math.PI) / 180;
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    ctx.moveTo(cx - Math.sin(tiltRad) * r * 1.8, cy - Math.cos(tiltRad) * r * 1.8);
-    ctx.lineTo(cx + Math.sin(tiltRad) * r * 1.8, cy + Math.cos(tiltRad) * r * 1.8);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // N/S labels on magnetic axis
-    ctx.font = "bold 11px Arial";
-    ctx.fillStyle = "#ef4444";
-    ctx.textAlign = "center";
-    ctx.fillText("N", cx - Math.sin(tiltRad) * r * 1.4, cy - Math.cos(tiltRad) * r * 1.4);
-    ctx.fillStyle = "#3b82f6";
-    ctx.fillText("S", cx + Math.sin(tiltRad) * r * 1.4, cy + Math.cos(tiltRad) * r * 1.4);
+    
+    // Dipole moment components (tilted)
+    const mx = Math.sin(tiltRad) * fieldStrength;
+    const my = Math.cos(tiltRad) * fieldStrength;
+    
+    // Magnetic field components for dipole
+    const r3 = r * r * r;
+    const r5 = r3 * r * r;
+    
+    // Convert to magnetic coordinates
+    const dotProduct = dx * mx + dy * my;
+    
+    const Bx = (3 * dotProduct * dx / r5 - mx / r3) * 1000;
+    const By = (3 * dotProduct * dy / r5 - my / r3) * 1000;
+    
+    const strength = Math.sqrt(Bx * Bx + By * By);
+    
+    return { Bx, By, strength };
   }
 
-  function drawFieldLines(cx: number, cy: number, earthR: number) {
-    const scale = earthR * 0.6;
-    const numLines = 8;
+  function generateFieldLines() {
+    fieldLines = [];
+    
+    // Generate field lines starting from various points around Earth
+    const numLines = 16;
+    
     for (let i = 0; i < numLines; i++) {
-      const startTheta = (i / numLines) * Math.PI * 2;
-      const pts = fieldLine(startTheta, 60);
-      if (pts.length < 2) continue;
-
-      const hue = 200 + (i / numLines) * 60;
-      ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${0.3 * fieldStrength})`;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      for (let j = 0; j < pts.length; j++) {
-        const sx = cx + pts[j].x * scale;
-        const sy = cy - pts[j].y * scale;
-        if (j === 0) ctx.moveTo(sx, sy);
-        else ctx.lineTo(sx, sy);
+      const startAngle = (i / numLines) * Math.PI; // Upper hemisphere
+      const startRadius = earthRadius + 5;
+      const startX = earthX + startRadius * Math.cos(startAngle);
+      const startY = earthY - startRadius * Math.sin(startAngle); // North up
+      
+      const line: Array<{ x: number; y: number; strength: number }> = [];
+      
+      let x = startX;
+      let y = startY;
+      let step = 0;
+      const maxSteps = 200;
+      const stepSize = 2;
+      
+      while (step < maxSteps) {
+        const field = calculateMagneticField(x, y);
+        
+        if (field.strength < 0.001) break;
+        
+        line.push({ x, y, strength: field.strength });
+        
+        // Follow field direction
+        const magnitude = Math.sqrt(field.Bx * field.Bx + field.By * field.By);
+        if (magnitude > 0) {
+          const dirX = field.Bx / magnitude;
+          const dirY = field.By / magnitude;
+          
+          x += dirX * stepSize;
+          y += dirY * stepSize;
+        }
+        
+        // Check if we're too far away or hit Earth
+        const distFromEarth = Math.sqrt((x - earthX) ** 2 + (y - earthY) ** 2);
+        if (distFromEarth > 400 || distFromEarth < earthRadius) break;
+        
+        step++;
       }
-      ctx.stroke();
-
-      // Arrow at midpoint
-      if (pts.length > 10) {
-        const mid = Math.floor(pts.length / 2);
-        const sx = cx + pts[mid].x * scale;
-        const sy = cy - pts[mid].y * scale;
-        const dx = pts[mid + 1].x - pts[mid - 1].x;
-        const dy = -(pts[mid + 1].y - pts[mid - 1].y);
-        const angle = Math.atan2(dy, dx);
-        ctx.fillStyle = `hsla(${hue}, 70%, 60%, ${0.5 * fieldStrength})`;
-        ctx.beginPath();
-        ctx.moveTo(sx + Math.cos(angle) * 5, sy + Math.sin(angle) * 5);
-        ctx.lineTo(sx + Math.cos(angle + 2.5) * 5, sy + Math.sin(angle + 2.5) * 5);
-        ctx.lineTo(sx + Math.cos(angle - 2.5) * 5, sy + Math.sin(angle - 2.5) * 5);
-        ctx.closePath();
-        ctx.fill();
+      
+      if (line.length > 5) {
+        fieldLines.push(line);
       }
     }
   }
 
-  function drawMagnetosphere(cx: number, cy: number, earthR: number) {
-    // Bow shock / magnetopause
-    const compressFactor = 1 / (0.5 + solarWindStrength * 0.5);
-    ctx.strokeStyle = "rgba(147, 51, 234, 0.3)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    // Dayside (compressed)
-    for (let a = -Math.PI / 2; a <= Math.PI / 2; a += 0.05) {
-      const r = earthR * (2.5 + compressFactor) / (1 + 0.3 * Math.cos(a));
-      const sx = cx + r * Math.cos(a);
-      const sy = cy + r * Math.sin(a);
-      if (a === -Math.PI / 2) ctx.moveTo(sx, sy);
-      else ctx.lineTo(sx, sy);
+  function generateMagnetosphericBoundaries() {
+    magnetopause = [];
+    bowShock = [];
+    
+    // Magnetopause - boundary where solar wind pressure balances magnetic pressure
+    const numPoints = 50;
+    for (let i = 0; i < numPoints; i++) {
+      const angle = (i / numPoints) * 2 * Math.PI;
+      
+      // Day side compressed, night side extended
+      let radius;
+      if (Math.cos(angle) > 0) {
+        // Day side (compressed)
+        radius = 180 - 50 * Math.cos(angle) * solarWindStrength;
+      } else {
+        // Night side (extended magnetotail)
+        radius = 280 + 100 * Math.cos(angle);
+      }
+      
+      radius *= fieldStrength; // Scale with field strength
+      
+      const x = earthX + radius * Math.cos(angle);
+      const y = earthY + radius * Math.sin(angle);
+      
+      magnetopause.push({ x, y });
     }
-    ctx.stroke();
-
-    // Magnetotail (nightside)
-    ctx.strokeStyle = "rgba(147, 51, 234, 0.15)";
-    ctx.beginPath();
-    ctx.moveTo(cx - earthR * 3, cy - earthR * 2.5);
-    ctx.lineTo(cx - earthR * 8, cy - earthR * 3);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(cx - earthR * 3, cy + earthR * 2.5);
-    ctx.lineTo(cx - earthR * 8, cy + earthR * 3);
-    ctx.stroke();
-
-    ctx.font = "10px Arial";
-    ctx.fillStyle = "rgba(147, 51, 234, 0.5)";
-    ctx.textAlign = "center";
-    ctx.fillText("Magnetopause", cx + earthR * 4, cy - earthR * 2);
-    ctx.fillText("Magnetotail", cx - earthR * 5.5, cy);
+    
+    // Bow shock - formed where solar wind encounters magnetosphere
+    for (let i = 0; i < numPoints; i++) {
+      const angle = (i / numPoints) * Math.PI; // Front half only
+      
+      const radius = 220 + 30 * solarWindStrength;
+      const x = earthX + radius * Math.cos(angle - Math.PI);
+      const y = earthY + radius * Math.sin(angle - Math.PI);
+      
+      bowShock.push({ x, y });
+    }
   }
 
-  function drawSolarWind(cx: number, cy: number, earthR: number) {
-    // Spawn
-    if (Math.random() < 0.3 * solarWindStrength) {
-      solarParticles.push({
-        x: W + 10, y: Math.random() * H,
-        vx: -120 * solarWindStrength - Math.random() * 40,
+  function updateSolarWind(dt: number) {
+    // Add new solar wind particles from the left
+    if (Math.random() < solarWindStrength * 0.1) {
+      solarWindParticles.push({
+        x: -20,
+        y: earthY + (Math.random() - 0.5) * 400,
+        vx: 100 + solarWindStrength * 50,
         vy: (Math.random() - 0.5) * 20,
-        trapped: false, life: 5,
+        charge: Math.random() > 0.1 ? 1 : -1, // Mostly protons, some electrons
+        energy: 1 + Math.random() * solarWindStrength,
+        trapped: false
       });
     }
-
-    ctx.fillStyle = "rgba(251, 191, 36, 0.6)";
-    for (const p of solarParticles) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Label
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "#fbbf24";
-    ctx.textAlign = "right";
-    ctx.fillText("Solar Wind →", W - 15, 25);
-  }
-
-  function drawAurora(cx: number, cy: number, earthR: number) {
-    if (!showAurora) return;
-    const tiltRad = (dipoleTilt * Math.PI) / 180;
-    // Aurora ovals at ~65-75° magnetic latitude
-    for (const pole of [-1, 1]) {
-      const baseAngle = pole * (Math.PI / 2 - tiltRad);
-      for (let i = 0; i < 15; i++) {
-        const angle = baseAngle + (Math.random() - 0.5) * 0.5;
-        const r = earthR * (1.02 + Math.random() * 0.15);
-        const ax = cx + r * Math.cos(angle) + (Math.random() - 0.5) * 8;
-        const ay = cy - r * Math.sin(angle) + (Math.random() - 0.5) * 8;
-        const intensity = 0.3 + Math.sin(time * 3 + i) * 0.2;
-        ctx.fillStyle = pole > 0
-          ? `rgba(34, 197, 94, ${intensity})`
-          : `rgba(147, 51, 234, ${intensity})`;
-        ctx.beginPath();
-        ctx.arc(ax, ay, 2 + Math.random() * 3, 0, Math.PI * 2);
-        ctx.fill();
+    
+    // Update existing particles
+    for (let i = solarWindParticles.length - 1; i >= 0; i--) {
+      const particle = solarWindParticles[i];
+      
+      // Apply Lorentz force: F = q(v × B)
+      const field = calculateMagneticField(particle.x, particle.y);
+      const lorentzForceX = particle.charge * particle.vy * field.By * 0.001;
+      const lorentzForceY = -particle.charge * particle.vx * field.Bx * 0.001;
+      
+      particle.vx += lorentzForceX * dt;
+      particle.vy += lorentzForceY * dt;
+      
+      // Update position
+      particle.x += particle.vx * dt;
+      particle.y += particle.vy * dt;
+      
+      // Check if particle is trapped in radiation belt
+      const distFromEarth = Math.sqrt((particle.x - earthX) ** 2 + (particle.y - earthY) ** 2);
+      if (distFromEarth > earthRadius * 1.5 && distFromEarth < earthRadius * 4 && field.strength > 0.1) {
+        particle.trapped = true;
+        // Reduce velocity for trapped particles
+        particle.vx *= 0.95;
+        particle.vy *= 0.95;
+      }
+      
+      // Generate aurora when energetic particles hit upper atmosphere
+      if (distFromEarth < earthRadius * 1.2 && distFromEarth > earthRadius && particle.energy > 0.5) {
+        if (showAurora && Math.random() < 0.3) {
+          const auroraIntensity = particle.energy * field.strength;
+          const color = particle.charge > 0 ? '#00ff88' : '#ff4488'; // Green for protons, red for electrons
+          
+          auroraParticles.push({
+            x: particle.x,
+            y: particle.y,
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            intensity: auroraIntensity,
+            color: color,
+            age: 0
+          });
+        }
+        
+        // Particle absorbed by atmosphere
+        solarWindParticles.splice(i, 1);
+        continue;
+      }
+      
+      // Remove particles that are too far away
+      if (particle.x > W + 50 || particle.y < -50 || particle.y > H + 50) {
+        solarWindParticles.splice(i, 1);
       }
     }
   }
 
-  function drawVanAllenBelts(cx: number, cy: number, earthR: number) {
-    // Inner belt (~1.5 R_E) and outer belt (~4 R_E)
-    for (const { r, color, label } of [
-      { r: 1.5, color: "rgba(239, 68, 68, 0.1)", label: "Inner Belt" },
-      { r: 3.5, color: "rgba(59, 130, 246, 0.07)", label: "Outer Belt" },
-    ]) {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, earthR * r * 1.2, earthR * r * 0.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.font = "9px Arial";
-      ctx.fillStyle = "rgba(148, 163, 184, 0.5)";
-      ctx.textAlign = "center";
-      ctx.fillText(label, cx, cy + earthR * r * 0.5 + 10);
+  function updateAurora(dt: number) {
+    for (let i = auroraParticles.length - 1; i >= 0; i--) {
+      const aurora = auroraParticles[i];
+      aurora.age += dt;
+      
+      // Update position with some random motion
+      aurora.x += aurora.vx * dt;
+      aurora.y += aurora.vy * dt;
+      
+      // Fade out over time
+      aurora.intensity = Math.max(0, aurora.intensity - dt * 0.5);
+      
+      // Remove old aurora particles
+      if (aurora.age > 3 || aurora.intensity <= 0) {
+        auroraParticles.splice(i, 1);
+      }
     }
-  }
-
-  function drawInfoPanel() {
-    const px = W * 0.02, py = H * 0.78, pw = W * 0.96, ph = H * 0.2;
-    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 1;
-    ctx.fillRect(px, py, pw, ph);
-    ctx.strokeRect(px, py, pw, ph);
-
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "#e2e8f0";
-    ctx.textAlign = "left";
-    const y0 = py + 18;
-    ctx.fillText(`Field Strength: ${(fieldStrength * 30).toFixed(0)} μT (at equator)`, px + 15, y0);
-    ctx.fillText(`Dipole Tilt: ${dipoleTilt.toFixed(1)}° from rotation axis`, px + 15, y0 + 18);
-    ctx.fillText(`Solar Wind: ${solarWindStrength.toFixed(1)}× normal`, px + 15, y0 + 36);
-
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#94a3b8";
-    ctx.fillText("B_r = (2μ₀m cos θ) / (4πr³)", px + pw - 15, y0);
-    ctx.fillText("B_θ = (μ₀m sin θ) / (4πr³)", px + pw - 15, y0 + 18);
-    ctx.fillText("Dipole field approximation", px + pw - 15, y0 + 36);
   }
 
   const engine: SimulationEngine = {
     config,
-    init(c) {
-      canvas = c; ctx = c.getContext("2d")!; W = c.width; H = c.height;
-      time = 0; solarParticles = [];
+
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      W = canvas.width;
+      H = canvas.height;
+      generateFieldLines();
+      generateMagnetosphericBoundaries();
+      time = 0;
     },
-    update(dt, params) {
+
+    update(dt: number, params: Record<string, number>) {
       fieldStrength = params.fieldStrength ?? fieldStrength;
       solarWindStrength = params.solarWindStrength ?? solarWindStrength;
       showAurora = Math.round(params.showAurora ?? showAurora);
       dipoleTilt = params.dipoleTilt ?? dipoleTilt;
-      time += dt;
 
-      for (const p of solarParticles) {
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.life -= dt;
+      time += dt;
+      
+      // Regenerate field geometry if parameters changed significantly
+      if (Math.random() < 0.1) { // Occasional refresh
+        generateFieldLines();
+        generateMagnetosphericBoundaries();
       }
-      solarParticles = solarParticles.filter(p => p.life > 0 && p.x > -10);
+      
+      updateSolarWind(dt);
+      updateAurora(dt);
     },
+
     render() {
-      ctx.fillStyle = "#050510";
+      // Background (space)
+      const gradient = ctx.createLinearGradient(0, 0, W, 0);
+      gradient.addColorStop(0, "#0a0a1f");
+      gradient.addColorStop(0.5, "#1a1a3a");
+      gradient.addColorStop(1, "#0a0a1f");
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, W, H);
 
-      ctx.font = "bold 18px Arial";
+      // Stars
+      ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+      for (let i = 0; i < 50; i++) {
+        const x = (i * 37) % W;
+        const y = (i * 41) % H;
+        ctx.beginPath();
+        ctx.arc(x, y, Math.random() * 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Title
+      ctx.font = "bold 20px Arial";
       ctx.fillStyle = "#e2e8f0";
       ctx.textAlign = "center";
-      ctx.fillText("Earth's Magnetic Field", W / 2, 28);
+      ctx.fillText("Earth's Magnetic Field", W / 2, 30);
 
-      const cx = W * 0.45, cy = H * 0.4;
-      const earthR = Math.min(W, H) * 0.09;
+      // Solar wind direction indicator
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#fbbf24";
+      ctx.textAlign = "left";
+      ctx.fillText("Solar Wind →", 20, 60);
 
-      drawVanAllenBelts(cx, cy, earthR);
-      drawMagnetosphere(cx, cy, earthR);
-      drawFieldLines(cx, cy, earthR);
-      drawEarth(cx, cy, earthR);
-      drawAurora(cx, cy, earthR);
-      drawSolarWind(cx, cy, earthR);
-      drawInfoPanel();
+      // Draw bow shock
+      if (bowShock.length > 0) {
+        ctx.strokeStyle = "rgba(255, 100, 100, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < bowShock.length; i++) {
+          const point = bowShock[i];
+          if (i === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        }
+        ctx.stroke();
+        
+        ctx.font = "10px Arial";
+        ctx.fillStyle = "#ff6464";
+        ctx.textAlign = "center";
+        ctx.fillText("Bow Shock", bowShock[bowShock.length / 2].x - 50, bowShock[bowShock.length / 2].y - 10);
+      }
+
+      // Draw magnetopause
+      if (magnetopause.length > 0) {
+        ctx.strokeStyle = "rgba(100, 255, 100, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < magnetopause.length; i++) {
+          const point = magnetopause[i];
+          if (i === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        
+        ctx.font = "10px Arial";
+        ctx.fillStyle = "#64ff64";
+        ctx.textAlign = "center";
+        ctx.fillText("Magnetopause", magnetopause[0].x + 30, magnetopause[0].y);
+      }
+
+      // Draw magnetic field lines
+      for (const line of fieldLines) {
+        if (line.length < 2) continue;
+        
+        ctx.strokeStyle = `rgba(100, 150, 255, ${0.3 + fieldStrength * 0.4})`;
+        ctx.lineWidth = 1 + fieldStrength;
+        ctx.beginPath();
+        
+        for (let i = 0; i < line.length; i++) {
+          const point = line[i];
+          if (i === 0) ctx.moveTo(point.x, point.y);
+          else ctx.lineTo(point.x, point.y);
+        }
+        ctx.stroke();
+        
+        // Draw field direction arrows
+        if (line.length > 10) {
+          const midIndex = Math.floor(line.length / 2);
+          const p1 = line[midIndex];
+          const p2 = line[midIndex + 1];
+          
+          if (p2) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.strokeStyle = `rgba(150, 200, 255, ${0.5 + fieldStrength * 0.3})`;
+            ctx.lineWidth = 2;
+            
+            // Arrowhead
+            const arrowLength = 8;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p1.x - arrowLength * Math.cos(angle - 0.3), p1.y - arrowLength * Math.sin(angle - 0.3));
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p1.x - arrowLength * Math.cos(angle + 0.3), p1.y - arrowLength * Math.sin(angle + 0.3));
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw solar wind particles
+      for (const particle of solarWindParticles) {
+        const alpha = particle.trapped ? 1.0 : 0.7;
+        const color = particle.charge > 0 ? `rgba(255, 100, 100, ${alpha})` : `rgba(100, 100, 255, ${alpha})`;
+        const radius = particle.trapped ? 3 : 2;
+        
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Particle trail for trapped particles
+        if (particle.trapped) {
+          ctx.strokeStyle = color.replace(/[\d.]+\)/, '0.3)');
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(particle.x, particle.y);
+          ctx.lineTo(particle.x - particle.vx * 0.1, particle.y - particle.vy * 0.1);
+          ctx.stroke();
+        }
+      }
+
+      // Draw aurora
+      for (const aurora of auroraParticles) {
+        const alpha = aurora.intensity * 0.8;
+        ctx.fillStyle = aurora.color.replace(')', `, ${alpha})`);
+        
+        // Aurora glow effect
+        const glowGradient = ctx.createRadialGradient(aurora.x, aurora.y, 0, aurora.x, aurora.y, 15);
+        glowGradient.addColorStop(0, aurora.color.replace(')', `, ${alpha})`));
+        glowGradient.addColorStop(1, aurora.color.replace(')', ', 0)'));
+        
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(aurora.x, aurora.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Draw Earth
+      const earthGradient = ctx.createRadialGradient(earthX - 20, earthY - 20, 0, earthX, earthY, earthRadius);
+      earthGradient.addColorStop(0, "#4ade80");
+      earthGradient.addColorStop(0.4, "#22c55e");
+      earthGradient.addColorStop(0.7, "#16a34a");
+      earthGradient.addColorStop(1, "#15803d");
+      
+      ctx.fillStyle = earthGradient;
+      ctx.beginPath();
+      ctx.arc(earthX, earthY, earthRadius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Earth's magnetic dipole indicator
+      const tiltRad = (dipoleTilt * Math.PI) / 180;
+      const dipoleLength = 60;
+      const dipoleEndX = earthX + dipoleLength * Math.sin(tiltRad);
+      const dipoleEndY = earthY - dipoleLength * Math.cos(tiltRad);
+      
+      ctx.strokeStyle = "#ff4444";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(earthX, earthY);
+      ctx.lineTo(dipoleEndX, dipoleEndY);
+      ctx.stroke();
+      
+      // Magnetic poles
+      ctx.fillStyle = "#ff4444";
+      ctx.beginPath();
+      ctx.arc(dipoleEndX, dipoleEndY, 4, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = "#4444ff";
+      ctx.beginPath();
+      ctx.arc(earthX - dipoleLength * Math.sin(tiltRad), earthY + dipoleLength * Math.cos(tiltRad), 4, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.font = "10px Arial";
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.fillText("N", dipoleEndX, dipoleEndY - 8);
+      ctx.fillText("S", earthX - dipoleLength * Math.sin(tiltRad), earthY + dipoleLength * Math.cos(tiltRad) + 15);
+
+      // Van Allen radiation belts indication
+      ctx.strokeStyle = "rgba(255, 255, 100, 0.4)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      
+      // Inner belt
+      ctx.beginPath();
+      ctx.ellipse(earthX, earthY, earthRadius * 2, earthRadius * 1.5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Outer belt
+      ctx.beginPath();
+      ctx.ellipse(earthX, earthY, earthRadius * 3.5, earthRadius * 2.5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Parameters panel
+      const paramX = 20;
+      const paramY = H - 180;
+      const paramW = 250;
+      const paramH = 160;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(paramX, paramY, paramW, paramH);
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(paramX, paramY, paramW, paramH);
+
+      let infoY = paramY + 20;
+      ctx.font = "bold 14px Arial";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.textAlign = "left";
+      ctx.fillText("Magnetic Field Properties", paramX + 10, infoY);
+      infoY += 25;
+
+      ctx.font = "11px Arial";
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillText(`Field Strength: ${fieldStrength.toFixed(1)}×`, paramX + 10, infoY);
+      infoY += 16;
+      ctx.fillText(`Solar Wind: ${solarWindStrength.toFixed(1)}×`, paramX + 10, infoY);
+      infoY += 16;
+      ctx.fillText(`Dipole Tilt: ${dipoleTilt.toFixed(1)}°`, paramX + 10, infoY);
+      infoY += 16;
+      ctx.fillText(`Aurora: ${showAurora ? "ON" : "OFF"}`, paramX + 10, infoY);
+      infoY += 20;
+
+      ctx.fillStyle = "#10b981";
+      ctx.fillText(`Active Particles: ${solarWindParticles.length}`, paramX + 10, infoY);
+      infoY += 14;
+      const trappedCount = solarWindParticles.filter(p => p.trapped).length;
+      ctx.fillText(`Trapped: ${trappedCount}`, paramX + 10, infoY);
+      infoY += 14;
+      ctx.fillText(`Aurora Events: ${auroraParticles.length}`, paramX + 10, infoY);
+
+      // Legend and physics panel
+      const legendX = W - 300;
+      const legendY = H - 180;
+      const legendW = 280;
+      const legendH = 160;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(legendX, legendY, legendW, legendH);
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(legendX, legendY, legendW, legendH);
+
+      let legY = legendY + 20;
+      ctx.font = "bold 14px Arial";
+      ctx.fillStyle = "#e2e8f0";
+      ctx.textAlign = "left";
+      ctx.fillText("Magnetospheric Physics", legendX + 10, legY);
+      legY += 25;
+
+      ctx.font = "10px Arial";
+      ctx.fillStyle = "#94a3b8";
+      const concepts = [
+        "• Dipole field deflects solar wind",
+        "• Charged particles follow field lines",
+        "• Van Allen belts trap radiation",
+        "• Aurora from particle precipitation",
+        "• Magnetopause: pressure balance",
+        "• Bow shock: supersonic deceleration",
+        "• Magnetic reconnection drives storms"
+      ];
+      
+      concepts.forEach((concept, i) => {
+        ctx.fillText(concept, legendX + 10, legY);
+        legY += 14;
+      });
+
+      // Legend for particle types
+      legY += 10;
+      ctx.font = "11px Arial";
+      ctx.fillStyle = "#ff6464";
+      ctx.fillText("● Protons (H+)", legendX + 10, legY);
+      legY += 14;
+      ctx.fillStyle = "#6464ff";
+      ctx.fillText("● Electrons (e-)", legendX + 10, legY);
+      legY += 14;
+      ctx.fillStyle = "#64ff64";
+      ctx.fillText("— Magnetosphere boundary", legendX + 10, legY);
+
+      // Current magnetic field strength at Earth's surface
+      const surfaceField = calculateMagneticField(earthX, earthY + earthRadius);
+      ctx.font = "11px Arial";
+      ctx.fillStyle = "#fbbf24";
+      ctx.textAlign = "left";
+      ctx.fillText(`Surface field: ${(surfaceField.strength * 50000).toFixed(0)} nT`, 20, H - 10);
     },
+
     reset() {
       time = 0;
-      solarParticles = [];
+      solarWindParticles = [];
+      auroraParticles = [];
+      generateFieldLines();
+      generateMagnetosphericBoundaries();
     },
-    destroy() {},
-    getStateDescription() {
-      return `Earth's magnetic field: dipole tilt ${dipoleTilt.toFixed(1)}°, field strength ${(fieldStrength * 30).toFixed(0)} μT at equator, solar wind ${solarWindStrength.toFixed(1)}× normal. ${showAurora ? "Aurora visible at magnetic poles." : "Aurora display off."}`;
+
+    destroy() {
+      solarWindParticles = [];
+      auroraParticles = [];
+      fieldLines = [];
+      magnetopause = [];
+      bowShock = [];
     },
-    resize(w, h) { W = w; H = h; },
+
+    getStateDescription(): string {
+      const trappedParticles = solarWindParticles.filter(p => p.trapped).length;
+      const surfaceField = calculateMagneticField(earthX, earthY + earthRadius);
+      
+      return (
+        `Earth's magnetic field simulation: Dipole field strength ${fieldStrength.toFixed(1)}× with ` +
+        `${dipoleTilt.toFixed(1)}° tilt. Solar wind intensity ${solarWindStrength.toFixed(1)}×. ` +
+        `Currently tracking ${solarWindParticles.length} charged particles, ` +
+        `${trappedParticles} trapped in Van Allen radiation belts. ` +
+        `${auroraParticles.length} active aurora events ${showAurora ? 'visible' : 'disabled'}. ` +
+        `Surface magnetic field strength: ${(surfaceField.strength * 50000).toFixed(0)} nanotesla. ` +
+        `Magnetosphere shows bow shock, magnetopause boundary, and particle deflection. ` +
+        `Demonstrates how Earth's magnetic field protects from harmful solar radiation.`
+      );
+    },
+
+    resize(w: number, h: number) {
+      W = w;
+      H = h;
+    }
   };
+
   return engine;
 };
 
-export default earthsMagneticFieldFactory;
+export default EarthsMagneticFieldFactory;
