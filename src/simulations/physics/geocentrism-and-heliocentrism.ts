@@ -1,344 +1,347 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
-interface Planet {
+interface CelestialBody {
   name: string;
-  orbitRadius: number; // AU (helio), scaled for display
-  period: number; // years
   color: string;
-  size: number;
+  radius: number;
+  orbitRadius: number;
+  period: number; // in Earth years
   angle: number;
 }
 
-const GeocentricHeliocentricFactory: SimulationFactory = (): SimulationEngine => {
+const GeoHelioFactory: SimulationFactory = (): SimulationEngine => {
   const config = getSimConfig("geocentrism-and-heliocentrism") as SimulationConfig;
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
+  let model = 0; // 0 = heliocentric, 1 = geocentric
   let timeScale = 1;
-  let viewMode = 0; // 0=heliocentric, 1=geocentric
+  let showLabels = 1;
   let showOrbits = 1;
-  let showTrails = 1;
 
-  // Simplified solar system (inner planets)
-  const planets: Planet[] = [
-    { name: "Mercury", orbitRadius: 0.39, period: 0.24, color: "#9e9e9e", size: 4, angle: 0 },
-    { name: "Venus", orbitRadius: 0.72, period: 0.62, color: "#ffcc80", size: 6, angle: Math.PI * 0.7 },
-    { name: "Earth", orbitRadius: 1.0, period: 1.0, color: "#42a5f5", size: 7, angle: Math.PI * 1.2 },
-    { name: "Mars", orbitRadius: 1.52, period: 1.88, color: "#ef5350", size: 5, angle: Math.PI * 0.3 },
-    { name: "Jupiter", orbitRadius: 2.5, period: 5.2, color: "#d4a574", size: 10, angle: Math.PI * 1.8 },
+  // Heliocentric data (orbit radius in px, period in years)
+  const planets: CelestialBody[] = [
+    { name: "Mercury", color: "#a8a29e", radius: 3, orbitRadius: 40, period: 0.241, angle: 0 },
+    { name: "Venus", color: "#fde68a", radius: 5, orbitRadius: 65, period: 0.615, angle: Math.PI / 4 },
+    { name: "Earth", color: "#3b82f6", radius: 5, orbitRadius: 95, period: 1.0, angle: Math.PI / 2 },
+    { name: "Mars", color: "#ef4444", radius: 4, orbitRadius: 130, period: 1.881, angle: Math.PI },
+    { name: "Jupiter", color: "#f59e0b", radius: 10, orbitRadius: 180, period: 11.86, angle: Math.PI * 1.5 },
+    { name: "Saturn", color: "#d4a574", radius: 8, orbitRadius: 230, period: 29.46, angle: Math.PI * 0.3 },
   ];
 
-  // Trail history for geocentric view
-  const geoTrails: Map<string, Array<{ x: number; y: number }>> = new Map();
-  const MAX_TRAIL = 600;
+  // Moon
+  const moonOrbitRadius = 15;
+  const moonPeriod = 0.0748; // ~27.3 days
+  let moonAngle = 0;
 
-  function reset(): void {
+  let elapsedYears = 0;
+
+  function initState() {
     time = 0;
+    elapsedYears = 0;
     planets[0].angle = 0;
-    planets[1].angle = Math.PI * 0.7;
-    planets[2].angle = Math.PI * 1.2;
-    planets[3].angle = Math.PI * 0.3;
-    planets[4].angle = Math.PI * 1.8;
-    geoTrails.clear();
-    for (const p of planets) {
-      geoTrails.set(p.name, []);
-    }
+    planets[1].angle = Math.PI / 4;
+    planets[2].angle = Math.PI / 2;
+    planets[3].angle = Math.PI;
+    planets[4].angle = Math.PI * 1.5;
+    planets[5].angle = Math.PI * 0.3;
+    moonAngle = 0;
   }
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
-  }
-
-  function getHelioPos(planet: Planet): { x: number; y: number } {
-    const scale = Math.min(W, H) * 0.15;
-    return {
-      x: planet.orbitRadius * scale * Math.cos(planet.angle),
-      y: planet.orbitRadius * scale * Math.sin(planet.angle),
-    };
-  }
-
-  function update(dt: number, params: Record<string, number>): void {
-    const newTS = params.timeScale ?? 1;
-    const newVM = params.viewMode ?? 0;
-    const newSO = params.showOrbits ?? 1;
-    const newST = params.showTrails ?? 1;
-
-    timeScale = newTS;
-    if (newVM !== viewMode) {
-      viewMode = newVM;
-      for (const [, trail] of geoTrails) trail.length = 0;
-    }
-    showOrbits = newSO;
-    showTrails = newST;
-
-    time += dt * timeScale;
-
-    // Update planet angles
-    for (const p of planets) {
-      const angularVel = (2 * Math.PI) / (p.period * 365.25 * 86400);
-      p.angle += angularVel * dt * timeScale * 86400 * 365.25;
-    }
-
-    // Record geocentric trails
-    if (showTrails >= 0.5 && viewMode >= 0.5) {
-      const earthPos = getHelioPos(planets[2]); // Earth
-      for (const p of planets) {
-        if (p.name === "Earth") continue;
-        const pos = getHelioPos(p);
-        const geoX = pos.x - earthPos.x;
-        const geoY = pos.y - earthPos.y;
-        const trail = geoTrails.get(p.name)!;
-        trail.push({ x: geoX, y: geoY });
-        if (trail.length > MAX_TRAIL) trail.shift();
-      }
-    }
-  }
-
-  function drawBackground(): void {
+  function drawBackground() {
     ctx.fillStyle = "#050510";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, width, height);
 
+    // Stars
     const rng = (s: number) => {
-      let v = s;
-      return () => { v = (v * 16807) % 2147483647; return v / 2147483647; };
+      let x = Math.sin(s) * 43758.5453;
+      return x - Math.floor(x);
     };
-    const rand = rng(77);
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 200; i++) {
+      const sx = rng(i * 7.1) * width;
+      const sy = rng(i * 13.3) * height;
+      const sr = rng(i * 3.7) * 1 + 0.3;
+      ctx.globalAlpha = 0.3 + rng(i * 11.1) * 0.4;
       ctx.beginPath();
-      ctx.arc(rand() * W, rand() * H, rand() * 1.2, 0, Math.PI * 2);
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
       ctx.fill();
     }
+    ctx.globalAlpha = 1;
   }
 
-  function drawHeliocentricView(): void {
-    const cx = W * 0.35;
-    const cy = H * 0.5;
-    const scale = Math.min(W, H) * 0.15;
+  function drawHeliocentricModel() {
+    const cx = width / 2;
+    const cy = height / 2;
 
-    // Title
-    ctx.fillStyle = "#ffa726";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Heliocentric (Copernicus)", cx, 25);
+    // Sun at center
+    drawSun(cx, cy);
 
-    // Sun
-    const sunGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 18);
-    sunGrad.addColorStop(0, "#fff59d");
-    sunGrad.addColorStop(0.5, "#ffb300");
-    sunGrad.addColorStop(1, "#ff8f00");
-    ctx.beginPath();
-    ctx.arc(cx, cy, 15, 0, Math.PI * 2);
-    ctx.fillStyle = sunGrad;
-    ctx.fill();
-
-    // Glow
-    const glowGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 40);
-    glowGrad.addColorStop(0, "rgba(255, 183, 0, 0.3)");
-    glowGrad.addColorStop(1, "rgba(255, 183, 0, 0)");
-    ctx.beginPath();
-    ctx.arc(cx, cy, 40, 0, Math.PI * 2);
-    ctx.fillStyle = glowGrad;
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Sun", cx, cy + 25);
-
-    // Orbits and planets
-    for (const p of planets) {
-      const r = p.orbitRadius * scale;
-
-      if (showOrbits >= 0.5) {
-        ctx.strokeStyle = `${p.color}30`;
+    // Planet orbits and positions
+    for (const planet of planets) {
+      if (showOrbits > 0.5) {
+        ctx.strokeStyle = planet.color + "30";
         ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.arc(cx, cy, planet.orbitRadius, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.setLineDash([]);
       }
 
-      const px = cx + r * Math.cos(p.angle);
-      const py = cy + r * Math.sin(p.angle);
+      const px = cx + Math.cos(planet.angle) * planet.orbitRadius;
+      const py = cy + Math.sin(planet.angle) * planet.orbitRadius;
 
-      ctx.beginPath();
-      ctx.arc(px, py, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.fill();
+      drawPlanet(px, py, planet);
 
-      ctx.fillStyle = p.color;
-      ctx.font = "9px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(p.name, px, py - p.size - 4);
-    }
-  }
-
-  function drawGeocentricView(): void {
-    const cx = W * 0.75;
-    const cy = H * 0.5;
-    const scale = Math.min(W, H) * 0.15;
-
-    // Title
-    ctx.fillStyle = "#42a5f5";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Geocentric (Ptolemy)", cx, 25);
-
-    // Earth at center
-    ctx.beginPath();
-    ctx.arc(cx, cy, 8, 0, Math.PI * 2);
-    ctx.fillStyle = "#42a5f5";
-    ctx.fill();
-    ctx.fillStyle = "#42a5f5";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Earth", cx, cy + 18);
-
-    const earthPos = getHelioPos(planets[2]);
-
-    for (const p of planets) {
-      if (p.name === "Earth") continue;
-
-      const helioPos = getHelioPos(p);
-      const geoX = helioPos.x - earthPos.x;
-      const geoY = helioPos.y - earthPos.y;
-
-      const px = cx + geoX;
-      const py = cy + geoY;
-
-      // Draw trail (retrograde motion path)
-      if (showTrails >= 0.5) {
-        const trail = geoTrails.get(p.name);
-        if (trail && trail.length > 1) {
-          ctx.strokeStyle = `${p.color}40`;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          for (let i = 0; i < trail.length; i++) {
-            const tx = cx + trail[i].x;
-            const ty = cy + trail[i].y;
-            if (i === 0) ctx.moveTo(tx, ty);
-            else ctx.lineTo(tx, ty);
-          }
-          ctx.stroke();
+      // Moon for Earth
+      if (planet.name === "Earth") {
+        const mx = px + Math.cos(moonAngle) * moonOrbitRadius;
+        const my = py + Math.sin(moonAngle) * moonOrbitRadius;
+        ctx.fillStyle = "#d1d5db";
+        ctx.beginPath();
+        ctx.arc(mx, my, 2, 0, Math.PI * 2);
+        ctx.fill();
+        if (showLabels > 0.5) {
+          ctx.fillStyle = "#9ca3af";
+          ctx.font = "9px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("Moon", mx, my - 5);
         }
       }
-
-      // Planet
-      ctx.beginPath();
-      ctx.arc(px, py, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-
-      ctx.fillStyle = p.color;
-      ctx.font = "9px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(p.name, px, py - p.size - 4);
     }
 
-    // Sun in geocentric view
-    const sunHelioX = 0;
-    const sunHelioY = 0;
-    const sunGeoX = sunHelioX - earthPos.x;
-    const sunGeoY = sunHelioY - earthPos.y;
-    const sx = cx + sunGeoX;
-    const sy = cy + sunGeoY;
-
-    const sunGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, 12);
-    sunGrad.addColorStop(0, "#fff59d");
-    sunGrad.addColorStop(1, "#ff8f00");
-    ctx.beginPath();
-    ctx.arc(sx, sy, 10, 0, Math.PI * 2);
-    ctx.fillStyle = sunGrad;
-    ctx.fill();
-    ctx.fillStyle = "#ffa726";
-    ctx.font = "9px sans-serif";
-    ctx.fillText("Sun", sx, sy - 14);
-  }
-
-  function drawDivider(): void {
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(W * 0.55, 40);
-    ctx.lineTo(W * 0.55, H - 40);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  function drawInfo(): void {
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(W * 0.05, H - 80, W * 0.9, 65, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
+    ctx.fillStyle = "#a855f7";
+    ctx.font = "bold 14px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(
-      "Geocentrism vs Heliocentrism",
-      W * 0.5, H - 62
-    );
-
-    ctx.font = "11px sans-serif";
-    ctx.fillStyle = "#ccc";
-    ctx.fillText(
-      "Left: Sun-centered model (Copernicus, 1543) — simple circular orbits. " +
-      "Right: Earth-centered model (Ptolemy) — planets show retrograde motion loops.",
-      W * 0.5, H - 44
-    );
-    ctx.fillStyle = "#ffa726";
-    ctx.font = "10px sans-serif";
-    ctx.fillText(
-      `Year: ${(time / (365.25 * 86400)).toFixed(2)}  |  Speed: ${timeScale}×`,
-      W * 0.5, H - 26
-    );
+    ctx.fillText("HELIOCENTRIC MODEL", cx, 45);
+    ctx.fillStyle = "#7c3aed";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("(Copernicus, 1543)", cx, 62);
   }
 
-  function render(): void {
-    drawBackground();
-    drawHeliocentricView();
-    drawDivider();
-    drawGeocentricView();
-    drawInfo();
+  function drawGeocentricModel() {
+    const cx = width / 2;
+    const cy = height / 2;
+
+    // Earth at center
+    const earth = planets[2];
+    drawPlanet(cx, cy, { ...earth, radius: 8 });
+
+    // Moon orbit
+    if (showOrbits > 0.5) {
+      ctx.strokeStyle = "#d1d5db30";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    const mx = cx + Math.cos(moonAngle) * 25;
+    const my = cy + Math.sin(moonAngle) * 25;
+    ctx.fillStyle = "#d1d5db";
+    ctx.beginPath();
+    ctx.arc(mx, my, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // In geocentric view, compute positions relative to Earth
+    const earthAngle = planets[2].angle;
+
+    for (const planet of planets) {
+      if (planet.name === "Earth") continue;
+
+      // Position relative to Earth
+      const relAngle = planet.angle - earthAngle;
+
+      // For geocentric model, use epicycles to explain retrograde motion
+      let geoRadius: number;
+      let geoAngle: number;
+
+      if (planet.name === "Mercury" || planet.name === "Venus") {
+        // Inner planets: epicycle around deferent that follows Sun
+        const sunRelAngle = -earthAngle;
+        const epicycleRadius = planet.orbitRadius * 0.8;
+        const deferentRadius = planets[2].orbitRadius * 0.9;
+
+        const sx = Math.cos(sunRelAngle) * deferentRadius;
+        const sy = Math.sin(sunRelAngle) * deferentRadius;
+
+        const px = sx + Math.cos(planet.angle * 3) * epicycleRadius * 0.3;
+        const py = sy + Math.sin(planet.angle * 3) * epicycleRadius * 0.3;
+
+        geoRadius = Math.sqrt(px * px + py * py);
+        geoAngle = Math.atan2(py, px);
+      } else {
+        // Outer planets: simple orbit at scale
+        geoRadius = planet.orbitRadius;
+        geoAngle = relAngle;
+      }
+
+      if (showOrbits > 0.5) {
+        ctx.strokeStyle = planet.color + "20";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, geoRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      const ppx = cx + Math.cos(geoAngle) * geoRadius;
+      const ppy = cy + Math.sin(geoAngle) * geoRadius;
+
+      if (planet.name === "Sun" as string) {
+        drawSun(ppx, ppy);
+      } else {
+        drawPlanet(ppx, ppy, planet);
+      }
+    }
+
+    // Draw Sun orbiting Earth in geocentric model
+    const sunGeoRadius = planets[2].orbitRadius;
+    const sunGeoAngle = -earthAngle;
+    if (showOrbits > 0.5) {
+      ctx.strokeStyle = "#fbbf2430";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, sunGeoRadius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    const sx = cx + Math.cos(sunGeoAngle) * sunGeoRadius;
+    const sy = cy + Math.sin(sunGeoAngle) * sunGeoRadius;
+    drawSun(sx, sy);
+
+    ctx.fillStyle = "#a855f7";
+    ctx.font = "bold 14px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("GEOCENTRIC MODEL", cx, 45);
+    ctx.fillStyle = "#7c3aed";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("(Ptolemy, ~150 AD)", cx, 62);
   }
 
-  function destroy(): void {
-    geoTrails.clear();
+  function drawSun(x: number, y: number) {
+    const r = 14;
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+    glow.addColorStop(0, "rgba(250, 204, 21, 0.4)");
+    glow.addColorStop(1, "rgba(250, 204, 21, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    const grad = ctx.createRadialGradient(x - 3, y - 3, 0, x, y, r);
+    grad.addColorStop(0, "#fef08a");
+    grad.addColorStop(0.6, "#fbbf24");
+    grad.addColorStop(1, "#b45309");
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    if (showLabels > 0.5) {
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Sun", x, y + r + 12);
+    }
   }
 
-  function getStateDescription(): string {
-    const year = time / (365.25 * 86400);
-    const earthAngle = ((planets[2].angle * 180) / Math.PI) % 360;
-    const marsAngle = ((planets[3].angle * 180) / Math.PI) % 360;
-    return (
-      `Geocentrism vs Heliocentrism comparison. Year: ${year.toFixed(2)}, speed: ${timeScale}×. ` +
-      `Left: Heliocentric (Copernican) model — Sun at center, planets in circular orbits. ` +
-      `Right: Geocentric (Ptolemaic) model — Earth at center, other bodies orbit Earth. ` +
-      `Earth angle: ${earthAngle.toFixed(0)}°, Mars angle: ${marsAngle.toFixed(0)}°. ` +
-      `In the geocentric view, superior planets (Mars, Jupiter) show retrograde motion loops — ` +
-      `this led Ptolemy to propose epicycles. Copernicus showed these are simply apparent motions ` +
-      `caused by Earth overtaking outer planets.`
-    );
+  function drawPlanet(x: number, y: number, planet: CelestialBody) {
+    const grad = ctx.createRadialGradient(x - planet.radius * 0.3, y - planet.radius * 0.3, 0, x, y, planet.radius);
+    grad.addColorStop(0, "#ffffff");
+    grad.addColorStop(0.5, planet.color);
+    grad.addColorStop(1, planet.color + "88");
+    ctx.beginPath();
+    ctx.arc(x, y, planet.radius, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    if (showLabels > 0.5) {
+      ctx.fillStyle = planet.color;
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(planet.name, x, y - planet.radius - 4);
+    }
   }
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
+  function drawLegend() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Geocentrism vs Heliocentrism", width / 2, 24);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "12px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`Year ${elapsedYears.toFixed(1)}  |  Speed: ${timeScale.toFixed(1)}×`, width / 2, height - 15);
   }
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+  return {
+    config,
+
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
+
+    update(dt: number, params: Record<string, number>) {
+      model = params.model ?? 0;
+      timeScale = params.timeScale ?? 1;
+      showLabels = params.showLabels ?? 1;
+      showOrbits = params.showOrbits ?? 1;
+
+      time += dt;
+      elapsedYears += dt * timeScale * 0.5;
+
+      // Update planet angles
+      for (const planet of planets) {
+        const angularVelocity = (2 * Math.PI) / planet.period;
+        planet.angle += angularVelocity * dt * timeScale * 0.5;
+      }
+
+      // Moon
+      moonAngle += (2 * Math.PI / moonPeriod) * dt * timeScale * 0.5;
+    },
+
+    render() {
+      drawBackground();
+      if (model < 0.5) {
+        drawHeliocentricModel();
+      } else {
+        drawGeocentricModel();
+      }
+      drawLegend();
+    },
+
+    reset() {
+      initState();
+    },
+
+    destroy() {},
+
+    getStateDescription(): string {
+      const modelName = model < 0.5 ? "Heliocentric (Sun-centered)" : "Geocentric (Earth-centered)";
+      return `Geocentrism & Heliocentrism: Showing ${modelName} model. Year ${elapsedYears.toFixed(1)}. The heliocentric model places the Sun at center with planets in elliptical orbits. The geocentric model places Earth at center, requiring epicycles to explain retrograde motion. Copernicus proposed heliocentrism in 1543.`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+    },
+  };
 };
 
-export default GeocentricHeliocentricFactory;
+export default GeoHelioFactory;

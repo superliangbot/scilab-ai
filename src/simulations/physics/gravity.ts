@@ -1,21 +1,16 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
-interface Body {
+interface FallingObject {
   x: number;
   y: number;
   vx: number;
   vy: number;
-  mass: number;
-  radius: number;
+  trail: { x: number; y: number }[];
+  label: string;
   color: string;
-  trail: Array<{ x: number; y: number }>;
-  name: string;
-  fixed: boolean;
+  radius: number;
+  active: boolean;
 }
 
 const GravityFactory: SimulationFactory = (): SimulationEngine => {
@@ -23,397 +18,340 @@ const GravityFactory: SimulationFactory = (): SimulationEngine => {
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
-  let G = 500; // Gravitational constant (scaled for visual)
-  let mass1 = 100;
-  let mass2 = 50;
-  let initialDistance = 200;
-  let showForceVectors = 1;
+  let zoom = 1;
+  let showTraces = 1;
+  let showForce = 1;
+  let launchSpeed = 5;
 
-  const MAX_TRAIL = 500;
-  let bodies: Body[] = [];
-  let gravitationalPE = 0;
-  let totalKE = 0;
+  // Earth
+  let earthX = 0;
+  let earthY = 0;
+  const earthRadius = 60;
+  const earthMass = 5.972e24; // kg
+  const G_real = 6.674e-11;
+  const G_sim = 2000; // simulation gravitational constant
 
-  // Force/energy history
-  const energyHistory: Array<{ t: number; ke: number; pe: number; total: number }> = [];
+  let objects: FallingObject[] = [];
+  let launched = false;
 
-  function initBodies(): void {
-    const cx = W * 0.4;
-    const cy = H * 0.45;
+  function initState() {
+    time = 0;
+    launched = false;
+    earthX = width / 2;
+    earthY = height / 2;
 
-    // Set up two bodies in a binary orbit
-    const totalMass = mass1 + mass2;
-    const d = initialDistance;
-
-    // Position bodies relative to center of mass
-    const x1 = cx - (mass2 / totalMass) * d;
-    const x2 = cx + (mass1 / totalMass) * d;
-
-    // Orbital velocity for circular orbit
-    const orbitalV = Math.sqrt(G * totalMass / d) * 0.5;
-    const v1 = orbitalV * (mass2 / totalMass);
-    const v2 = orbitalV * (mass1 / totalMass);
-
-    bodies = [
+    objects = [
       {
-        x: x1, y: cy, vx: 0, vy: v1,
-        mass: mass1, radius: Math.max(8, Math.sqrt(mass1) * 1.5),
-        color: "#42a5f5", trail: [], name: "Body 1", fixed: false,
+        x: earthX,
+        y: earthY - earthRadius * zoom - 40,
+        vx: 0, vy: 0,
+        trail: [],
+        label: "Apple",
+        color: "#ef4444",
+        radius: 8,
+        active: true,
       },
       {
-        x: x2, y: cy, vx: 0, vy: -v2,
-        mass: mass2, radius: Math.max(6, Math.sqrt(mass2) * 1.5),
-        color: "#ef5350", trail: [], name: "Body 2", fixed: false,
+        x: earthX + earthRadius * zoom + 80,
+        y: earthY,
+        vx: 0, vy: -launchSpeed,
+        trail: [],
+        label: "Moon",
+        color: "#d1d5db",
+        radius: 10,
+        active: false,
       },
     ];
   }
 
-  function reset(): void {
-    time = 0;
-    energyHistory.length = 0;
-    initBodies();
-  }
+  function drawBackground() {
+    ctx.fillStyle = "#0a0a1a";
+    ctx.fillRect(0, 0, width, height);
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
-  }
-
-  function update(dt: number, params: Record<string, number>): void {
-    const newG = params.G ?? 500;
-    const newM1 = params.mass1 ?? 100;
-    const newM2 = params.mass2 ?? 50;
-    const newD = params.initialDistance ?? 200;
-    const newSF = params.showForceVectors ?? 1;
-
-    if (newG !== G || newM1 !== mass1 || newM2 !== mass2 || newD !== initialDistance) {
-      G = newG;
-      mass1 = newM1;
-      mass2 = newM2;
-      initialDistance = newD;
-      reset();
-      return;
-    }
-    showForceVectors = newSF;
-
-    time += dt;
-
-    const a = bodies[0];
-    const b = bodies[1];
-
-    // Calculate gravitational force
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const minDist = a.radius + b.radius;
-
-    if (dist > minDist) {
-      const force = (G * a.mass * b.mass) / (dist * dist);
-      const fx = force * (dx / dist);
-      const fy = force * (dy / dist);
-
-      // Apply forces (F = ma → a = F/m)
-      a.vx += (fx / a.mass) * dt;
-      a.vy += (fy / a.mass) * dt;
-      b.vx -= (fx / b.mass) * dt;
-      b.vy -= (fy / b.mass) * dt;
-    } else {
-      // Elastic collision
-      const nx = dx / Math.max(dist, 0.01);
-      const ny = dy / Math.max(dist, 0.01);
-      const dvn = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
-      if (dvn > 0) {
-        const mSum = a.mass + b.mass;
-        a.vx -= (2 * b.mass / mSum) * dvn * nx;
-        a.vy -= (2 * b.mass / mSum) * dvn * ny;
-        b.vx += (2 * a.mass / mSum) * dvn * nx;
-        b.vy += (2 * a.mass / mSum) * dvn * ny;
-      }
-    }
-
-    // Update positions
-    for (const body of bodies) {
-      body.x += body.vx * dt;
-      body.y += body.vy * dt;
-      body.trail.push({ x: body.x, y: body.y });
-      if (body.trail.length > MAX_TRAIL) body.trail.shift();
-    }
-
-    // Calculate energies
-    const va = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
-    const vb = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-    totalKE = 0.5 * a.mass * va * va + 0.5 * b.mass * vb * vb;
-    gravitationalPE = -(G * a.mass * b.mass) / Math.max(dist, 1);
-    const totalEnergy = totalKE + gravitationalPE;
-
-    if (energyHistory.length === 0 || time - energyHistory[energyHistory.length - 1].t > 0.1) {
-      energyHistory.push({ t: time, ke: totalKE, pe: gravitationalPE, total: totalEnergy });
-      if (energyHistory.length > 200) energyHistory.shift();
-    }
-  }
-
-  function drawBackground(): void {
-    ctx.fillStyle = "#050510";
-    ctx.fillRect(0, 0, W, H);
-
+    // Stars
     const rng = (s: number) => {
-      let v = s;
-      return () => { v = (v * 16807) % 2147483647; return v / 2147483647; };
+      let x = Math.sin(s) * 43758.5453;
+      return x - Math.floor(x);
     };
-    const rand = rng(42);
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 120; i++) {
+      const sx = rng(i * 7.1) * width;
+      const sy = rng(i * 13.3) * height;
+      const sr = rng(i * 3.7) * 1 + 0.3;
+      ctx.globalAlpha = 0.2 + rng(i * 11.1) * 0.4;
+      ctx.fillStyle = "#ffffff";
       ctx.beginPath();
-      ctx.arc(rand() * W, rand() * H, rand() * 1, 0, Math.PI * 2);
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.globalAlpha = 1;
   }
 
-  function drawBodies(): void {
-    for (const body of bodies) {
+  function drawEarth() {
+    const r = earthRadius * zoom;
+
+    // Atmosphere glow
+    const glow = ctx.createRadialGradient(earthX, earthY, r, earthX, earthY, r * 1.3);
+    glow.addColorStop(0, "rgba(96, 165, 250, 0.2)");
+    glow.addColorStop(1, "rgba(96, 165, 250, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(earthX, earthY, r * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Earth body
+    const grad = ctx.createRadialGradient(earthX - r * 0.3, earthY - r * 0.3, 0, earthX, earthY, r);
+    grad.addColorStop(0, "#60a5fa");
+    grad.addColorStop(0.4, "#2563eb");
+    grad.addColorStop(0.7, "#1d4ed8");
+    grad.addColorStop(1, "#1e3a5f");
+    ctx.beginPath();
+    ctx.arc(earthX, earthY, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Continents (simplified)
+    ctx.fillStyle = "#22c55e88";
+    // Americas
+    ctx.beginPath();
+    ctx.ellipse(earthX - r * 0.2, earthY - r * 0.15, r * 0.15, r * 0.25, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    // Eurasia
+    ctx.beginPath();
+    ctx.ellipse(earthX + r * 0.2, earthY - r * 0.1, r * 0.25, r * 0.15, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    // Africa
+    ctx.beginPath();
+    ctx.ellipse(earthX + r * 0.1, earthY + r * 0.2, r * 0.1, r * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#93c5fd";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Earth", earthX, earthY + r + 16);
+  }
+
+  function drawObjects() {
+    for (const obj of objects) {
+      if (!obj.active && !launched) continue;
+
       // Trail
-      if (body.trail.length > 1) {
-        for (let i = 1; i < body.trail.length; i++) {
-          const alpha = (i / body.trail.length) * 0.5;
-          ctx.strokeStyle = body.color + Math.floor(alpha * 255).toString(16).padStart(2, "0");
-          ctx.lineWidth = 1;
+      if (showTraces > 0.5 && obj.trail.length > 1) {
+        ctx.strokeStyle = obj.color + "60";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < obj.trail.length; i++) {
+          if (i === 0) ctx.moveTo(obj.trail[i].x, obj.trail[i].y);
+          else ctx.lineTo(obj.trail[i].x, obj.trail[i].y);
+        }
+        ctx.stroke();
+
+        // Trail dots
+        for (let i = 0; i < obj.trail.length; i += 5) {
+          ctx.fillStyle = obj.color + "40";
           ctx.beginPath();
-          ctx.moveTo(body.trail[i - 1].x, body.trail[i - 1].y);
-          ctx.lineTo(body.trail[i].x, body.trail[i].y);
-          ctx.stroke();
+          ctx.arc(obj.trail[i].x, obj.trail[i].y, 2, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
 
-      // Body
+      // Object
       const grad = ctx.createRadialGradient(
-        body.x - body.radius * 0.3, body.y - body.radius * 0.3, body.radius * 0.2,
-        body.x, body.y, body.radius
+        obj.x - obj.radius * 0.3, obj.y - obj.radius * 0.3, 0,
+        obj.x, obj.y, obj.radius
       );
-      grad.addColorStop(0, lighten(body.color, 40));
-      grad.addColorStop(1, body.color);
+      grad.addColorStop(0, "#ffffff");
+      grad.addColorStop(0.5, obj.color);
+      grad.addColorStop(1, obj.color + "88");
       ctx.beginPath();
-      ctx.arc(body.x, body.y, body.radius, 0, Math.PI * 2);
+      ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
       ctx.fillStyle = grad;
       ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.3)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
 
       // Label
-      ctx.fillStyle = body.color;
+      ctx.fillStyle = obj.color;
       ctx.font = "11px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`${body.name} (m=${body.mass})`, body.x, body.y - body.radius - 8);
-    }
+      ctx.fillText(obj.label, obj.x, obj.y - obj.radius - 5);
 
-    // Force vectors
-    if (showForceVectors >= 0.5 && bodies.length === 2) {
-      const a = bodies[0];
-      const b = bodies[1];
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
+      // Force vector
+      if (showForce > 0.5) {
+        const dx = earthX - obj.x;
+        const dy = earthY - obj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > earthRadius * zoom + 5) {
+          const forceMag = G_sim / (dist * dist) * 5000;
+          const arrowLen = Math.min(40, forceMag);
+          const nx = dx / dist;
+          const ny = dy / dist;
+
+          ctx.strokeStyle = "#ef444488";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(obj.x, obj.y);
+          ctx.lineTo(obj.x + nx * arrowLen, obj.y + ny * arrowLen);
+          ctx.stroke();
+
+          // Arrow head
+          ctx.fillStyle = "#ef4444";
+          ctx.beginPath();
+          const tipX = obj.x + nx * arrowLen;
+          const tipY = obj.y + ny * arrowLen;
+          ctx.moveTo(tipX, tipY);
+          ctx.lineTo(tipX - ny * 4 - nx * 6, tipY + nx * 4 - ny * 6);
+          ctx.lineTo(tipX + ny * 4 - nx * 6, tipY - nx * 4 - ny * 6);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      // Distance line
+      const dx = obj.x - earthX;
+      const dy = obj.y - earthY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > 0) {
-        const force = (G * a.mass * b.mass) / (dist * dist);
-        const scale = Math.min(60, force * 0.001);
-        const nx = dx / dist;
-        const ny = dy / dist;
+      const distInRadii = dist / (earthRadius * zoom);
 
-        // Force on body 1 (toward body 2)
-        drawArrow(a.x, a.y, a.x + nx * scale, a.y + ny * scale, "#ffa726", 2);
-        // Force on body 2 (toward body 1)
-        drawArrow(b.x, b.y, b.x - nx * scale, b.y - ny * scale, "#ffa726", 2);
-
-        // Force label
-        ctx.fillStyle = "#ffa726";
-        ctx.font = "10px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(`F = ${force.toFixed(1)}`, (a.x + b.x) / 2, (a.y + b.y) / 2 - 15);
-
-        // Distance line
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
-        ctx.setLineDash([3, 3]);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = "rgba(255,255,255,0.4)";
-        ctx.fillText(`r = ${dist.toFixed(0)}`, (a.x + b.x) / 2, (a.y + b.y) / 2 + 8);
-      }
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`r = ${distInRadii.toFixed(1)} R⊕`, obj.x, obj.y + obj.radius + 14);
     }
   }
 
-  function drawArrow(x1: number, y1: number, x2: number, y2: number, color: string, width: number): void {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const len = Math.sqrt(dx * dx + dy * dy);
-    if (len < 2) return;
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
+  function drawPhysicsInfo() {
+    const py = height - 80;
+    ctx.fillStyle = "rgba(10, 10, 26, 0.85)";
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-
-    const angle = Math.atan2(dy, dx);
-    const headLen = 8;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - headLen * Math.cos(angle - 0.4), y2 - headLen * Math.sin(angle - 0.4));
-    ctx.lineTo(x2 - headLen * Math.cos(angle + 0.4), y2 - headLen * Math.sin(angle + 0.4));
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  function lighten(hex: string, amount: number): string {
-    const num = parseInt(hex.replace("#", ""), 16);
-    const r = Math.min(255, (num >> 16) + amount);
-    const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-    const b = Math.min(255, (num & 0xff) + amount);
-    return `rgb(${r},${g},${b})`;
-  }
-
-  function drawEnergyGraph(): void {
-    const gx = W * 0.62;
-    const gy = 15;
-    const gw = W * 0.35;
-    const gh = H * 0.35;
-
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 8);
+    ctx.roundRect(10, py, width - 20, 70, 8);
     ctx.fill();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "12px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText("F = GMm/r²  |  g = GM/r² ≈ 9.8 m/s² at surface", 20, py + 18);
+    ctx.fillText("Slow throw → parabolic fall  |  Fast enough → orbit (v = √(GM/r))", 20, py + 38);
+    ctx.fillText(`Launch speed: ${launchSpeed.toFixed(1)}  |  Orbital speed (surface): √(gR) ≈ 7.9 km/s`, 20, py + 58);
+  }
+
+  function drawTitle() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 18px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Energy Conservation", gx + gw / 2, gy + 14);
+    ctx.fillText("Gravity — From Falling Apples to Orbits", width / 2, 28);
 
-    if (energyHistory.length < 2) return;
-
-    const px = gx + 35;
-    const py = gy + 28;
-    const pw = gw - 50;
-    const ph = gh - 45;
-
-    const allE = energyHistory.flatMap((d) => [d.ke, d.pe, d.total]);
-    const eMax = Math.max(...allE) * 1.1;
-    const eMin = Math.min(...allE) * 1.1;
-    const eRange = Math.max(eMax - eMin, 1);
-
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px, py + ph);
-    ctx.lineTo(px + pw, py + ph);
-    ctx.stroke();
-
-    const tMin = energyHistory[0].t;
-    const tMax = energyHistory[energyHistory.length - 1].t;
-    const tRange = Math.max(tMax - tMin, 1);
-
-    function drawLine(data: number[], color: string): void {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      for (let i = 0; i < data.length; i++) {
-        const x = px + ((energyHistory[i].t - tMin) / tRange) * pw;
-        const y = py + ph - ((data[i] - eMin) / eRange) * ph;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    }
-
-    drawLine(energyHistory.map((d) => d.ke), "#ef5350");
-    drawLine(energyHistory.map((d) => d.pe), "#42a5f5");
-    drawLine(energyHistory.map((d) => d.total), "#fff");
-
-    // Legend
-    ctx.font = "9px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#ef5350";
-    ctx.fillText("KE", px + 5, py + 10);
-    ctx.fillStyle = "#42a5f5";
-    ctx.fillText("PE", px + 30, py + 10);
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Total", px + 55, py + 10);
-  }
-
-  function drawInfo(): void {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.beginPath();
-    ctx.roundRect(10, 10, 220, 120, 8);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Newton's Gravity", 20, 28);
-
-    ctx.font = "11px monospace";
-    ctx.fillStyle = "#ffa726";
-    ctx.fillText("F = G·m₁·m₂/r²", 20, 48);
-    ctx.fillStyle = "#ccc";
-    ctx.font = "11px monospace";
-    ctx.fillText(`G = ${G}`, 20, 66);
-    ctx.fillText(`KE = ${totalKE.toFixed(0)}`, 20, 82);
-    ctx.fillText(`PE = ${gravitationalPE.toFixed(0)}`, 20, 98);
-    ctx.fillText(`Total = ${(totalKE + gravitationalPE).toFixed(0)}`, 20, 114);
-  }
-
-  function render(): void {
-    drawBackground();
-    drawBodies();
-    drawEnergyGraph();
-    drawInfo();
-
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.fillStyle = "#94a3b8";
     ctx.font = "12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Gravitational Attraction — Newton's Law of Universal Gravitation", W / 2, H - 10);
+    ctx.fillText("Objects fall toward Earth; with enough horizontal speed, they orbit", width / 2, 50);
   }
 
-  function destroy(): void {
-    bodies = [];
-    energyHistory.length = 0;
-  }
+  return {
+    config,
 
-  function getStateDescription(): string {
-    const a = bodies[0];
-    const b = bodies[1];
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const force = (G * a.mass * b.mass) / (dist * dist + 1);
-    return (
-      `Gravitational Attraction: G=${G}, m₁=${a.mass}, m₂=${b.mass}. ` +
-      `Distance: ${dist.toFixed(0)}. Force: ${force.toFixed(1)}. ` +
-      `KE=${totalKE.toFixed(0)}, PE=${gravitationalPE.toFixed(0)}, Total=${(totalKE + gravitationalPE).toFixed(0)}. ` +
-      `Newton's Law: F = G·m₁·m₂/r². ` +
-      `Energy is conserved: KE + PE = constant. ` +
-      `Bodies orbit their common center of mass.`
-    );
-  }
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
-  }
+    update(dt: number, params: Record<string, number>) {
+      zoom = params.zoom ?? 1;
+      showTraces = params.showTraces ?? 1;
+      showForce = params.showForce ?? 1;
+      const newSpeed = params.launchSpeed ?? 5;
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+      if (Math.abs(newSpeed - launchSpeed) > 0.1) {
+        launchSpeed = newSpeed;
+        initState();
+        return;
+      }
+
+      time += dt;
+
+      if (!launched) {
+        launched = true;
+        // Activate moon with launch speed
+        objects[1].active = true;
+        objects[1].x = earthX + earthRadius * zoom + 80;
+        objects[1].y = earthY;
+        objects[1].vx = 0;
+        objects[1].vy = -launchSpeed;
+      }
+
+      // Physics for each object
+      for (const obj of objects) {
+        if (!obj.active) continue;
+
+        const dx = earthX - obj.x;
+        const dy = earthY - obj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Check collision with Earth
+        if (dist < earthRadius * zoom + obj.radius) {
+          obj.vx = 0;
+          obj.vy = 0;
+          // Push to surface
+          const nx = dx / dist;
+          const ny = dy / dist;
+          obj.x = earthX - nx * (earthRadius * zoom + obj.radius);
+          obj.y = earthY - ny * (earthRadius * zoom + obj.radius);
+          continue;
+        }
+
+        // Gravity
+        const forceMag = G_sim / (dist * dist);
+        const ax = forceMag * dx / dist;
+        const ay = forceMag * dy / dist;
+
+        obj.vx += ax * dt * 60;
+        obj.vy += ay * dt * 60;
+        obj.x += obj.vx * dt * 60;
+        obj.y += obj.vy * dt * 60;
+
+        // Record trail
+        obj.trail.push({ x: obj.x, y: obj.y });
+        if (obj.trail.length > 600) obj.trail.shift();
+      }
+    },
+
+    render() {
+      drawBackground();
+      drawEarth();
+      drawObjects();
+      drawPhysicsInfo();
+      drawTitle();
+    },
+
+    reset() {
+      initState();
+    },
+
+    destroy() {
+      objects = [];
+    },
+
+    getStateDescription(): string {
+      const descs = objects.filter(o => o.active).map(o => {
+        const dx = o.x - earthX;
+        const dy = o.y - earthY;
+        const dist = Math.sqrt(dx * dx + dy * dy) / (earthRadius * zoom);
+        const speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy);
+        return `${o.label}: r=${dist.toFixed(1)}R⊕, v=${speed.toFixed(1)}`;
+      });
+      return `Gravity: ${descs.join(". ")}. Launch speed: ${launchSpeed.toFixed(1)}. F=GMm/r². Low speed → object falls back (parabolic). High speed → stable orbit (v=√(GM/r)). Demonstrates Newton's universal gravitation.`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+      earthX = width / 2;
+      earthY = height / 2;
+    },
+  };
 };
 
 export default GravityFactory;

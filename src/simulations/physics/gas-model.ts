@@ -1,8 +1,4 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
 interface Particle {
@@ -10,8 +6,6 @@ interface Particle {
   y: number;
   vx: number;
   vy: number;
-  radius: number;
-  highlighted: boolean;
 }
 
 const GasModelFactory: SimulationFactory = (): SimulationEngine => {
@@ -19,415 +13,336 @@ const GasModelFactory: SimulationFactory = (): SimulationEngine => {
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
-  let numParticles = 50;
-  let temperature = 300;
-  let wallGap = 0; // 0=closed, >0 = gap in middle wall for diffusion
-  let trackedParticle = 1; // whether to highlight one particle
+  let tempA = 300;
+  let tempB = 300;
+  let particlesA = 20;
+  let particlesB = 20;
 
-  const particles: Particle[] = [];
-  let totalKE = 0;
-  let collisionCount = 0;
-  let meanFreePath = 0;
+  let pA: Particle[] = [];
+  let pB: Particle[] = [];
+  let partitionX = 0.5; // fraction of container width
+  let partitionLocked = 1;
 
-  // Tracked particle trail
-  const trail: Array<{ x: number; y: number }> = [];
-  const MAX_TRAIL = 500;
+  // Container geometry
+  let boxLeft = 0;
+  let boxRight = 0;
+  let boxTop = 0;
+  let boxBot = 0;
 
-  // Collision rate history
-  const collisionHistory: Array<{ t: number; rate: number }> = [];
-  let lastCollisionCheck = 0;
-  let intervalCollisions = 0;
+  let pressureA = 0;
+  let pressureB = 0;
+  let volumeA = 0;
+  let volumeB = 0;
 
-  function containerBounds() {
-    return {
-      x: W * 0.05,
-      y: H * 0.08,
-      w: W * 0.55,
-      h: H * 0.6,
-    };
+  function initState() {
+    time = 0;
+    partitionX = 0.5;
+    pressureA = 0;
+    pressureB = 0;
+    computeLayout();
+    createParticles();
   }
 
-  function initParticles(): void {
-    particles.length = 0;
-    trail.length = 0;
-    const cb = containerBounds();
-    const baseSpeed = Math.sqrt(temperature) * 0.7;
+  function computeLayout() {
+    boxLeft = 60;
+    boxRight = width - 60;
+    boxTop = 100;
+    boxBot = height - 120;
+  }
 
-    for (let i = 0; i < numParticles; i++) {
+  function createParticles() {
+    pA = [];
+    pB = [];
+    const boxW = boxRight - boxLeft;
+    const boxH = boxBot - boxTop;
+    const dividerX = boxLeft + boxW * partitionX;
+
+    const speedA = Math.sqrt(tempA / 300) * 60;
+    for (let i = 0; i < particlesA; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = baseSpeed * (0.3 + Math.random() * 1.4);
-      particles.push({
-        x: cb.x + 10 + Math.random() * (cb.w - 20),
-        y: cb.y + 10 + Math.random() * (cb.h - 20),
-        vx: speed * Math.cos(angle),
-        vy: speed * Math.sin(angle),
-        radius: 4,
-        highlighted: i === 0,
+      const speed = (0.3 + Math.random() * 0.7) * speedA;
+      pA.push({
+        x: boxLeft + 10 + Math.random() * (dividerX - boxLeft - 20),
+        y: boxTop + 10 + Math.random() * (boxH - 20),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+      });
+    }
+
+    const speedB = Math.sqrt(tempB / 300) * 60;
+    for (let i = 0; i < particlesB; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (0.3 + Math.random() * 0.7) * speedB;
+      pB.push({
+        x: dividerX + 10 + Math.random() * (boxRight - dividerX - 20),
+        y: boxTop + 10 + Math.random() * (boxH - 20),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
       });
     }
   }
 
-  function reset(): void {
-    time = 0;
-    totalKE = 0;
-    collisionCount = 0;
-    meanFreePath = 0;
-    collisionHistory.length = 0;
-    lastCollisionCheck = 0;
-    intervalCollisions = 0;
-    initParticles();
+  function updatePartition(dt: number) {
+    if (partitionLocked > 0.5) return;
+
+    // Partition moves based on pressure difference
+    const boxW = boxRight - boxLeft;
+    const pDiff = pressureA - pressureB;
+    partitionX += pDiff * 0.0001 * dt;
+    partitionX = Math.max(0.15, Math.min(0.85, partitionX));
   }
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
-  }
+  function updateParticleGroup(particles: Particle[], leftBound: number, rightBound: number, temp: number, dt: number): number {
+    const r = 4;
+    const speedFactor = Math.sqrt(temp / 300);
+    let wallHits = 0;
 
-  function update(dt: number, params: Record<string, number>): void {
-    const newN = Math.round(params.numParticles ?? 50);
-    const newT = params.temperature ?? 300;
-    const newGap = params.wallGap ?? 0;
-    const newTrack = params.trackedParticle ?? 1;
-
-    if (newN !== numParticles) {
-      numParticles = newN;
-      reset();
-      return;
-    }
-
-    if (newT !== temperature) {
-      const ratio = Math.sqrt(newT / Math.max(temperature, 1));
-      for (const p of particles) {
-        p.vx *= ratio;
-        p.vy *= ratio;
-      }
-      temperature = newT;
-    }
-    wallGap = newGap;
-    trackedParticle = newTrack;
-
-    time += dt;
-
-    const cb = containerBounds();
-    let frameCollisions = 0;
-    totalKE = 0;
-
-    // Update particles
     for (const p of particles) {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
+      p.x += p.vx * dt * speedFactor;
+      p.y += p.vy * dt * speedFactor;
 
-      // Wall collisions
-      if (p.x - p.radius < cb.x) { p.x = cb.x + p.radius; p.vx = Math.abs(p.vx); }
-      if (p.x + p.radius > cb.x + cb.w) { p.x = cb.x + cb.w - p.radius; p.vx = -Math.abs(p.vx); }
-      if (p.y - p.radius < cb.y) { p.y = cb.y + p.radius; p.vy = Math.abs(p.vy); }
-      if (p.y + p.radius > cb.y + cb.h) { p.y = cb.y + cb.h - p.radius; p.vy = -Math.abs(p.vy); }
-
-      // Middle wall (if gap is not full opening)
-      if (wallGap < 90) {
-        const wallX = cb.x + cb.w / 2;
-        const gapSize = (wallGap / 100) * cb.h;
-        const gapTop = cb.y + (cb.h - gapSize) / 2;
-        const gapBottom = gapTop + gapSize;
-
-        if (Math.abs(p.x - wallX) < p.radius + 2) {
-          if (p.y < gapTop || p.y > gapBottom) {
-            if (p.x < wallX) {
-              p.x = wallX - p.radius - 2;
-              p.vx = -Math.abs(p.vx);
-            } else {
-              p.x = wallX + p.radius + 2;
-              p.vx = Math.abs(p.vx);
-            }
-          }
-        }
-      }
-
-      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      totalKE += 0.5 * speed * speed;
+      if (p.x - r < leftBound) { p.x = leftBound + r; p.vx = Math.abs(p.vx); wallHits++; }
+      if (p.x + r > rightBound) { p.x = rightBound - r; p.vx = -Math.abs(p.vx); wallHits++; }
+      if (p.y - r < boxTop) { p.y = boxTop + r; p.vy = Math.abs(p.vy); wallHits++; }
+      if (p.y + r > boxBot) { p.y = boxBot - r; p.vy = -Math.abs(p.vy); wallHits++; }
     }
 
     // Particle-particle collisions
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i];
-        const b = particles[j];
+        const a = particles[i], b = particles[j];
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const minDist = a.radius + b.radius;
-
-        if (dist < minDist && dist > 0) {
+        if (dist < r * 2 && dist > 0) {
           const nx = dx / dist;
           const ny = dy / dist;
           const dvn = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
-
           if (dvn > 0) {
             a.vx -= dvn * nx;
             a.vy -= dvn * ny;
             b.vx += dvn * nx;
             b.vy += dvn * ny;
-            const overlap = minDist - dist;
-            a.x -= nx * overlap * 0.5;
-            a.y -= ny * overlap * 0.5;
-            b.x += nx * overlap * 0.5;
-            b.y += ny * overlap * 0.5;
-            frameCollisions++;
           }
         }
       }
     }
 
-    collisionCount += frameCollisions;
-    intervalCollisions += frameCollisions;
-
-    // Track highlighted particle
-    if (trackedParticle >= 0.5 && particles.length > 0) {
-      trail.push({ x: particles[0].x, y: particles[0].y });
-      if (trail.length > MAX_TRAIL) trail.shift();
-    }
-
-    // Collision rate
-    if (time - lastCollisionCheck > 0.3) {
-      const rate = intervalCollisions / (time - lastCollisionCheck);
-      collisionHistory.push({ t: time, rate });
-      if (collisionHistory.length > 100) collisionHistory.shift();
-      intervalCollisions = 0;
-      lastCollisionCheck = time;
-    }
-
-    // Mean free path estimate
-    const density = numParticles / (cb.w * cb.h);
-    const sigma = 2 * 4; // 2 * particle radius
-    meanFreePath = 1 / (Math.sqrt(2) * Math.PI * sigma * density + 0.001);
+    return wallHits;
   }
 
-  function drawContainer(): void {
-    const cb = containerBounds();
-
-    ctx.fillStyle = "rgba(15, 25, 40, 0.7)";
-    ctx.strokeStyle = "#546e7a";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.rect(cb.x, cb.y, cb.w, cb.h);
-    ctx.fill();
-    ctx.stroke();
-
-    // Middle wall with gap
-    if (wallGap < 90) {
-      const wallX = cb.x + cb.w / 2;
-      const gapSize = (wallGap / 100) * cb.h;
-      const gapTop = cb.y + (cb.h - gapSize) / 2;
-      const gapBottom = gapTop + gapSize;
-
-      ctx.strokeStyle = "#78909c";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(wallX, cb.y);
-      ctx.lineTo(wallX, gapTop);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(wallX, gapBottom);
-      ctx.lineTo(wallX, cb.y + cb.h);
-      ctx.stroke();
-
-      if (wallGap > 0) {
-        ctx.fillStyle = "rgba(76, 175, 80, 0.2)";
-        ctx.fillRect(wallX - 3, gapTop, 6, gapSize);
-      }
-    }
-  }
-
-  function drawParticles(): void {
-    const cb = containerBounds();
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(cb.x, cb.y, cb.w, cb.h);
-    ctx.clip();
-
-    // Trail for tracked particle
-    if (trackedParticle >= 0.5 && trail.length > 1) {
-      ctx.strokeStyle = "rgba(255, 152, 0, 0.3)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      for (let i = 0; i < trail.length; i++) {
-        if (i === 0) ctx.moveTo(trail[i].x, trail[i].y);
-        else ctx.lineTo(trail[i].x, trail[i].y);
-      }
-      ctx.stroke();
-    }
-
-    for (const p of particles) {
-      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      const maxSpeed = Math.sqrt(temperature) * 2;
-      const frac = Math.min(speed / maxSpeed, 1);
-
-      if (p.highlighted && trackedParticle >= 0.5) {
-        // Highlighted particle with glow
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius + 5, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255, 152, 0, 0.2)";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius + 1, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff9800";
-        ctx.fill();
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      } else {
-        const hue = 220 - frac * 160;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
-        ctx.fill();
-      }
-    }
-    ctx.restore();
-  }
-
-  function drawCollisionGraph(): void {
-    const gx = W * 0.63;
-    const gy = H * 0.08;
-    const gw = W * 0.34;
-    const gh = H * 0.28;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Collision Rate", gx + gw / 2, gy + 14);
-
-    if (collisionHistory.length < 2) return;
-
-    const px = gx + 30;
-    const py = gy + 25;
-    const pw = gw - 45;
-    const ph = gh - 40;
-
-    ctx.strokeStyle = "rgba(255,255,255,0.3)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px, py + ph);
-    ctx.lineTo(px + pw, py + ph);
-    ctx.stroke();
-
-    const maxRate = Math.max(...collisionHistory.map((d) => d.rate), 1);
-    const tMin = collisionHistory[0].t;
-    const tMax = collisionHistory[collisionHistory.length - 1].t;
-    const tRange = Math.max(tMax - tMin, 1);
-
-    ctx.strokeStyle = "#42a5f5";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let i = 0; i < collisionHistory.length; i++) {
-      const x = px + ((collisionHistory[i].t - tMin) / tRange) * pw;
-      const y = py + ph - (collisionHistory[i].rate / maxRate) * ph;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-
-  function drawInfo(): void {
-    const px = W * 0.63;
-    const py = H * 0.4;
-    const pw = W * 0.34;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(px, py, pw, H * 0.32, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Gas Model Statistics", px + 10, py + 16);
-
-    ctx.font = "11px monospace";
-    let y = py + 35;
-    const items = [
-      { label: "Particles", value: `${numParticles}`, color: "#42a5f5" },
-      { label: "Temperature", value: `${temperature} K`, color: "#ef5350" },
-      { label: "Total KE", value: `${totalKE.toFixed(0)}`, color: "#66bb6a" },
-      { label: "Avg KE/particle", value: `${(totalKE / Math.max(numParticles, 1)).toFixed(1)}`, color: "#ffa726" },
-      { label: "Collisions", value: `${collisionCount}`, color: "#ab47bc" },
-      { label: "Mean free path", value: `${meanFreePath.toFixed(1)} px`, color: "#78909c" },
-    ];
-
-    for (const item of items) {
-      ctx.fillStyle = item.color;
-      ctx.fillText(item.label + ":", px + 10, y);
-      ctx.fillStyle = "#fff";
-      ctx.fillText(item.value, px + 140, y);
-      y += 18;
-    }
-
-    y += 8;
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("KE ∝ T (Kinetic Molecular Theory)", px + 10, y);
-    y += 14;
-    ctx.fillText("λ = 1/(√2·π·d²·n/V)", px + 10, y);
-  }
-
-  function render(): void {
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#0a0e27");
-    grad.addColorStop(1, "#1a1a3e");
+  function drawBackground() {
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, "#0f172a");
+    grad.addColorStop(1, "#1e293b");
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, width, height);
+  }
 
-    ctx.fillStyle = "#fff";
+  function drawContainers() {
+    const boxW = boxRight - boxLeft;
+    const dividerX = boxLeft + boxW * partitionX;
+
+    // Chamber A background
+    const tempNormA = Math.min(1, (tempA - 200) / 300);
+    ctx.fillStyle = `rgba(${Math.round(59 + tempNormA * 180)}, ${Math.round(130 - tempNormA * 80)}, ${Math.round(246 - tempNormA * 200)}, 0.1)`;
+    ctx.fillRect(boxLeft, boxTop, dividerX - boxLeft, boxBot - boxTop);
+
+    // Chamber B background
+    const tempNormB = Math.min(1, (tempB - 200) / 300);
+    ctx.fillStyle = `rgba(${Math.round(59 + tempNormB * 180)}, ${Math.round(130 - tempNormB * 80)}, ${Math.round(246 - tempNormB * 200)}, 0.1)`;
+    ctx.fillRect(dividerX, boxTop, boxRight - dividerX, boxBot - boxTop);
+
+    // Container border
+    ctx.strokeStyle = "#64748b";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(boxLeft, boxTop, boxW, boxBot - boxTop);
+
+    // Partition
+    ctx.fillStyle = partitionLocked > 0.5 ? "#94a3b8" : "#f59e0b";
+    ctx.fillRect(dividerX - 3, boxTop, 6, boxBot - boxTop);
+
+    // Labels
+    ctx.fillStyle = "#60a5fa";
     ctx.font = "bold 16px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Kinetic Gas Model", W / 2, H - 15);
-    ctx.font = "11px sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.fillText("Elastic collisions • Random motion • Temperature ∝ Kinetic Energy", W / 2, H - 2);
+    ctx.fillText("A", boxLeft + (dividerX - boxLeft) / 2, boxTop - 10);
 
-    drawContainer();
-    drawParticles();
-    drawCollisionGraph();
-    drawInfo();
+    ctx.fillStyle = "#f87171";
+    ctx.fillText("B", dividerX + (boxRight - dividerX) / 2, boxTop - 10);
   }
 
-  function destroy(): void {
-    particles.length = 0;
-    trail.length = 0;
-    collisionHistory.length = 0;
+  function drawParticles() {
+    const boxW = boxRight - boxLeft;
+    const dividerX = boxLeft + boxW * partitionX;
+
+    // Particles A
+    const colorA = tempA < 300 ? "#60a5fa" : tempA < 400 ? "#fbbf24" : "#ef4444";
+    for (const p of pA) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = colorA;
+      ctx.fill();
+    }
+
+    // Particles B
+    const colorB = tempB < 300 ? "#60a5fa" : tempB < 400 ? "#fbbf24" : "#ef4444";
+    for (const p of pB) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = colorB;
+      ctx.fill();
+    }
   }
 
-  function getStateDescription(): string {
-    const avgKE = totalKE / Math.max(numParticles, 1);
-    return (
-      `Kinetic Gas Model: ${numParticles} particles at T=${temperature}K. ` +
-      `Total KE=${totalKE.toFixed(0)}, avg KE/particle=${avgKE.toFixed(1)}. ` +
-      `Total collisions: ${collisionCount}. Mean free path: ${meanFreePath.toFixed(1)}px. ` +
-      `Wall gap: ${wallGap}%. ` +
-      `Demonstrates kinetic molecular theory: particles in constant random motion, ` +
-      `elastic collisions, temperature proportional to average kinetic energy.`
-    );
+  function drawVolumeScale() {
+    const scaleY = boxBot + 15;
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(boxLeft, scaleY);
+    ctx.lineTo(boxRight, scaleY);
+    ctx.stroke();
+
+    const boxW = boxRight - boxLeft;
+    const dividerX = boxLeft + boxW * partitionX;
+
+    ctx.fillStyle = "#60a5fa";
+    ctx.font = "11px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`V_A = ${volumeA.toFixed(1)} L`, boxLeft + (dividerX - boxLeft) / 2, scaleY + 16);
+
+    ctx.fillStyle = "#f87171";
+    ctx.fillText(`V_B = ${volumeB.toFixed(1)} L`, dividerX + (boxRight - dividerX) / 2, scaleY + 16);
   }
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
+  function drawDataPanel() {
+    const py = height - 70;
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(10, py, width - 20, 60, 8);
+    ctx.fill();
+
+    ctx.font = "12px monospace";
+    ctx.textAlign = "left";
+
+    const x1 = 20;
+    const x2 = width / 2 + 10;
+
+    ctx.fillStyle = "#60a5fa";
+    ctx.fillText(`A: n=${particlesA}  T=${tempA}K  P=${pressureA.toFixed(2)}  V=${volumeA.toFixed(1)}L`, x1, py + 20);
+
+    ctx.fillStyle = "#f87171";
+    ctx.fillText(`B: n=${particlesB}  T=${tempB}K  P=${pressureB.toFixed(2)}  V=${volumeB.toFixed(1)}L`, x1, py + 40);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "right";
+    ctx.fillText(`P_A/P_B = ${(pressureA / (pressureB || 1)).toFixed(2)}`, width - 20, py + 20);
+    ctx.fillText(`V_A/V_B = ${(volumeA / (volumeB || 1)).toFixed(2)}  (nT_A)/(nT_B) = ${((particlesA * tempA) / (particlesB * tempB || 1)).toFixed(2)}`, width - 20, py + 40);
   }
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+  function drawTitle() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Kinetic Molecular Model of Gases", width / 2, 28);
+
+    ctx.fillStyle = "#64748b";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(`Partition: ${partitionLocked > 0.5 ? "Locked" : "Free"}  |  PV = nRT  |  V_ratio = (n₁T₁):(n₂T₂)`, width / 2, 50);
+  }
+
+  return {
+    config,
+
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
+
+    update(dt: number, params: Record<string, number>) {
+      const newTA = params.tempA ?? 300;
+      const newTB = params.tempB ?? 300;
+      const newNA = Math.round(params.particlesA ?? 20);
+      const newNB = Math.round(params.particlesB ?? 20);
+      partitionLocked = params.lockPartition ?? 1;
+
+      if (newNA !== particlesA || newNB !== particlesB) {
+        particlesA = newNA;
+        particlesB = newNB;
+        tempA = newTA;
+        tempB = newTB;
+        initState();
+        return;
+      }
+
+      // Rescale velocities for temperature changes
+      if (Math.abs(newTA - tempA) > 1) {
+        const ratio = Math.sqrt(newTA / tempA);
+        for (const p of pA) { p.vx *= ratio; p.vy *= ratio; }
+        tempA = newTA;
+      }
+      if (Math.abs(newTB - tempB) > 1) {
+        const ratio = Math.sqrt(newTB / tempB);
+        for (const p of pB) { p.vx *= ratio; p.vy *= ratio; }
+        tempB = newTB;
+      }
+
+      time += dt;
+
+      const boxW = boxRight - boxLeft;
+      const dividerX = boxLeft + boxW * partitionX;
+
+      // Update particles
+      const hitsA = updateParticleGroup(pA, boxLeft, dividerX - 3, tempA, dt);
+      const hitsB = updateParticleGroup(pB, dividerX + 3, boxRight, tempB, dt);
+
+      // Estimate pressures
+      volumeA = ((dividerX - boxLeft) / (boxRight - boxLeft)) * 10;
+      volumeB = ((boxRight - dividerX) / (boxRight - boxLeft)) * 10;
+
+      pressureA = (particlesA * tempA) / (volumeA * 100 + 1);
+      pressureB = (particlesB * tempB) / (volumeB * 100 + 1);
+
+      updatePartition(dt);
+    },
+
+    render() {
+      drawBackground();
+      drawContainers();
+      drawParticles();
+      drawVolumeScale();
+      drawDataPanel();
+      drawTitle();
+    },
+
+    reset() {
+      initState();
+    },
+
+    destroy() {
+      pA = [];
+      pB = [];
+    },
+
+    getStateDescription(): string {
+      return `Gas Model: Two-chamber system. A: n=${particlesA}, T=${tempA}K, V=${volumeA.toFixed(1)}L, P=${pressureA.toFixed(2)}. B: n=${particlesB}, T=${tempB}K, V=${volumeB.toFixed(1)}L, P=${pressureB.toFixed(2)}. Partition ${partitionLocked > 0.5 ? "locked" : "free"}. Volume ratio = (n₁T₁):(n₂T₂).`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+      computeLayout();
+    },
+  };
 };
 
 export default GasModelFactory;

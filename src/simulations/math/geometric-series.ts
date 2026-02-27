@@ -1,8 +1,4 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
 const GeometricSeriesFactory: SimulationFactory = (): SimulationEngine => {
@@ -10,365 +6,317 @@ const GeometricSeriesFactory: SimulationFactory = (): SimulationEngine => {
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
-  let firstTerm = 1; // a
-  let commonRatio = 0.5; // r
-  let numTerms = 10; // n
+  let ratio = 0.5;
+  let numTerms = 8;
   let animSpeed = 1;
+  let firstTerm = 1;
 
-  let partialSums: number[] = [];
-  let terms: number[] = [];
-  let theoreticalSum = 0;
-  let currentAnimTerm = 0;
+  let currentTermIndex = 0;
+  let termProgress = 0;
+  let displayedSum = 0;
 
-  function computeSeries(): void {
-    terms = [];
-    partialSums = [];
-    let sum = 0;
-    for (let i = 0; i < numTerms; i++) {
-      const term = firstTerm * Math.pow(commonRatio, i);
-      terms.push(term);
-      sum += term;
-      partialSums.push(sum);
-    }
-    if (Math.abs(commonRatio) < 1) {
-      theoreticalSum = firstTerm / (1 - commonRatio);
-    } else {
-      theoreticalSum = Infinity;
-    }
-  }
-
-  function reset(): void {
+  function initState() {
     time = 0;
-    currentAnimTerm = 0;
-    computeSeries();
+    currentTermIndex = 0;
+    termProgress = 0;
+    displayedSum = 0;
   }
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
+  function getTermValue(n: number): number {
+    return firstTerm * Math.pow(ratio, n);
   }
 
-  function update(dt: number, params: Record<string, number>): void {
-    const newA = params.firstTerm ?? 1;
-    const newR = params.commonRatio ?? 0.5;
-    const newN = Math.round(params.numTerms ?? 10);
-    const newAS = params.animSpeed ?? 1;
-
-    if (newA !== firstTerm || newR !== commonRatio || newN !== numTerms) {
-      firstTerm = newA;
-      commonRatio = newR;
-      numTerms = newN;
-      reset();
-    }
-    animSpeed = newAS;
-
-    time += dt * animSpeed;
-    currentAnimTerm = Math.min(numTerms, Math.floor(time * 2));
+  function getPartialSum(n: number): number {
+    if (Math.abs(ratio - 1) < 0.001) return firstTerm * (n + 1);
+    return firstTerm * (1 - Math.pow(ratio, n + 1)) / (1 - ratio);
   }
 
-  function drawBackground(): void {
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#1a1a2e");
-    grad.addColorStop(1, "#0f3460");
+  function getConvergentSum(): number | null {
+    if (Math.abs(ratio) >= 1) return null;
+    return firstTerm / (1 - ratio);
+  }
+
+  function drawBackground() {
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, "#1e1b4b");
+    grad.addColorStop(1, "#312e81");
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, width, height);
   }
 
-  function drawVisualBlocks(): void {
-    const bx = W * 0.05;
-    const by = H * 0.08;
-    const bw = W * 0.42;
-    const bh = H * 0.4;
+  function drawBarVisualization() {
+    const barAreaLeft = 40;
+    const barAreaRight = width - 40;
+    const barAreaTop = 80;
+    const barAreaH = 80;
 
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 8);
-    ctx.fill();
+    const convergentSum = getConvergentSum();
+    const totalWidth = barAreaRight - barAreaLeft;
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Visual Representation", bx + bw / 2, by + 16);
-
-    if (terms.length === 0) return;
-
-    const maxTerm = Math.max(Math.abs(terms[0]), 0.01);
-    const barAreaX = bx + 15;
-    const barAreaY = by + 30;
-    const barAreaW = bw - 30;
-    const barAreaH = bh - 45;
-
-    const barWidth = Math.min(30, barAreaW / numTerms - 2);
-
-    for (let i = 0; i < Math.min(currentAnimTerm, terms.length); i++) {
-      const barH = (Math.abs(terms[i]) / maxTerm) * barAreaH * 0.8;
-      const x = barAreaX + i * (barWidth + 2);
-      const y = barAreaY + barAreaH - barH;
-
-      const hue = 200 + (i / numTerms) * 120;
-      const alpha = 0.6 + 0.4 * (1 - i / numTerms);
-      ctx.fillStyle = `hsla(${hue}, 70%, 55%, ${alpha})`;
-
-      if (terms[i] >= 0) {
-        ctx.fillRect(x, y, barWidth, barH);
-      } else {
-        ctx.fillRect(x, barAreaY + barAreaH, barWidth, barH);
-      }
-
-      // Term value
-      if (barWidth > 12) {
-        ctx.fillStyle = "#fff";
-        ctx.font = "8px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(terms[i].toFixed(3), x + barWidth / 2, y - 4);
-      }
-    }
-
-    // Convergence visualization: nested squares for |r| < 1
-    if (Math.abs(commonRatio) < 1 && commonRatio > 0) {
-      const sqX = bx + bw * 0.6;
-      const sqY = barAreaY + 20;
-      const sqSize = Math.min(bw * 0.35, barAreaH - 30);
-
-      let size = sqSize;
-      for (let i = 0; i < Math.min(currentAnimTerm, 8); i++) {
-        const hue = 200 + i * 20;
-        ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.7)`;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(sqX, sqY, size, size);
-        size *= commonRatio;
-      }
-      ctx.fillStyle = "rgba(255,255,255,0.3)";
-      ctx.font = "9px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Nested squares (r=" + commonRatio.toFixed(2) + ")", sqX + sqSize / 2, sqY + sqSize + 12);
-    }
-  }
-
-  function drawPartialSumGraph(): void {
-    const gx = W * 0.52;
-    const gy = H * 0.08;
-    const gw = W * 0.44;
-    const gh = H * 0.4;
-
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 8);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Partial Sums Sₙ", gx + gw / 2, gy + 16);
-
-    const px = gx + 45;
-    const py = gy + 32;
-    const pw = gw - 60;
-    const ph = gh - 52;
-
-    // Axes
-    ctx.strokeStyle = "rgba(255,255,255,0.3)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px, py + ph);
-    ctx.lineTo(px + pw, py + ph);
-    ctx.stroke();
-
-    if (partialSums.length === 0) return;
-
-    const allVals = [...partialSums];
-    if (isFinite(theoreticalSum)) allVals.push(theoreticalSum);
-    const maxVal = Math.max(...allVals.map(Math.abs), 0.01) * 1.15;
-    const minVal = Math.min(0, ...allVals) * 1.15;
-    const range = maxVal - minVal;
-
-    // Convergence line
-    if (isFinite(theoreticalSum)) {
-      const sumY = py + ph - ((theoreticalSum - minVal) / range) * ph;
-      ctx.strokeStyle = "rgba(255, 152, 0, 0.5)";
-      ctx.setLineDash([5, 3]);
+    // Draw the convergent sum line
+    if (convergentSum !== null) {
+      ctx.strokeStyle = "#f59e0b";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.moveTo(px, sumY);
-      ctx.lineTo(px + pw, sumY);
+      ctx.moveTo(barAreaRight, barAreaTop - 5);
+      ctx.lineTo(barAreaRight, barAreaTop + barAreaH + 5);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = "#ffa726";
-      ctx.font = "10px monospace";
-      ctx.textAlign = "right";
-      ctx.fillText(`S∞ = ${theoreticalSum.toFixed(4)}`, px + pw, sumY - 5);
+
+      ctx.fillStyle = "#f59e0b";
+      ctx.font = "12px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`S∞ = ${convergentSum.toFixed(4)}`, barAreaRight, barAreaTop - 10);
     }
 
-    // Partial sum points
-    const displayN = Math.min(currentAnimTerm, partialSums.length);
-    for (let i = 0; i < displayN; i++) {
-      const x = px + ((i + 0.5) / numTerms) * pw;
-      const y = py + ph - ((partialSums[i] - minVal) / range) * ph;
+    // Draw accumulated bars
+    let xPos = barAreaLeft;
+    const maxDisplayTerms = Math.min(currentTermIndex + 1, numTerms);
+    const colors = ["#3b82f6", "#8b5cf6", "#ec4899", "#ef4444", "#f59e0b", "#10b981", "#06b6d4", "#84cc16",
+                    "#a855f7", "#f97316", "#14b8a6", "#e879f9", "#fb923c", "#22d3ee", "#a3e635", "#fbbf24"];
 
-      // Line connection
-      if (i > 0) {
-        const prevX = px + ((i - 0.5) / numTerms) * pw;
-        const prevY = py + ph - ((partialSums[i - 1] - minVal) / range) * ph;
-        ctx.strokeStyle = "#42a5f5";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(prevX, prevY);
-        ctx.lineTo(x, y);
-        ctx.stroke();
+    for (let i = 0; i < maxDisplayTerms; i++) {
+      const termVal = getTermValue(i);
+      const barW = (termVal / (convergentSum || firstTerm * 2)) * totalWidth;
+      const isCurrent = i === currentTermIndex;
+      const effectiveBarW = isCurrent ? barW * termProgress : barW;
+
+      if (effectiveBarW > 0.5) {
+        ctx.fillStyle = colors[i % colors.length] + (isCurrent ? "cc" : "ff");
+        ctx.fillRect(xPos, barAreaTop, effectiveBarW, barAreaH);
+
+        // Border
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 1;
+        ctx.strokeRect(xPos, barAreaTop, effectiveBarW, barAreaH);
+
+        // Label if bar is wide enough
+        if (effectiveBarW > 30) {
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "11px monospace";
+          ctx.textAlign = "center";
+          const label = ratio === 0.5 ? `1/${Math.pow(2, i)}` : termVal.toFixed(3);
+          ctx.fillText(label, xPos + effectiveBarW / 2, barAreaTop + barAreaH / 2 + 4);
+        }
+
+        xPos += effectiveBarW;
       }
-
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = "#42a5f5";
-      ctx.fill();
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 1;
-      ctx.stroke();
     }
+
+    // Remaining space
+    if (xPos < barAreaRight) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.fillRect(xPos, barAreaTop, barAreaRight - xPos, barAreaH);
+    }
+  }
+
+  function drawFormulas() {
+    const y = 190;
+
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "14px monospace";
+    ctx.textAlign = "center";
+
+    // Series formula
+    let seriesStr = "";
+    for (let i = 0; i <= Math.min(currentTermIndex, 5); i++) {
+      const term = getTermValue(i);
+      if (i > 0) seriesStr += " + ";
+      if (ratio === 0.5) {
+        seriesStr += i === 0 ? "1" : `1/${Math.pow(2, i)}`;
+      } else {
+        seriesStr += term.toFixed(3);
+      }
+    }
+    if (currentTermIndex > 5) seriesStr += " + ...";
+
+    ctx.fillText(`S = ${seriesStr}`, width / 2, y);
+
+    // Current sum
+    ctx.fillStyle = "#22d3ee";
+    ctx.font = "bold 16px monospace";
+    ctx.fillText(`S₍${currentTermIndex + 1}₎ = ${displayedSum.toFixed(6)}`, width / 2, y + 30);
+
+    const convergent = getConvergentSum();
+    if (convergent !== null) {
+      ctx.fillStyle = "#f59e0b";
+      ctx.font = "14px monospace";
+      ctx.fillText(`S∞ = a/(1−r) = ${firstTerm}/(1−${ratio}) = ${convergent.toFixed(6)}`, width / 2, y + 58);
+    }
+  }
+
+  function drawGraph() {
+    const gx = 60;
+    const gy = 280;
+    const gw = width - 120;
+    const gh = height - gy - 80;
+
+    // Graph background
+    ctx.fillStyle = "rgba(15, 23, 42, 0.5)";
+    ctx.beginPath();
+    ctx.roundRect(gx - 10, gy - 10, gw + 20, gh + 30, 8);
+    ctx.fill();
+
+    // Axes
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(gx, gy);
+    ctx.lineTo(gx, gy + gh);
+    ctx.lineTo(gx + gw, gy + gh);
+    ctx.stroke();
 
     // Axis labels
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = "9px monospace";
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("n (term index)", px + pw / 2, py + ph + 14);
-    ctx.textAlign = "right";
-    ctx.fillText(maxVal.toFixed(2), px - 5, py + 4);
-    ctx.fillText(minVal.toFixed(2), px - 5, py + ph);
-  }
+    ctx.fillText("n (term number)", gx + gw / 2, gy + gh + 25);
+    ctx.save();
+    ctx.translate(gx - 25, gy + gh / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Partial Sum Sₙ", 0, 0);
+    ctx.restore();
 
-  function drawFormulas(): void {
-    const fx = W * 0.05;
-    const fy = H * 0.52;
-    const fw = W * 0.9;
-    const fh = H * 0.2;
+    const convergent = getConvergentSum();
+    const maxY = convergent !== null ? convergent * 1.1 : getPartialSum(numTerms) * 1.1;
 
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    // Convergent sum line
+    if (convergent !== null) {
+      const cy = gy + gh - (convergent / maxY) * gh;
+      ctx.strokeStyle = "#f59e0b44";
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(gx, cy);
+      ctx.lineTo(gx + gw, cy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#f59e0b";
+      ctx.font = "10px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(`S∞ = ${convergent.toFixed(3)}`, gx + gw - 80, cy - 5);
+    }
+
+    // Plot partial sums
+    const maxDisplayTerms = Math.min(currentTermIndex + 1, numTerms);
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(fx, fy, fw, fh, 8);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Geometric Series Formulas", fx + 15, fy + 18);
-
-    ctx.font = "12px monospace";
-    let y = fy + 40;
-
-    ctx.fillStyle = "#42a5f5";
-    ctx.fillText(`General term:  aₙ = a·rⁿ = ${firstTerm} × ${commonRatio}ⁿ`, fx + 15, y);
-    y += 20;
-
-    ctx.fillStyle = "#66bb6a";
-    ctx.fillText(`Partial sum:   Sₙ = a(1-rⁿ)/(1-r)`, fx + 15, y);
-    if (currentAnimTerm > 0 && currentAnimTerm <= partialSums.length) {
-      ctx.fillStyle = "#fff";
-      ctx.fillText(`= ${partialSums[Math.min(currentAnimTerm - 1, partialSums.length - 1)].toFixed(6)}`, fx + 340, y);
+    for (let i = 0; i <= maxDisplayTerms; i++) {
+      let sum: number;
+      if (i < maxDisplayTerms) {
+        sum = getPartialSum(i);
+      } else {
+        sum = displayedSum;
+      }
+      const px = gx + (i / numTerms) * gw;
+      const py = gy + gh - (sum / maxY) * gh;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
     }
-    y += 20;
+    ctx.stroke();
 
-    if (Math.abs(commonRatio) < 1) {
-      ctx.fillStyle = "#ffa726";
-      ctx.fillText(`Infinite sum:  S∞ = a/(1-r) = ${firstTerm}/(1-${commonRatio}) = ${theoreticalSum.toFixed(6)}`, fx + 15, y);
-      ctx.fillStyle = "#4caf50";
-      ctx.fillText(" ← CONVERGES (|r| < 1)", fx + 520, y);
-    } else {
-      ctx.fillStyle = "#ef5350";
-      ctx.fillText(`|r| = ${Math.abs(commonRatio).toFixed(2)} ≥ 1 → Series DIVERGES`, fx + 15, y);
-    }
-  }
+    // Plot points
+    for (let i = 0; i <= Math.min(currentTermIndex, numTerms - 1); i++) {
+      const sum = getPartialSum(i);
+      const px = gx + (i / numTerms) * gw;
+      const py = gy + gh - (sum / maxY) * gh;
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#60a5fa";
+      ctx.fill();
 
-  function drawTermTable(): void {
-    const tx = W * 0.05;
-    const ty = H * 0.75;
-    const tw = W * 0.9;
-    const th = H * 0.22;
-
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
-    ctx.beginPath();
-    ctx.roundRect(tx, ty, tw, th, 8);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Terms & Partial Sums", tx + 15, ty + 16);
-
-    const cols = Math.min(numTerms, Math.floor(tw / 80));
-    const colW = (tw - 30) / cols;
-
-    // Header
-    ctx.font = "10px monospace";
-    ctx.fillStyle = "#78909c";
-    for (let i = 0; i < cols; i++) {
-      const x = tx + 15 + i * colW;
-      ctx.textAlign = "center";
-      ctx.fillText(`n=${i}`, x + colW / 2, ty + 34);
-    }
-
-    // Terms
-    for (let i = 0; i < Math.min(cols, currentAnimTerm); i++) {
-      const x = tx + 15 + i * colW;
-      ctx.fillStyle = "#42a5f5";
+      // X-axis labels
+      ctx.fillStyle = "#94a3b8";
       ctx.font = "10px monospace";
       ctx.textAlign = "center";
-      ctx.fillText(`aₙ=${terms[i].toFixed(4)}`, x + colW / 2, ty + 50);
-      ctx.fillStyle = "#66bb6a";
-      ctx.fillText(`Sₙ=${partialSums[i].toFixed(4)}`, x + colW / 2, ty + 65);
-    }
-
-    // Error from convergence value
-    if (Math.abs(commonRatio) < 1 && currentAnimTerm > 0) {
-      const lastIdx = Math.min(currentAnimTerm - 1, partialSums.length - 1);
-      const error = Math.abs(theoreticalSum - partialSums[lastIdx]);
-      ctx.fillStyle = "#ef5350";
-      ctx.font = "11px monospace";
-      ctx.textAlign = "left";
-      ctx.fillText(`Error from S∞: |S∞ - S${lastIdx + 1}| = ${error.toExponential(3)}`, tx + 15, ty + th - 10);
+      ctx.fillText(`${i + 1}`, px, gy + gh + 12);
     }
   }
 
-  function render(): void {
-    drawBackground();
-    drawVisualBlocks();
-    drawPartialSumGraph();
-    drawFormulas();
-    drawTermTable();
+  function drawTitle() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Geometric Series Convergence", width / 2, 28);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(`a = ${firstTerm}  |  r = ${ratio}  |  Sₙ = a(1−rⁿ)/(1−r)`, width / 2, 50);
   }
 
-  function destroy(): void {
-    terms = [];
-    partialSums = [];
-  }
+  return {
+    config,
 
-  function getStateDescription(): string {
-    const displayN = Math.min(currentAnimTerm, partialSums.length);
-    const lastSum = displayN > 0 ? partialSums[displayN - 1] : 0;
-    return (
-      `Geometric Series: a=${firstTerm}, r=${commonRatio}, n=${numTerms}. ` +
-      `Currently showing ${displayN} terms. ` +
-      `Latest partial sum S${displayN}=${lastSum.toFixed(6)}. ` +
-      `${Math.abs(commonRatio) < 1
-        ? `Series converges to S∞ = a/(1-r) = ${theoreticalSum.toFixed(6)}`
-        : `Series diverges (|r|=${Math.abs(commonRatio)} ≥ 1)`
-      }. ` +
-      `General term: aₙ = ${firstTerm}·${commonRatio}ⁿ. Partial sum: Sₙ = a(1-rⁿ)/(1-r).`
-    );
-  }
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
-  }
+    update(dt: number, params: Record<string, number>) {
+      const newRatio = params.ratio ?? 0.5;
+      const newTerms = Math.round(params.numTerms ?? 8);
+      animSpeed = params.animSpeed ?? 1;
+      firstTerm = params.firstTerm ?? 1;
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+      if (Math.abs(newRatio - ratio) > 0.001 || newTerms !== numTerms) {
+        ratio = newRatio;
+        numTerms = newTerms;
+        initState();
+        return;
+      }
+
+      time += dt;
+
+      // Animate terms appearing
+      if (currentTermIndex < numTerms) {
+        termProgress += dt * animSpeed * 1.5;
+        if (termProgress >= 1) {
+          termProgress = 0;
+          displayedSum = getPartialSum(currentTermIndex);
+          currentTermIndex++;
+        } else {
+          displayedSum = (currentTermIndex > 0 ? getPartialSum(currentTermIndex - 1) : 0) +
+                         getTermValue(currentTermIndex) * termProgress;
+        }
+      }
+    },
+
+    render() {
+      drawBackground();
+      drawBarVisualization();
+      drawFormulas();
+      drawGraph();
+      drawTitle();
+    },
+
+    reset() {
+      initState();
+    },
+
+    destroy() {},
+
+    getStateDescription(): string {
+      const convergent = getConvergentSum();
+      const convergesStr = convergent !== null
+        ? `Converges to ${convergent.toFixed(6)}`
+        : "Diverges (|r| ≥ 1)";
+      return `Geometric Series: a=${firstTerm}, r=${ratio}. Showing ${currentTermIndex + 1}/${numTerms} terms. Current partial sum: ${displayedSum.toFixed(6)}. ${convergesStr}. Formula: Sₙ = a(1−rⁿ)/(1−r).`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+    },
+  };
 };
 
 export default GeometricSeriesFactory;

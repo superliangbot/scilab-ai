@@ -1,8 +1,4 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
 const GeneralRelativityFactory: SimulationFactory = (): SimulationEngine => {
@@ -10,400 +6,331 @@ const GeneralRelativityFactory: SimulationFactory = (): SimulationEngine => {
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
-  let mass = 10; // Mass of central body (solar masses)
-  let gridDensity = 15;
-  let testParticleSpeed = 2;
-  let showGeodesics = 1;
+  let massRatio = 0.1;
+  let startDistance = 150;
+  let startSpeed = 1.2;
+  let showGrid = 1;
 
-  // Grid deformation
-  const GRID_SIZE = 30;
+  // Bodies
+  let body1 = { x: 0, y: 0, vx: 0, vy: 0, mass: 1 };
+  let body2 = { x: 0, y: 0, vx: 0, vy: 0, mass: 0.1 };
 
-  // Test particles orbiting the mass
-  interface TestParticle {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    trail: Array<{ x: number; y: number }>;
-    color: string;
-  }
+  let trail1: { x: number; y: number }[] = [];
+  let trail2: { x: number; y: number }[] = [];
+  let crashed = false;
 
-  const testParticles: TestParticle[] = [];
-  let schwarzschildRadius = 0;
+  const G = 1; // Normalized gravitational constant
 
-  // Light rays for gravitational lensing
-  interface LightRay {
-    points: Array<{ x: number; y: number }>;
-    color: string;
-  }
-  const lightRays: LightRay[] = [];
-
-  function initTestParticles(): void {
-    testParticles.length = 0;
-    const cx = W * 0.5;
-    const cy = H * 0.5;
-
-    const colors = ["#42a5f5", "#66bb6a", "#ffa726"];
-    const distances = [120, 180, 250];
-
-    for (let i = 0; i < 3; i++) {
-      const r = distances[i];
-      const angle = (i * Math.PI * 2) / 3;
-      const orbitalSpeed = testParticleSpeed * Math.sqrt(mass * 5 / r);
-      testParticles.push({
-        x: cx + r * Math.cos(angle),
-        y: cy + r * Math.sin(angle),
-        vx: -orbitalSpeed * Math.sin(angle),
-        vy: orbitalSpeed * Math.cos(angle),
-        trail: [],
-        color: colors[i],
-      });
-    }
-  }
-
-  function computeLightRays(): void {
-    lightRays.length = 0;
-    const cx = W * 0.5;
-    const cy = H * 0.5;
-    const numRays = 8;
-
-    for (let i = 0; i < numRays; i++) {
-      const startY = cy - 200 + (i * 400) / (numRays - 1);
-      const ray: LightRay = {
-        points: [],
-        color: `hsla(${50 + i * 20}, 80%, 70%, 0.6)`,
-      };
-
-      let x = -20;
-      let y = startY;
-      let vx = 300;
-      let vy = 0;
-
-      for (let step = 0; step < 300; step++) {
-        ray.points.push({ x, y });
-        const dx = cx - x;
-        const dy = cy - y;
-        const r = Math.sqrt(dx * dx + dy * dy);
-        if (r < schwarzschildRadius * 0.8) break;
-        if (r > 0) {
-          const deflection = (mass * 200) / (r * r + 100);
-          vx += (dx / r) * deflection;
-          vy += (dy / r) * deflection;
-        }
-        const speed = Math.sqrt(vx * vx + vy * vy);
-        const dt = 3;
-        x += (vx / speed) * dt;
-        y += (vy / speed) * dt;
-        if (x > W + 50 || y < -100 || y > H + 100) break;
-      }
-
-      lightRays.push(ray);
-    }
-  }
-
-  function reset(): void {
+  function initState() {
     time = 0;
-    schwarzschildRadius = mass * 3; // Scaled Schwarzschild radius
-    initTestParticles();
-    computeLightRays();
+    crashed = false;
+    trail1 = [];
+    trail2 = [];
+
+    const cx = width / 2;
+    const cy = height / 2;
+
+    body1.mass = 1;
+    body2.mass = massRatio;
+
+    const totalMass = body1.mass + body2.mass;
+    const r1 = startDistance * body2.mass / totalMass;
+    const r2 = startDistance * body1.mass / totalMass;
+
+    body1.x = cx - r1;
+    body1.y = cy;
+    body2.x = cx + r2;
+    body2.y = cy;
+
+    // Circular orbit velocity
+    const v = startSpeed * Math.sqrt(G * totalMass / startDistance);
+    body1.vx = 0;
+    body1.vy = v * body2.mass / totalMass;
+    body2.vx = 0;
+    body2.vy = -v * body1.mass / totalMass;
   }
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
+  function drawBackground() {
+    ctx.fillStyle = "#0a0a1a";
+    ctx.fillRect(0, 0, width, height);
   }
 
-  function update(dt: number, params: Record<string, number>): void {
-    const newMass = params.mass ?? 10;
-    const newGrid = params.gridDensity ?? 15;
-    const newSpeed = params.testParticleSpeed ?? 2;
-    const newGeo = params.showGeodesics ?? 1;
+  function drawSpacetimeGrid() {
+    if (showGrid < 0.5) return;
 
-    if (newMass !== mass || newSpeed !== testParticleSpeed) {
-      mass = newMass;
-      testParticleSpeed = newSpeed;
-      schwarzschildRadius = mass * 3;
-      reset();
-      return;
-    }
+    const gridSize = 30;
+    const gridPoints: { x: number; y: number; dx: number; dy: number }[][] = [];
 
-    gridDensity = newGrid;
-    showGeodesics = newGeo;
+    for (let gy = 0; gy <= height; gy += gridSize) {
+      const row: { x: number; y: number; dx: number; dy: number }[] = [];
+      for (let gx = 0; gx <= width; gx += gridSize) {
+        let dx = 0, dy = 0;
 
-    time += dt;
-
-    const cx = W * 0.5;
-    const cy = H * 0.5;
-
-    // Update test particles with gravitational attraction
-    for (const tp of testParticles) {
-      const dx = cx - tp.x;
-      const dy = cy - tp.y;
-      const r = Math.sqrt(dx * dx + dy * dy);
-
-      if (r < schwarzschildRadius) {
-        // Captured by black hole
-        tp.x = cx;
-        tp.y = cy;
-        tp.vx = 0;
-        tp.vy = 0;
-        continue;
-      }
-
-      // Gravitational acceleration: a = GM/r²
-      const a = (mass * 500) / (r * r + 10);
-      tp.vx += (dx / r) * a * dt;
-      tp.vy += (dy / r) * a * dt;
-
-      // GR correction: precession term (perihelion advance)
-      const L = tp.x * tp.vy - tp.y * tp.vx; // angular momentum
-      const grCorrection = (3 * mass * L * L) / (r * r * r * r * r) * 0.001;
-      tp.vx += (dx / r) * grCorrection * dt;
-      tp.vy += (dy / r) * grCorrection * dt;
-
-      tp.x += tp.vx * dt;
-      tp.y += tp.vy * dt;
-
-      tp.trail.push({ x: tp.x, y: tp.y });
-      if (tp.trail.length > 400) tp.trail.shift();
-    }
-  }
-
-  function drawSpacetimeFabric(): void {
-    const cx = W * 0.5;
-    const cy = H * 0.5;
-    const gridN = Math.round(gridDensity);
-
-    ctx.strokeStyle = "rgba(100, 150, 255, 0.15)";
-    ctx.lineWidth = 1;
-
-    // Horizontal grid lines
-    for (let i = -gridN; i <= gridN; i++) {
-      ctx.beginPath();
-      for (let j = -gridN * 2; j <= gridN * 2; j++) {
-        const baseX = cx + (j / gridN) * (W * 0.5);
-        const baseY = cy + (i / gridN) * (H * 0.5);
-
-        const dx = baseX - cx;
-        const dy = baseY - cy;
-        const r = Math.sqrt(dx * dx + dy * dy);
-
-        // Spacetime curvature deformation
-        let deformY = 0;
-        if (r > 10) {
-          deformY = (mass * 30) / (r * 0.3 + 10);
-          // Pull toward center
-          deformY *= (dy / r) * 0.5;
+        // Spacetime warping near masses
+        for (const body of [body1, body2]) {
+          const bx = gx - body.x;
+          const by = gy - body.y;
+          const dist = Math.sqrt(bx * bx + by * by);
+          if (dist > 5) {
+            const warp = body.mass * 600 / (dist * dist + 100);
+            dx += bx / dist * warp;
+            dy += by / dist * warp;
+          }
         }
 
-        const px = baseX;
-        const py = baseY + deformY;
+        row.push({ x: gx, y: gy, dx, dy });
+      }
+      gridPoints.push(row);
+    }
 
-        if (j === -gridN * 2) ctx.moveTo(px, py);
+    // Draw grid lines (horizontal)
+    ctx.strokeStyle = "rgba(99, 102, 241, 0.2)";
+    ctx.lineWidth = 0.5;
+    for (const row of gridPoints) {
+      ctx.beginPath();
+      for (let i = 0; i < row.length; i++) {
+        const p = row[i];
+        const px = p.x + p.dx;
+        const py = p.y + p.dy;
+        if (i === 0) ctx.moveTo(px, py);
         else ctx.lineTo(px, py);
       }
       ctx.stroke();
     }
 
-    // Vertical grid lines
-    for (let j = -gridN * 2; j <= gridN * 2; j++) {
+    // Draw grid lines (vertical)
+    for (let col = 0; col < gridPoints[0].length; col++) {
       ctx.beginPath();
-      for (let i = -gridN; i <= gridN; i++) {
-        const baseX = cx + (j / gridN) * (W * 0.5);
-        const baseY = cy + (i / gridN) * (H * 0.5);
-
-        const dx = baseX - cx;
-        const dy = baseY - cy;
-        const r = Math.sqrt(dx * dx + dy * dy);
-
-        let deformX = 0;
-        if (r > 10) {
-          deformX = (mass * 30) / (r * 0.3 + 10);
-          deformX *= (dx / r) * 0.5;
-        }
-
-        const px = baseX + deformX;
-        const py = baseY;
-
-        if (i === -gridN) ctx.moveTo(px, py);
+      for (let row = 0; row < gridPoints.length; row++) {
+        const p = gridPoints[row][col];
+        const px = p.x + p.dx;
+        const py = p.y + p.dy;
+        if (row === 0) ctx.moveTo(px, py);
         else ctx.lineTo(px, py);
       }
       ctx.stroke();
     }
   }
 
-  function drawCentralMass(): void {
-    const cx = W * 0.5;
-    const cy = H * 0.5;
-
-    // Event horizon
-    ctx.beginPath();
-    ctx.arc(cx, cy, schwarzschildRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255, 100, 50, 0.5)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Accretion disk glow
-    const glowR = schwarzschildRadius * 2.5;
-    const glow = ctx.createRadialGradient(cx, cy, schwarzschildRadius, cx, cy, glowR);
-    glow.addColorStop(0, "rgba(255, 100, 30, 0.3)");
-    glow.addColorStop(0.5, "rgba(255, 60, 10, 0.1)");
-    glow.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.beginPath();
-    ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
-    ctx.fillStyle = glow;
-    ctx.fill();
-
-    // Label
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.font = "11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(`M = ${mass} M☉`, cx, cy + schwarzschildRadius + 18);
-    ctx.fillText(`r_s = ${schwarzschildRadius.toFixed(0)}`, cx, cy + schwarzschildRadius + 32);
-  }
-
-  function drawTestParticles(): void {
-    if (showGeodesics < 0.5) return;
-
-    for (const tp of testParticles) {
-      // Trail (geodesic)
-      if (tp.trail.length > 1) {
-        ctx.strokeStyle = tp.color + "60";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        for (let i = 0; i < tp.trail.length; i++) {
-          if (i === 0) ctx.moveTo(tp.trail[i].x, tp.trail[i].y);
-          else ctx.lineTo(tp.trail[i].x, tp.trail[i].y);
-        }
-        ctx.stroke();
-      }
-
-      // Particle
-      ctx.beginPath();
-      ctx.arc(tp.x, tp.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = tp.color;
-      ctx.fill();
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-  }
-
-  function drawLightRays(): void {
-    for (const ray of lightRays) {
-      if (ray.points.length < 2) continue;
-      ctx.strokeStyle = ray.color;
+  function drawTrails() {
+    // Trail 1
+    if (trail1.length > 1) {
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.4)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      for (let i = 0; i < ray.points.length; i++) {
-        if (i === 0) ctx.moveTo(ray.points[i].x, ray.points[i].y);
-        else ctx.lineTo(ray.points[i].x, ray.points[i].y);
+      for (let i = 0; i < trail1.length; i++) {
+        if (i === 0) ctx.moveTo(trail1[i].x, trail1[i].y);
+        else ctx.lineTo(trail1[i].x, trail1[i].y);
       }
       ctx.stroke();
     }
 
-    // Label
-    ctx.fillStyle = "rgba(255, 235, 59, 0.5)";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Light rays (gravitational lensing)", 10, H - 30);
+    // Trail 2
+    if (trail2.length > 1) {
+      ctx.strokeStyle = "rgba(34, 211, 238, 0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < trail2.length; i++) {
+        if (i === 0) ctx.moveTo(trail2[i].x, trail2[i].y);
+        else ctx.lineTo(trail2[i].x, trail2[i].y);
+      }
+      ctx.stroke();
+    }
   }
 
-  function drawInfo(): void {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
+  function drawBodies() {
+    // Body 1 (larger)
+    const r1 = 10 + body1.mass * 12;
+    const g1 = ctx.createRadialGradient(body1.x - r1 * 0.2, body1.y - r1 * 0.2, 0, body1.x, body1.y, r1);
+    g1.addColorStop(0, "#fde68a");
+    g1.addColorStop(0.6, "#f59e0b");
+    g1.addColorStop(1, "#92400e");
     ctx.beginPath();
-    ctx.roundRect(10, 10, 250, 160, 8);
+    ctx.arc(body1.x, body1.y, r1, 0, Math.PI * 2);
+    ctx.fillStyle = g1;
     ctx.fill();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    ctx.fillText("General Relativity", 20, 18);
+    // Glow
+    const glow1 = ctx.createRadialGradient(body1.x, body1.y, r1, body1.x, body1.y, r1 * 3);
+    glow1.addColorStop(0, "rgba(245, 158, 11, 0.3)");
+    glow1.addColorStop(1, "rgba(245, 158, 11, 0)");
+    ctx.fillStyle = glow1;
+    ctx.beginPath();
+    ctx.arc(body1.x, body1.y, r1 * 3, 0, Math.PI * 2);
+    ctx.fill();
 
-    ctx.font = "11px monospace";
-    ctx.fillStyle = "#ccc";
-    let y = 40;
-    ctx.fillText(`Mass: ${mass} solar masses`, 20, y); y += 16;
-    ctx.fillText(`Schwarzschild radius: ${schwarzschildRadius.toFixed(0)}`, 20, y); y += 16;
-    ctx.fillText(`Grid density: ${Math.round(gridDensity)}`, 20, y); y += 20;
+    // Body 2 (smaller)
+    const r2 = 6 + body2.mass * 12;
+    const g2 = ctx.createRadialGradient(body2.x - r2 * 0.2, body2.y - r2 * 0.2, 0, body2.x, body2.y, r2);
+    g2.addColorStop(0, "#a5f3fc");
+    g2.addColorStop(0.6, "#22d3ee");
+    g2.addColorStop(1, "#0e7490");
+    ctx.beginPath();
+    ctx.arc(body2.x, body2.y, r2, 0, Math.PI * 2);
+    ctx.fillStyle = g2;
+    ctx.fill();
 
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Einstein Field Equations:", 20, y); y += 14;
-    ctx.font = "11px monospace";
-    ctx.fillStyle = "#42a5f5";
-    ctx.fillText("Gμν + Λgμν = (8πG/c⁴)Tμν", 20, y); y += 18;
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Mass curves spacetime,", 20, y); y += 13;
-    ctx.fillText("curved spacetime guides mass.", 20, y);
+    // Labels
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`M₁ = ${body1.mass.toFixed(1)}`, body1.x, body1.y + r1 + 14);
+    ctx.fillText(`M₂ = ${body2.mass.toFixed(2)}`, body2.x, body2.y + r2 + 14);
   }
 
-  function render(): void {
-    // Deep space background
-    ctx.fillStyle = "#020210";
-    ctx.fillRect(0, 0, W, H);
+  function drawEquations() {
+    const px = 15;
+    const py = height - 80;
 
-    // Stars
-    const rng = (s: number) => {
-      let v = s;
-      return () => { v = (v * 16807) % 2147483647; return v / 2147483647; };
-    };
-    const rand = rng(123);
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    for (let i = 0; i < 80; i++) {
-      ctx.beginPath();
-      ctx.arc(rand() * W, rand() * H, rand() * 1, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.fillStyle = "rgba(10, 10, 26, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(px, py, 350, 70, 8);
+    ctx.fill();
+
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "12px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText("Newton: F = GMm/r²  (force between masses)", px + 10, py + 20);
+    ctx.fillText("Einstein: Gμν + Λgμν = (8πG/c⁴)Tμν", px + 10, py + 40);
+    ctx.fillText("Mass warps spacetime → objects follow geodesics", px + 10, py + 60);
+  }
+
+  function drawInfo() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("General Relativity — Spacetime Curvature", width / 2, 28);
+
+    if (crashed) {
+      ctx.fillStyle = "#ef4444";
+      ctx.font = "bold 16px sans-serif";
+      ctx.fillText("COLLISION!", width / 2, 55);
     }
 
-    drawSpacetimeFabric();
-    drawLightRays();
-    drawCentralMass();
-    drawTestParticles();
-    drawInfo();
+    // Stats panel
+    ctx.fillStyle = "rgba(10, 10, 26, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(width - 200, 60, 190, 60, 8);
+    ctx.fill();
 
-    // Title
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Spacetime Curvature — General Relativity", W / 2, H - 10);
+    const dx = body2.x - body1.x;
+    const dy = body2.y - body1.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(`Distance: ${dist.toFixed(1)} px`, width - 190, 80);
+    ctx.fillText(`Time: ${time.toFixed(1)} s`, width - 190, 96);
+    ctx.fillText(`Mass ratio: 1:${massRatio.toFixed(3)}`, width - 190, 112);
   }
 
-  function destroy(): void {
-    testParticles.length = 0;
-    lightRays.length = 0;
-  }
+  return {
+    config,
 
-  function getStateDescription(): string {
-    return (
-      `General Relativity Visualization: central mass=${mass} solar masses. ` +
-      `Schwarzschild radius=${schwarzschildRadius.toFixed(0)}. ` +
-      `Grid shows spacetime curvature (fabric deformation). ` +
-      `Test particles follow geodesics (curved paths through spacetime). ` +
-      `Light rays demonstrate gravitational lensing. ` +
-      `Einstein's equation: Gμν + Λgμν = (8πG/c⁴)Tμν — ` +
-      `mass-energy tells spacetime how to curve, spacetime tells matter how to move.`
-    );
-  }
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
-    computeLightRays();
-  }
+    update(dt: number, params: Record<string, number>) {
+      const newMR = params.massRatio ?? 0.1;
+      const newDist = params.startDistance ?? 150;
+      const newSpeed = params.startSpeed ?? 1.2;
+      showGrid = params.showGrid ?? 1;
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+      if (Math.abs(newMR - massRatio) > 0.001 || Math.abs(newDist - startDistance) > 1 || Math.abs(newSpeed - startSpeed) > 0.01) {
+        massRatio = newMR;
+        startDistance = newDist;
+        startSpeed = newSpeed;
+        initState();
+        return;
+      }
+
+      if (crashed) return;
+
+      time += dt;
+
+      // Velocity Verlet integration
+      const steps = 4;
+      const subDt = dt / steps;
+
+      for (let s = 0; s < steps; s++) {
+        const dx = body2.x - body1.x;
+        const dy = body2.y - body1.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 15) {
+          crashed = true;
+          return;
+        }
+
+        const softened = dist * dist + 10;
+        const force = G * body1.mass * body2.mass / softened;
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        // Accelerations
+        const a1x = force * nx / body1.mass;
+        const a1y = force * ny / body1.mass;
+        const a2x = -force * nx / body2.mass;
+        const a2y = -force * ny / body2.mass;
+
+        body1.vx += a1x * subDt * 60;
+        body1.vy += a1y * subDt * 60;
+        body2.vx += a2x * subDt * 60;
+        body2.vy += a2y * subDt * 60;
+
+        body1.x += body1.vx * subDt;
+        body1.y += body1.vy * subDt;
+        body2.x += body2.vx * subDt;
+        body2.y += body2.vy * subDt;
+      }
+
+      // Record trails
+      trail1.push({ x: body1.x, y: body1.y });
+      trail2.push({ x: body2.x, y: body2.y });
+      if (trail1.length > 500) trail1.shift();
+      if (trail2.length > 500) trail2.shift();
+    },
+
+    render() {
+      drawBackground();
+      drawSpacetimeGrid();
+      drawTrails();
+      drawBodies();
+      drawEquations();
+      drawInfo();
+    },
+
+    reset() {
+      initState();
+    },
+
+    destroy() {
+      trail1 = [];
+      trail2 = [];
+    },
+
+    getStateDescription(): string {
+      const dx = body2.x - body1.x;
+      const dy = body2.y - body1.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      return `General Relativity: Two bodies (M₁=1, M₂=${massRatio.toFixed(3)}) orbiting. Distance: ${dist.toFixed(1)}. ${crashed ? "COLLISION occurred." : "Orbiting normally."} The grid shows spacetime curvature — mass warps space, and objects follow curved paths (geodesics) rather than being pulled by a force.`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+    },
+  };
 };
 
 export default GeneralRelativityFactory;

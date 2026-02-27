@@ -1,440 +1,279 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-}
 
 const GraphOfCharlesLawFactory: SimulationFactory = (): SimulationEngine => {
   const config = getSimConfig("graph-of-charles-law") as SimulationConfig;
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
-  let temperature = 300; // K
-  let pressure = 1; // atm (constant)
-  let moles = 1;
-  let showAbsoluteZero = 1;
+  let zoom = 1;
+  let pressure = 1; // atm
+  let showExtrapolation = 1;
+  let gasType = 0; // 0=ideal, 1=nitrogen, 2=oxygen
 
-  // Gas constant
-  const R = 0.0821; // L·atm/(mol·K)
+  // Charles's Law: V = V₀(1 + T/273) at constant pressure
+  // V/T = constant (in Kelvin)
+  const V0 = 22.4; // L/mol at STP
 
-  // Current volume (Charles' Law: V = nRT/P)
-  let volume = 0;
-
-  // Particles for visualization
-  const particles: Particle[] = [];
-  const NUM_PARTICLES = 40;
-
-  // Data points collected
-  const dataPoints: Array<{ T: number; V: number }> = [];
-
-  function computeVolume(): number {
-    return (moles * R * temperature) / Math.max(pressure, 0.01);
-  }
-
-  function containerBounds() {
-    const vol = computeVolume();
-    const maxVol = (moles * R * 600) / pressure;
-    const frac = vol / maxVol;
-    const maxH = H * 0.5;
-    const ch = maxH * frac;
-    const cw = W * 0.22;
-    return {
-      x: W * 0.06,
-      y: H * 0.1 + (maxH - ch),
-      w: cw,
-      h: Math.max(ch, 30),
-    };
-  }
-
-  function initParticles(): void {
-    particles.length = 0;
-    const cb = containerBounds();
-    const speed = Math.sqrt(temperature) * 0.5;
-    for (let i = 0; i < NUM_PARTICLES; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      particles.push({
-        x: cb.x + 5 + Math.random() * (cb.w - 10),
-        y: cb.y + 5 + Math.random() * (cb.h - 10),
-        vx: speed * Math.cos(angle) * (0.5 + Math.random()),
-        vy: speed * Math.sin(angle) * (0.5 + Math.random()),
-      });
-    }
-  }
-
-  function reset(): void {
+  function initState() {
     time = 0;
-    volume = computeVolume();
-    dataPoints.length = 0;
-    initParticles();
   }
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
+  function drawBackground() {
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    grad.addColorStop(0, "#0f172a");
+    grad.addColorStop(1, "#1e293b");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
   }
 
-  function update(dt: number, params: Record<string, number>): void {
-    const newT = params.temperature ?? 300;
-    const newP = params.pressure ?? 1;
-    const newN = params.moles ?? 1;
-    const newSAZ = params.showAbsoluteZero ?? 1;
+  function drawGraph() {
+    const padL = 80;
+    const padR = 40;
+    const padT = 80;
+    const padB = 70;
 
-    if (newP !== pressure || newN !== moles) {
-      pressure = newP;
-      moles = newN;
-      reset();
-    }
+    const gx = padL;
+    const gy = padT;
+    const gw = width - padL - padR;
+    const gh = height - padT - padB;
 
-    if (newT !== temperature) {
-      const ratio = Math.sqrt(newT / Math.max(temperature, 1));
-      for (const p of particles) {
-        p.vx *= ratio;
-        p.vy *= ratio;
-      }
-      temperature = newT;
-      volume = computeVolume();
-    }
-    showAbsoluteZero = newSAZ;
-
-    time += dt;
-
-    const cb = containerBounds();
-
-    // Move particles
-    for (const p of particles) {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-
-      if (p.x < cb.x + 3) { p.x = cb.x + 3; p.vx = Math.abs(p.vx); }
-      if (p.x > cb.x + cb.w - 3) { p.x = cb.x + cb.w - 3; p.vx = -Math.abs(p.vx); }
-      if (p.y < cb.y + 3) { p.y = cb.y + 3; p.vy = Math.abs(p.vy); }
-      if (p.y > cb.y + cb.h - 3) { p.y = cb.y + cb.h - 3; p.vy = -Math.abs(p.vy); }
-
-      p.x = Math.max(cb.x + 3, Math.min(cb.x + cb.w - 3, p.x));
-      p.y = Math.max(cb.y + 3, Math.min(cb.y + cb.h - 3, p.y));
-    }
-
-    // Record data point
-    const lastPt = dataPoints.length > 0 ? dataPoints[dataPoints.length - 1] : null;
-    if (!lastPt || Math.abs(lastPt.T - temperature) > 2) {
-      dataPoints.push({ T: temperature, V: volume });
-      if (dataPoints.length > 200) dataPoints.shift();
-    }
-  }
-
-  function drawContainer(): void {
-    const cb = containerBounds();
-    const maxVol = (moles * R * 600) / pressure;
-    const maxH = H * 0.5;
-
-    // Container outline (fixed width, variable height)
-    ctx.strokeStyle = "#546e7a";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.rect(cb.x, H * 0.1, cb.w, maxH);
-    ctx.stroke();
-
-    // Gas fill
-    ctx.fillStyle = "rgba(66, 165, 245, 0.15)";
-    ctx.fillRect(cb.x, cb.y, cb.w, cb.h);
-
-    // Piston (top of gas)
-    ctx.fillStyle = "#455a64";
-    ctx.fillRect(cb.x - 3, cb.y - 5, cb.w + 6, 10);
-    ctx.fillStyle = "#78909c";
-    for (let i = 0; i < cb.w; i += 10) {
-      ctx.fillRect(cb.x + i, cb.y - 3, 5, 6);
-    }
-
-    // Weight on piston showing constant pressure
-    ctx.fillStyle = "#37474f";
-    ctx.fillRect(cb.x + cb.w * 0.2, cb.y - 30, cb.w * 0.6, 22);
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(`P=${pressure} atm`, cb.x + cb.w / 2, cb.y - 15);
-
-    // Volume label
-    ctx.fillStyle = "#42a5f5";
-    ctx.font = "12px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText(`V = ${volume.toFixed(2)} L`, cb.x + cb.w / 2, H * 0.1 + maxH + 18);
-
-    // Temperature indicator (flames/ice)
-    const tempFrac = temperature / 600;
-    if (tempFrac > 0.3) {
-      for (let i = 0; i < 4; i++) {
-        const fx = cb.x + cb.w * (0.15 + i * 0.25);
-        const fy = H * 0.1 + maxH + 5;
-        const flameH = 8 + tempFrac * 18 + Math.sin(time * 6 + i * 2) * 4;
-        const grad = ctx.createLinearGradient(fx, fy + flameH, fx, fy);
-        grad.addColorStop(0, "rgba(255, 87, 34, 0)");
-        grad.addColorStop(0.5, `rgba(255, ${Math.floor(100 + tempFrac * 100)}, 0, 0.5)`);
-        grad.addColorStop(1, "rgba(255, 235, 59, 0.7)");
-        ctx.beginPath();
-        ctx.moveTo(fx - 4, fy + flameH);
-        ctx.quadraticCurveTo(fx, fy, fx + 4, fy + flameH);
-        ctx.fillStyle = grad;
-        ctx.fill();
-      }
-    }
-  }
-
-  function drawParticles(): void {
-    const cb = containerBounds();
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(cb.x, cb.y, cb.w, cb.h);
-    ctx.clip();
-
-    for (const p of particles) {
-      const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-      const maxSpeed = Math.sqrt(600) * 1.5;
-      const frac = Math.min(speed / maxSpeed, 1);
-      const r = Math.floor(50 + frac * 200);
-      const g = Math.floor(120 + (1 - frac) * 60);
-      const b = Math.floor(240 - frac * 180);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function drawVTGraph(): void {
-    const gx = W * 0.35;
-    const gy = H * 0.05;
-    const gw = W * 0.6;
-    const gh = H * 0.55;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.beginPath();
-    ctx.roundRect(gx, gy, gw, gh, 8);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 14px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Charles' Law: V vs T (at constant P)", gx + gw / 2, gy + 18);
-
-    const px = gx + 55;
-    const py = gy + 38;
-    const pw = gw - 75;
-    const ph = gh - 60;
-
-    // Temperature range: include absolute zero if enabled
-    const tMin = showAbsoluteZero >= 0.5 ? -273.15 : 0;
-    const tMax = 650;
-    const tRange = tMax - tMin;
-
-    const maxV = (moles * R * 600) / Math.max(pressure, 0.01) * 1.1;
+    // Ranges based on zoom
+    const tempMin = -300 / zoom;
+    const tempMax = 600 / zoom;
+    const volMin = 0;
+    const volMax = V0 * (1 + tempMax / 273) * 1.1 / pressure;
 
     // Grid
-    ctx.strokeStyle = "rgba(255,255,255,0.1)";
-    ctx.lineWidth = 1;
-    for (let t = 0; t <= 600; t += 100) {
-      const x = px + ((t - tMin) / tRange) * pw;
+    ctx.strokeStyle = "#1e3a5f";
+    ctx.lineWidth = 0.5;
+
+    // Temperature grid lines
+    const tempStep = zoom > 1.5 ? 50 : 100;
+    for (let t = Math.ceil(tempMin / tempStep) * tempStep; t <= tempMax; t += tempStep) {
+      const x = gx + ((t - tempMin) / (tempMax - tempMin)) * gw;
       ctx.beginPath();
-      ctx.moveTo(x, py);
-      ctx.lineTo(x, py + ph);
+      ctx.moveTo(x, gy);
+      ctx.lineTo(x, gy + gh);
       ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255,0.4)";
-      ctx.font = "9px monospace";
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10px monospace";
       ctx.textAlign = "center";
-      ctx.fillText(`${t}K`, x, py + ph + 12);
+      ctx.fillText(`${t}°C`, x, gy + gh + 16);
+    }
+
+    // Volume grid lines
+    const volStep = Math.max(5, Math.round(volMax / 8 / 5) * 5);
+    for (let v = 0; v <= volMax; v += volStep) {
+      const y = gy + gh - (v / volMax) * gh;
+      ctx.beginPath();
+      ctx.moveTo(gx, y);
+      ctx.lineTo(gx + gw, y);
+      ctx.stroke();
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10px monospace";
+      ctx.textAlign = "right";
+      ctx.fillText(`${v.toFixed(0)}`, gx - 8, y + 4);
     }
 
     // Axes
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px, py + ph);
-    ctx.lineTo(px + pw, py + ph);
+    ctx.moveTo(gx, gy);
+    ctx.lineTo(gx, gy + gh);
+    ctx.lineTo(gx + gw, gy + gh);
     ctx.stroke();
 
-    // Axis labels
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "11px sans-serif";
+    // Axis arrows
+    ctx.beginPath();
+    ctx.moveTo(gx + gw, gy + gh);
+    ctx.lineTo(gx + gw - 8, gy + gh - 4);
+    ctx.lineTo(gx + gw - 8, gy + gh + 4);
+    ctx.closePath();
+    ctx.fillStyle = "#94a3b8";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(gx, gy);
+    ctx.lineTo(gx - 4, gy + 8);
+    ctx.lineTo(gx + 4, gy + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // Labels
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "13px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Temperature (K)", px + pw / 2, py + ph + 28);
+    ctx.fillText("Temperature (°C)", gx + gw / 2, gy + gh + 45);
     ctx.save();
-    ctx.translate(px - 38, py + ph / 2);
+    ctx.translate(20, gy + gh / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("Volume (L)", 0, 0);
+    ctx.fillText("Volume (L/mol)", 0, 0);
     ctx.restore();
 
-    // Absolute zero line
-    if (showAbsoluteZero >= 0.5) {
-      const azX = px + ((0 - tMin) / tRange) * pw;
-      // Also show -273.15°C point
-      const azLineX = px + ((-273.15 - tMin) / tRange) * pw;
-      ctx.strokeStyle = "rgba(100, 181, 246, 0.5)";
-      ctx.setLineDash([4, 4]);
+    // Charles's Law line: V = V₀(1 + T/273) / P
+    // This is a straight line that passes through (−273, 0) and (0, V₀/P)
+    function tempToX(t: number) { return gx + ((t - tempMin) / (tempMax - tempMin)) * gw; }
+    function volToY(v: number) { return gy + gh - (v / volMax) * gh; }
+
+    // Extrapolation (dashed) below 0°C
+    if (showExtrapolation > 0.5) {
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = "#ef444488";
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(azLineX, py);
-      ctx.lineTo(azLineX, py + ph);
+      const extStart = Math.max(tempMin, -273);
+      ctx.moveTo(tempToX(extStart), volToY(V0 * (1 + extStart / 273) / pressure));
+      ctx.lineTo(tempToX(0), volToY(V0 / pressure));
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = "#42a5f5";
-      ctx.font = "10px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("0 K", azLineX, py - 6);
-      ctx.fillText("(-273.15°C)", azLineX, py - 18);
+
+      // Absolute zero marker
+      if (tempMin <= -273) {
+        const azX = tempToX(-273);
+        const azY = volToY(0);
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.arc(azX, azY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ef4444";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("−273°C", azX, azY - 12);
+        ctx.fillText("(Absolute Zero)", azX, azY + 18);
+      }
     }
 
-    // Theoretical Charles' Law line: V = (nR/P) * T
-    // This is a straight line through origin (0K, 0L)
-    ctx.strokeStyle = "rgba(255, 152, 0, 0.7)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (let t = Math.max(0, tMin); t <= tMax; t += 5) {
-      const v = (moles * R * t) / Math.max(pressure, 0.01);
-      const x = px + ((t - tMin) / tRange) * pw;
-      const y = py + ph - (v / maxV) * ph;
-      if (t === Math.max(0, tMin)) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
+    // Main line (solid) above 0°C for gas types
+    const gasColors = ["#3b82f6", "#10b981", "#f59e0b"];
+    const gasLabels = ["Ideal Gas", "Nitrogen (N₂)", "Oxygen (O₂)"];
+    const gasDeviations = [0, 0.02, 0.03]; // slight deviations for real gases
 
-    // Extrapolation to absolute zero (dashed)
-    if (showAbsoluteZero >= 0.5) {
-      ctx.strokeStyle = "rgba(255, 152, 0, 0.3)";
-      ctx.setLineDash([5, 5]);
+    for (let g = 0; g <= gasType; g++) {
+      const deviation = gasDeviations[g];
+      ctx.strokeStyle = gasColors[g];
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      const x0 = px + ((0 - tMin) / tRange) * pw;
-      const y0 = py + ph;
-      const x1 = px + ((100 - tMin) / tRange) * pw;
-      const v1 = (moles * R * 100) / Math.max(pressure, 0.01);
-      const y1 = py + ph - (v1 / maxV) * ph;
-      ctx.moveTo(x0, y0);
-      ctx.lineTo(x1, y1);
+
+      let first = true;
+      for (let t = -273; t <= tempMax; t += 2) {
+        if (t < tempMin) continue;
+        let v = V0 * (1 + t / 273) / pressure;
+        // Real gas deviation at low temps
+        if (deviation > 0 && t < 100) {
+          v *= (1 - deviation * Math.exp(-t / 100));
+        }
+        if (v < 0) v = 0;
+
+        const x = tempToX(t);
+        const y = volToY(v);
+        if (first) { ctx.moveTo(x, y); first = false; }
+        else ctx.lineTo(x, y);
+      }
       ctx.stroke();
-      ctx.setLineDash([]);
     }
 
-    // Data points
-    for (const dp of dataPoints) {
-      const x = px + ((dp.T - tMin) / tRange) * pw;
-      const y = py + ph - (dp.V / maxV) * ph;
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = "#66bb6a";
-      ctx.fill();
-    }
-
-    // Current state point
-    const curX = px + ((temperature - tMin) / tRange) * pw;
-    const curY = py + ph - (volume / maxV) * ph;
+    // Key points
+    // 0°C point
+    const v0Point = V0 / pressure;
+    ctx.fillStyle = "#22d3ee";
     ctx.beginPath();
-    ctx.arc(curX, curY, 7, 0, Math.PI * 2);
-    ctx.fillStyle = "#ff5722";
+    ctx.arc(tempToX(0), volToY(v0Point), 5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.fillStyle = "#22d3ee";
+    ctx.font = "10px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(`(0°C, ${v0Point.toFixed(1)} L)`, tempToX(0) + 8, volToY(v0Point) - 6);
+
+    // 100°C point
+    const v100 = V0 * (1 + 100 / 273) / pressure;
+    ctx.fillStyle = "#22d3ee";
+    ctx.beginPath();
+    ctx.arc(tempToX(100), volToY(v100), 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillText(`(100°C, ${v100.toFixed(1)} L)`, tempToX(100) + 8, volToY(v100) - 6);
 
     // Legend
-    ctx.fillStyle = "#ffa726";
-    ctx.font = "10px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("— V = nRT/P (Charles' Law)", px + 5, py + 12);
-    ctx.fillStyle = "#66bb6a";
-    ctx.fillText("● Measured points", px + 5, py + 24);
-  }
-
-  function drawInfo(): void {
-    const ix = W * 0.35;
-    const iy = H * 0.64;
-    const iw = W * 0.6;
-    const ih = H * 0.32;
-
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    const lx = gx + gw - 160;
+    const ly = gy + 10;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.8)";
     ctx.beginPath();
-    ctx.roundRect(ix, iy, iw, ih, 8);
+    ctx.roundRect(lx, ly, 155, 20 + (gasType + 1) * 18, 6);
     ctx.fill();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Charles' Law (Jacques Charles, 1787)", ix + 15, iy + 18);
+    for (let g = 0; g <= gasType; g++) {
+      ctx.strokeStyle = gasColors[g];
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lx + 10, ly + 16 + g * 18);
+      ctx.lineTo(lx + 30, ly + 16 + g * 18);
+      ctx.stroke();
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(gasLabels[g], lx + 35, ly + 20 + g * 18);
+    }
+  }
 
+  function drawInfo() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Charles's Law — V ∝ T at Constant Pressure", width / 2, 28);
+
+    ctx.fillStyle = "#94a3b8";
     ctx.font = "12px monospace";
-    let y = iy + 40;
-
-    ctx.fillStyle = "#ffa726";
-    ctx.fillText("V₁/T₁ = V₂/T₂   (at constant pressure)", ix + 15, y);
-    y += 22;
-    ctx.fillStyle = "#42a5f5";
-    ctx.fillText(`V = nRT/P = ${moles}×${R}×${temperature}/${pressure} = ${volume.toFixed(2)} L`, ix + 15, y);
-    y += 22;
-
-    ctx.fillStyle = "#ccc";
-    ctx.font = "11px sans-serif";
-    ctx.fillText(`Temperature: ${temperature} K (${(temperature - 273.15).toFixed(1)}°C)`, ix + 15, y);
-    y += 18;
-    ctx.fillText(`Pressure: ${pressure} atm (constant)`, ix + 15, y);
-    y += 18;
-    ctx.fillText(`Moles: ${moles} mol`, ix + 15, y);
-    y += 22;
-
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Volume is directly proportional to temperature at constant pressure.", ix + 15, y);
-    y += 14;
-    ctx.fillText("Extrapolating to V=0 gives absolute zero: −273.15°C = 0 K.", ix + 15, y);
+    ctx.fillText(`V = V₀(1 + T/273)  |  P = ${pressure.toFixed(1)} atm  |  V₀ = ${(V0/pressure).toFixed(1)} L/mol`, width / 2, 52);
   }
 
-  function render(): void {
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#0d1b2a");
-    grad.addColorStop(1, "#1a2940");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
+  return {
+    config,
 
-    drawContainer();
-    drawParticles();
-    drawVTGraph();
-    drawInfo();
-  }
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
 
-  function destroy(): void {
-    particles.length = 0;
-    dataPoints.length = 0;
-  }
+    update(dt: number, params: Record<string, number>) {
+      zoom = params.zoom ?? 1;
+      pressure = params.pressure ?? 1;
+      showExtrapolation = params.showExtrapolation ?? 1;
+      gasType = Math.round(params.gasType ?? 0);
+      time += dt;
+    },
 
-  function getStateDescription(): string {
-    return (
-      `Charles' Law Graph: V vs T at constant pressure. ` +
-      `T=${temperature}K (${(temperature - 273.15).toFixed(1)}°C), P=${pressure} atm, n=${moles} mol. ` +
-      `Volume = nRT/P = ${volume.toFixed(2)} L. ` +
-      `Charles' Law states V₁/T₁ = V₂/T₂ at constant pressure. ` +
-      `The V-T graph is a straight line that extrapolates to V=0 at absolute zero (0 K = −273.15°C).`
-    );
-  }
+    render() {
+      drawBackground();
+      drawGraph();
+      drawInfo();
+    },
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
-  }
+    reset() {
+      initState();
+    },
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+    destroy() {},
+
+    getStateDescription(): string {
+      const v0 = V0 / pressure;
+      return `Charles's Law Graph: V = V₀(1 + T/273) at P=${pressure} atm. At 0°C, V=${v0.toFixed(1)} L/mol. At 100°C, V=${(V0*(1+100/273)/pressure).toFixed(1)} L/mol. The line extrapolates to V=0 at −273°C (absolute zero, 0 K). This shows volume is directly proportional to absolute temperature at constant pressure.`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+    },
+  };
 };
 
 export default GraphOfCharlesLawFactory;

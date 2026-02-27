@@ -1,17 +1,14 @@
-import type {
-  SimulationEngine,
-  SimulationFactory,
-  SimulationConfig,
-} from "../types";
+import type { SimulationEngine, SimulationFactory, SimulationConfig } from "../types";
 import { getSimConfig } from "../registry";
 
 interface Moon {
   name: string;
-  orbitalRadius: number; // in Jupiter radii
-  period: number; // in Earth days
-  radius: number; // display radius in px
   color: string;
+  radius: number;
+  orbitalRadius: number;
+  period: number; // in Earth days
   angle: number;
+  description: string;
 }
 
 const GalileanMoonsFactory: SimulationFactory = (): SimulationEngine => {
@@ -19,342 +16,316 @@ const GalileanMoonsFactory: SimulationFactory = (): SimulationEngine => {
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let W = 800;
-  let H = 600;
+  let width = 0;
+  let height = 0;
   let time = 0;
 
   let timeScale = 1;
-  let viewMode = 0; // 0=top, 1=side (as seen from Earth)
-  let showOrbits = 1;
   let showLabels = 1;
+  let showOrbits = 1;
+  let zoom = 1;
 
-  // Galilean moons — real orbital data
   const moons: Moon[] = [
-    { name: "Io", orbitalRadius: 5.9, period: 1.769, radius: 6, color: "#ffeb3b", angle: 0 },
-    { name: "Europa", orbitalRadius: 9.4, period: 3.551, radius: 5, color: "#90caf9", angle: Math.PI * 0.5 },
-    { name: "Ganymede", orbitalRadius: 15.0, period: 7.155, radius: 8, color: "#bcaaa4", angle: Math.PI },
-    { name: "Callisto", orbitalRadius: 26.3, period: 16.689, radius: 7, color: "#78909c", angle: Math.PI * 1.5 },
+    {
+      name: "Io",
+      color: "#f59e0b",
+      radius: 5,
+      orbitalRadius: 80,
+      period: 1.769,
+      angle: 0,
+      description: "Most volcanically active body in the solar system",
+    },
+    {
+      name: "Europa",
+      color: "#e0e7ff",
+      radius: 4.5,
+      orbitalRadius: 130,
+      period: 3.551,
+      angle: Math.PI / 3,
+      description: "Subsurface ocean beneath icy crust",
+    },
+    {
+      name: "Ganymede",
+      color: "#94a3b8",
+      radius: 7,
+      orbitalRadius: 200,
+      period: 7.155,
+      angle: Math.PI * 0.7,
+      description: "Largest moon in the solar system",
+    },
+    {
+      name: "Callisto",
+      color: "#78716c",
+      radius: 6,
+      orbitalRadius: 260,
+      period: 16.689,
+      angle: Math.PI * 1.3,
+      description: "Most heavily cratered object in the solar system",
+    },
   ];
 
-  // Trail data for each moon
-  const trails: Array<Array<{ x: number; y: number }>> = [[], [], [], []];
-  const MAX_TRAIL = 300;
+  let trails: { moon: number; x: number; y: number; age: number }[] = [];
+  let elapsedDays = 0;
 
-  function reset(): void {
+  function initState() {
     time = 0;
+    elapsedDays = 0;
+    trails = [];
     moons[0].angle = 0;
-    moons[1].angle = Math.PI * 0.5;
-    moons[2].angle = Math.PI;
-    moons[3].angle = Math.PI * 1.5;
-    for (const t of trails) t.length = 0;
+    moons[1].angle = Math.PI / 3;
+    moons[2].angle = Math.PI * 0.7;
+    moons[3].angle = Math.PI * 1.3;
   }
 
-  function init(c: HTMLCanvasElement): void {
-    canvas = c;
-    ctx = canvas.getContext("2d")!;
-    W = canvas.width;
-    H = canvas.height;
-    reset();
-  }
+  function drawBackground() {
+    ctx.fillStyle = "#0a0a1a";
+    ctx.fillRect(0, 0, width, height);
 
-  function update(dt: number, params: Record<string, number>): void {
-    const newTS = params.timeScale ?? 1;
-    const newVM = params.viewMode ?? 0;
-    const newSO = params.showOrbits ?? 1;
-    const newSL = params.showLabels ?? 1;
-
-    if (newVM !== viewMode) {
-      viewMode = newVM;
-      for (const t of trails) t.length = 0;
-    }
-    timeScale = newTS;
-    showOrbits = newSO;
-    showLabels = newSL;
-
-    time += dt * timeScale;
-
-    // Update moon angles based on orbital periods
-    for (let i = 0; i < moons.length; i++) {
-      const angularVel = (2 * Math.PI) / (moons[i].period * 86400); // radians per second
-      moons[i].angle += angularVel * dt * timeScale * 86400; // scale dt to days
-
-      // Record trail
-      const pos = getMoonCanvasPos(i);
-      trails[i].push(pos);
-      if (trails[i].length > MAX_TRAIL) trails[i].shift();
-    }
-  }
-
-  function getMoonCanvasPos(idx: number): { x: number; y: number } {
-    const moon = moons[idx];
-    const cx = W * 0.45;
-    const cy = H * 0.5;
-    const scale = Math.min(W, H) * 0.013;
-    const r = moon.orbitalRadius * scale;
-
-    if (viewMode < 0.5) {
-      // Top-down view
-      return {
-        x: cx + r * Math.cos(moon.angle),
-        y: cy + r * Math.sin(moon.angle),
-      };
-    } else {
-      // Side view (as seen from Earth) — only x displacement visible
-      return {
-        x: cx + r * Math.cos(moon.angle),
-        y: cy,
-      };
-    }
-  }
-
-  function drawBackground(): void {
-    ctx.fillStyle = "#050510";
-    ctx.fillRect(0, 0, W, H);
-
-    // Stars
-    const rng = (seed: number) => {
-      let s = seed;
-      return () => {
-        s = (s * 16807 + 0) % 2147483647;
-        return s / 2147483647;
-      };
+    // Starfield
+    const rng = (s: number) => {
+      let x = Math.sin(s) * 43758.5453;
+      return x - Math.floor(x);
     };
-    const rand = rng(42);
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    for (let i = 0; i < 120; i++) {
-      const sx = rand() * W;
-      const sy = rand() * H;
-      const sr = rand() * 1.2;
+    ctx.fillStyle = "#ffffff";
+    for (let i = 0; i < 150; i++) {
+      const sx = rng(i * 7.1) * width;
+      const sy = rng(i * 13.3) * height;
+      const sr = rng(i * 3.7) * 1.2 + 0.3;
+      const alpha = 0.3 + rng(i * 11.1) * 0.5;
+      ctx.globalAlpha = alpha;
       ctx.beginPath();
       ctx.arc(sx, sy, sr, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.globalAlpha = 1;
   }
 
-  function drawJupiter(): void {
-    const cx = W * 0.45;
-    const cy = H * 0.5;
-    const jupR = Math.min(W, H) * 0.06;
+  function drawJupiter(cx: number, cy: number) {
+    const r = 35 * zoom;
 
-    // Jupiter bands
-    const grad = ctx.createLinearGradient(cx, cy - jupR, cx, cy + jupR);
-    grad.addColorStop(0, "#d4a574");
-    grad.addColorStop(0.2, "#c49660");
-    grad.addColorStop(0.35, "#e8c89e");
-    grad.addColorStop(0.5, "#b87333");
-    grad.addColorStop(0.6, "#d4a574");
-    grad.addColorStop(0.75, "#c49660");
-    grad.addColorStop(0.9, "#e8c89e");
-    grad.addColorStop(1, "#b87333");
-
+    // Jupiter body
+    const grad = ctx.createRadialGradient(cx - r * 0.2, cy - r * 0.2, 0, cx, cy, r);
+    grad.addColorStop(0, "#e8c89e");
+    grad.addColorStop(0.5, "#c9956b");
+    grad.addColorStop(1, "#8b5e3c");
     ctx.beginPath();
-    ctx.arc(cx, cy, jupR, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fillStyle = grad;
     ctx.fill();
 
+    // Bands
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.clip();
+
+    const bandColors = ["#d4a574", "#b8834a", "#d4a574", "#c09060", "#b8834a", "#d4a574"];
+    const bandH = (r * 2) / bandColors.length;
+    for (let i = 0; i < bandColors.length; i++) {
+      ctx.fillStyle = bandColors[i] + "60";
+      ctx.fillRect(cx - r, cy - r + i * bandH, r * 2, bandH);
+    }
+
     // Great Red Spot
-    ctx.fillStyle = "rgba(200, 80, 60, 0.6)";
+    ctx.fillStyle = "#c0503080";
     ctx.beginPath();
-    ctx.ellipse(cx + jupR * 0.3, cy + jupR * 0.2, jupR * 0.15, jupR * 0.1, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx + r * 0.3, cy + r * 0.2, r * 0.2, r * 0.12, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Shadow for 3D effect
-    const shadowGrad = ctx.createRadialGradient(cx - jupR * 0.3, cy, jupR * 0.5, cx, cy, jupR);
-    shadowGrad.addColorStop(0, "rgba(0,0,0,0)");
-    shadowGrad.addColorStop(1, "rgba(0,0,0,0.3)");
-    ctx.beginPath();
-    ctx.arc(cx, cy, jupR, 0, Math.PI * 2);
-    ctx.fillStyle = shadowGrad;
-    ctx.fill();
+    ctx.restore();
 
-    if (showLabels >= 0.5) {
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 14px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-      ctx.fillText("Jupiter", cx, cy - jupR - 8);
-    }
+    // Label
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 14px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Jupiter", cx, cy + r + 20);
   }
 
-  function drawOrbits(): void {
-    if (showOrbits < 0.5) return;
-    const cx = W * 0.45;
-    const cy = H * 0.5;
-    const scale = Math.min(W, H) * 0.013;
-
-    for (const moon of moons) {
-      const r = moon.orbitalRadius * scale;
-      ctx.strokeStyle = `${moon.color}33`;
-      ctx.lineWidth = 1;
-      if (viewMode < 0.5) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.stroke();
-      } else {
-        // Side view — horizontal line
-        ctx.beginPath();
-        ctx.moveTo(cx - r, cy);
-        ctx.lineTo(cx + r, cy);
-        ctx.stroke();
-      }
-    }
-  }
-
-  function drawMoons(): void {
+  function drawMoons(cx: number, cy: number) {
     for (let i = 0; i < moons.length; i++) {
       const moon = moons[i];
-      const pos = getMoonCanvasPos(i);
+      const orbitR = moon.orbitalRadius * zoom;
 
-      // Trail
-      if (trails[i].length > 1) {
-        ctx.strokeStyle = `${moon.color}40`;
+      // Orbit path
+      if (showOrbits > 0.5) {
+        ctx.strokeStyle = moon.color + "30";
         ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        for (let j = 0; j < trails[i].length; j++) {
-          if (j === 0) ctx.moveTo(trails[i][j].x, trails[i][j].y);
-          else ctx.lineTo(trails[i][j].x, trails[i][j].y);
-        }
+        ctx.arc(cx, cy, orbitR, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.setLineDash([]);
       }
 
-      // Moon body
-      const grad = ctx.createRadialGradient(
-        pos.x - moon.radius * 0.3, pos.y - moon.radius * 0.3, 1,
-        pos.x, pos.y, moon.radius
-      );
-      grad.addColorStop(0, lightenColor(moon.color, 30));
-      grad.addColorStop(1, moon.color);
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, moon.radius, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
+      // Moon position
+      const mx = cx + Math.cos(moon.angle) * orbitR;
+      const my = cy + Math.sin(moon.angle) * orbitR * 0.3; // Slight inclination for perspective
 
-      // In side view, if moon is behind Jupiter, draw dimmer
-      if (viewMode >= 0.5) {
-        const sinAngle = Math.sin(moon.angle);
-        if (sinAngle > 0) {
-          // Behind Jupiter (farther)
-          ctx.beginPath();
-          ctx.arc(pos.x, pos.y, moon.radius, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(0,0,0,0.4)";
-          ctx.fill();
+      // Behind Jupiter check
+      const behindJupiter = Math.sin(moon.angle) < -0.1 && Math.abs(mx - cx) < 35 * zoom;
+
+      if (!behindJupiter) {
+        // Moon glow
+        const glow = ctx.createRadialGradient(mx, my, 0, mx, my, moon.radius * zoom * 3);
+        glow.addColorStop(0, moon.color + "40");
+        glow.addColorStop(1, moon.color + "00");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(mx, my, moon.radius * zoom * 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Moon body
+        const mGrad = ctx.createRadialGradient(
+          mx - moon.radius * zoom * 0.3, my - moon.radius * zoom * 0.3, 0,
+          mx, my, moon.radius * zoom
+        );
+        mGrad.addColorStop(0, "#ffffff");
+        mGrad.addColorStop(0.5, moon.color);
+        mGrad.addColorStop(1, moon.color + "88");
+        ctx.beginPath();
+        ctx.arc(mx, my, moon.radius * zoom, 0, Math.PI * 2);
+        ctx.fillStyle = mGrad;
+        ctx.fill();
+
+        // Label
+        if (showLabels > 0.5) {
+          ctx.fillStyle = moon.color;
+          ctx.font = "12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(moon.name, mx, my - moon.radius * zoom - 6);
         }
-      }
-
-      // Label
-      if (showLabels >= 0.5) {
-        ctx.fillStyle = moon.color;
-        ctx.font = "11px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        ctx.fillText(moon.name, pos.x, pos.y - moon.radius - 4);
       }
     }
   }
 
-  function lightenColor(hex: string, amount: number): string {
-    const num = parseInt(hex.replace("#", ""), 16);
-    const r = Math.min(255, (num >> 16) + amount);
-    const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-    const b = Math.min(255, (num & 0xff) + amount);
-    return `rgb(${r},${g},${b})`;
-  }
+  function drawSideView(cx: number) {
+    const sideY = height - 90;
+    const sideW = width - 40;
 
-  function drawInfoPanel(): void {
-    const px = W * 0.72;
-    const py = 20;
-    const pw = W * 0.26;
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Side View (as seen from Earth)", width / 2, sideY - 20);
 
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    // Jupiter in center
+    ctx.fillStyle = "#c9956b";
     ctx.beginPath();
-    ctx.roundRect(px, py, pw, 260, 8);
+    ctx.arc(cx, sideY + 15, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-    ctx.fillText("Galilean Moons", px + 10, py + 10);
+    // Moon positions projected on x-axis
+    for (let i = 0; i < moons.length; i++) {
+      const moon = moons[i];
+      const xOffset = Math.cos(moon.angle) * moon.orbitalRadius * zoom * 0.6;
+      const mx = cx + xOffset;
 
-    ctx.font = "10px sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.fillText("Discovered by Galileo, 1610", px + 10, py + 28);
-
-    let y = py + 50;
-    for (const moon of moons) {
       ctx.fillStyle = moon.color;
       ctx.beginPath();
-      ctx.arc(px + 16, y + 6, 5, 0, Math.PI * 2);
+      ctx.arc(mx, sideY + 15, moon.radius * zoom * 0.6, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 11px sans-serif";
-      ctx.fillText(moon.name, px + 28, y);
-      ctx.font = "10px monospace";
-      ctx.fillStyle = "#aaa";
-      ctx.fillText(`Period: ${moon.period.toFixed(3)} days`, px + 28, y + 14);
-      ctx.fillText(`Radius: ${moon.orbitalRadius.toFixed(1)} Rj`, px + 28, y + 26);
-      y += 48;
+      if (showLabels > 0.5) {
+        ctx.font = "10px sans-serif";
+        ctx.fillText(moon.name, mx, sideY + 35);
+      }
     }
 
-    // Orbital resonance note
-    y += 5;
-    ctx.fillStyle = "#ffa726";
-    ctx.font = "bold 10px sans-serif";
-    ctx.fillText("Laplace Resonance:", px + 10, y);
-    ctx.fillStyle = "#ccc";
-    ctx.font = "10px sans-serif";
-    ctx.fillText("Io : Europa : Ganymede", px + 10, y + 14);
-    ctx.fillText("= 1 : 2 : 4 (orbital periods)", px + 10, y + 26);
+    // Horizontal line
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(20, sideY + 15);
+    ctx.lineTo(width - 20, sideY + 15);
+    ctx.stroke();
   }
 
-  function drawViewLabel(): void {
-    const label = viewMode < 0.5 ? "Top-Down View" : "Side View (from Earth)";
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.font = "12px sans-serif";
+  function drawInfo() {
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 18px sans-serif";
     ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
-    ctx.fillText(label, W * 0.45, H - 10);
+    ctx.fillText("Galilean Moons of Jupiter", width / 2, 28);
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px monospace";
+    // Time display
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "13px monospace";
+    ctx.fillText(`Day ${elapsedDays.toFixed(1)}  |  Speed: ${timeScale.toFixed(1)}×`, width / 2, 50);
+
+    // Info panel
+    const px = 10;
+    const py = 70;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.beginPath();
+    ctx.roundRect(px, py, 180, 100, 8);
+    ctx.fill();
+
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "11px monospace";
     ctx.textAlign = "left";
-    ctx.fillText(`Day ${(time / 86400).toFixed(1)}  |  Speed: ${timeScale}×`, 10, H - 10);
+    for (let i = 0; i < moons.length; i++) {
+      const moon = moons[i];
+      ctx.fillStyle = moon.color;
+      ctx.fillText(`${moon.name}: P=${moon.period.toFixed(2)}d`, px + 10, py + 20 + i * 22);
+    }
   }
 
-  function render(): void {
-    drawBackground();
-    drawOrbits();
-    drawJupiter();
-    drawMoons();
-    drawInfoPanel();
-    drawViewLabel();
-  }
+  return {
+    config,
 
-  function destroy(): void {
-    for (const t of trails) t.length = 0;
-  }
+    init(c: HTMLCanvasElement) {
+      canvas = c;
+      ctx = canvas.getContext("2d")!;
+      width = canvas.width;
+      height = canvas.height;
+      initState();
+    },
 
-  function getStateDescription(): string {
-    const dayTime = time / 86400;
-    const moonDescs = moons.map((m) => {
-      const angleDeg = ((m.angle * 180) / Math.PI) % 360;
-      return `${m.name}: angle=${angleDeg.toFixed(0)}°, period=${m.period} days, orbital radius=${m.orbitalRadius} Rj`;
-    });
-    return (
-      `Galilean Moons of Jupiter. Day ${dayTime.toFixed(1)}, time scale=${timeScale}×. ` +
-      `View: ${viewMode < 0.5 ? "top-down" : "side (Earth perspective)"}. ` +
-      `Moons: ${moonDescs.join("; ")}. ` +
-      `Note: Io, Europa, Ganymede are in 1:2:4 Laplace resonance.`
-    );
-  }
+    update(dt: number, params: Record<string, number>) {
+      timeScale = params.timeScale ?? 1;
+      showLabels = params.showLabels ?? 1;
+      showOrbits = params.showOrbits ?? 1;
+      zoom = params.zoom ?? 1;
 
-  function resize(w: number, h: number): void {
-    W = w;
-    H = h;
-  }
+      time += dt;
+      elapsedDays += dt * timeScale;
 
-  return { config, init, update, render, reset, destroy, getStateDescription, resize };
+      // Update moon angles
+      for (const moon of moons) {
+        const angularVelocity = (2 * Math.PI) / (moon.period * 86400); // rad/s in real time
+        moon.angle += angularVelocity * dt * timeScale * 86400; // scale simulation time
+      }
+    },
+
+    render() {
+      drawBackground();
+      const cx = width / 2;
+      const cy = height * 0.4;
+      drawMoons(cx, cy);
+      drawJupiter(cx, cy);
+      drawSideView(cx);
+      drawInfo();
+    },
+
+    reset() {
+      initState();
+    },
+
+    destroy() {
+      trails = [];
+    },
+
+    getStateDescription(): string {
+      const moonDescs = moons.map(m => {
+        const deg = ((m.angle * 180 / Math.PI) % 360).toFixed(0);
+        return `${m.name}: ${deg}° (period ${m.period}d)`;
+      }).join(", ");
+      return `Galilean Moons: Day ${elapsedDays.toFixed(1)}. ${moonDescs}. Orbital resonance: Io:Europa:Ganymede = 1:2:4. Speed: ${timeScale}×.`;
+    },
+
+    resize(w: number, h: number) {
+      width = w;
+      height = h;
+    },
+  };
 };
 
 export default GalileanMoonsFactory;
