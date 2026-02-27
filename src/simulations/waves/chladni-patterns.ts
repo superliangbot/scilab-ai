@@ -9,538 +9,324 @@ const ChladniPatterns: SimulationFactory = () => {
   let width = 800;
   let height = 600;
 
-  // Physics parameters
-  let frequency = 500; // Hz
-  let plateSize = 0.3; // meters
-  let plateThickness = 0.001; // meters
-  let dampingFactor = 0.05;
+  // Physics state
+  let frequency = 1000; // Hz
+  let plateSize = 300;
+  let dampening = 0.98;
   let time = 0;
-  let plateShape = 0; // 0=square, 1=circle, 2=rectangle
-  let excitationX = 0.8; // normalized position 0-1
-  let excitationY = 0.8; // normalized position 0-1
+  let modeM = 2; // m,n mode numbers for standing wave patterns
+  let modeN = 1;
 
-  // Simulation grid
-  const gridRes = 100;
-  let displacement: Float32Array = new Float32Array(gridRes * gridRes);
-  let velocity: Float32Array = new Float32Array(gridRes * gridRes);
-  let nodeSand: Float32Array = new Float32Array(gridRes * gridRes);
-  
-  // Wave properties
-  const waveSpeed = 1000; // m/s in the plate
-  let wavelength = 0;
-  let nodePattern: number[][] = [];
+  // Plate simulation
+  let plateGrid: number[][] = [];
+  let sandParticles: { x: number; y: number; vx: number; vy: number }[] = [];
+  const gridSize = 50;
 
-  // Particle animation
-  let particles: { x: number; y: number; vx: number; vy: number; onNode: boolean }[] = [];
-  const numParticles = 800;
-
-  // Colors
-  const BG = "#0f172a";
+  // Colors and styles
+  const BG_COLOR = "#0a0a0f";
   const PLATE_COLOR = "#1e293b";
-  const NODE_COLOR = "#f59e0b";
-  const ANTINODE_COLOR = "#ef4444";
-  const SAND_COLOR = "#92400e";
-  const EXCITATION_COLOR = "#10b981";
-  const VIBRATION_POS = "#3b82f6";
-  const VIBRATION_NEG = "#dc2626";
-  const GRID_COLOR = "rgba(148, 163, 184, 0.1)";
+  const VIBRATION_COLOR = "#3b82f6";
+  const SAND_COLOR = "#fbbf24";
+  const NODE_COLOR = "#ef4444";
   const TEXT_COLOR = "#e2e8f0";
 
-  function computePhysics(dt: number, params: Record<string, number>) {
-    frequency = Math.max(20, Math.min(5000, params.frequency ?? frequency));
-    plateSize = params.plateSize ?? plateSize;
-    dampingFactor = params.dampingFactor ?? dampingFactor;
-    plateShape = Math.floor(params.plateShape ?? plateShape);
-    excitationX = Math.max(0, Math.min(1, params.excitationX ?? excitationX));
-    excitationY = Math.max(0, Math.min(1, params.excitationY ?? excitationY));
-
-    time += dt;
-    wavelength = waveSpeed / frequency;
-
-    // Update wave equation on the plate
-    updateWaveEquation(dt);
+  function initializePlate() {
+    plateGrid = [];
+    sandParticles = [];
     
-    // Update particle positions
-    updateParticles(dt);
+    // Initialize 2D array for plate vibration
+    for (let i = 0; i < gridSize; i++) {
+      plateGrid[i] = [];
+      for (let j = 0; j < gridSize; j++) {
+        plateGrid[i][j] = 0;
+      }
+    }
     
-    // Calculate node pattern for visualization
-    calculateNodePattern();
-  }
-
-  function updateWaveEquation(dt: number) {
-    const dx = plateSize / gridRes;
-    const c = waveSpeed;
-    const omega = 2 * Math.PI * frequency;
-    
-    // Apply excitation at specified point
-    const exciteI = Math.floor(excitationX * gridRes);
-    const exciteJ = Math.floor(excitationY * gridRes);
-    const exciteIdx = exciteJ * gridRes + exciteI;
-    
-    // Add driving force at excitation point
-    if (isValidPoint(exciteI, exciteJ)) {
-      velocity[exciteIdx] += 0.5 * Math.sin(omega * time) * dt;
-    }
-
-    // Update wave equation: ∂²u/∂t² = c²∇²u - 2γ∂u/∂t
-    for (let j = 1; j < gridRes - 1; j++) {
-      for (let i = 1; i < gridRes - 1; i++) {
-        const idx = j * gridRes + i;
-        
-        if (!isValidPoint(i, j)) continue;
-        
-        // Laplacian (finite difference)
-        const laplacian = (displacement[(j) * gridRes + (i-1)] + 
-                          displacement[(j) * gridRes + (i+1)] + 
-                          displacement[(j-1) * gridRes + (i)] + 
-                          displacement[(j+1) * gridRes + (i)] - 
-                          4 * displacement[idx]) / (dx * dx);
-        
-        // Wave equation with damping
-        const acceleration = c * c * laplacian - 2 * dampingFactor * velocity[idx];
-        
-        velocity[idx] += acceleration * dt;
-        displacement[idx] += velocity[idx] * dt;
-      }
-    }
-
-    // Apply boundary conditions (fixed edges)
-    applyBoundaryConditions();
-  }
-
-  function isValidPoint(i: number, j: number): boolean {
-    const centerX = gridRes / 2;
-    const centerY = gridRes / 2;
-    const x = i - centerX;
-    const y = j - centerY;
-    const radius = gridRes / 2 - 1;
-
-    switch (plateShape) {
-      case 0: // Square
-        return i >= 1 && i < gridRes - 1 && j >= 1 && j < gridRes - 1;
-      
-      case 1: // Circle
-        return (x * x + y * y) <= radius * radius && i >= 1 && i < gridRes - 1 && j >= 1 && j < gridRes - 1;
-      
-      case 2: // Rectangle
-        const rectW = gridRes * 0.8;
-        const rectH = gridRes * 0.6;
-        return Math.abs(x) <= rectW / 2 && Math.abs(y) <= rectH / 2 && i >= 1 && i < gridRes - 1 && j >= 1 && j < gridRes - 1;
-      
-      default:
-        return true;
-    }
-  }
-
-  function applyBoundaryConditions() {
-    // Fix displacement at boundaries to zero
-    for (let i = 0; i < gridRes; i++) {
-      displacement[0 * gridRes + i] = 0; // Top
-      displacement[(gridRes-1) * gridRes + i] = 0; // Bottom
-      displacement[i * gridRes + 0] = 0; // Left
-      displacement[i * gridRes + (gridRes-1)] = 0; // Right
-      
-      velocity[0 * gridRes + i] = 0;
-      velocity[(gridRes-1) * gridRes + i] = 0;
-      velocity[i * gridRes + 0] = 0;
-      velocity[i * gridRes + (gridRes-1)] = 0;
-    }
-
-    // For circular plate, fix points outside the circle
-    if (plateShape === 1) {
-      const centerX = gridRes / 2;
-      const centerY = gridRes / 2;
-      const radius = gridRes / 2 - 1;
-
-      for (let j = 0; j < gridRes; j++) {
-        for (let i = 0; i < gridRes; i++) {
-          const x = i - centerX;
-          const y = j - centerY;
-          if (x * x + y * y > radius * radius) {
-            displacement[j * gridRes + i] = 0;
-            velocity[j * gridRes + i] = 0;
-          }
-        }
-      }
-    }
-  }
-
-  function calculateNodePattern() {
-    // Calculate time-averaged displacement to find nodes and antinodes
-    const threshold = 0.001;
-    
-    for (let j = 0; j < gridRes; j++) {
-      for (let i = 0; i < gridRes; i++) {
-        const idx = j * gridRes + i;
-        if (!isValidPoint(i, j)) {
-          nodeSand[idx] = 0;
-          continue;
-        }
-        
-        // Check if this point is a node (low vibration amplitude)
-        const currentAmplitude = Math.abs(displacement[idx]);
-        
-        // Accumulate sand at nodes over time
-        if (currentAmplitude < threshold) {
-          nodeSand[idx] = Math.min(1, nodeSand[idx] + 0.01);
-        } else {
-          // Sand is scattered away from antinodes
-          nodeSand[idx] *= 0.995;
-        }
-      }
-    }
-  }
-
-  function updateParticles(dt: number) {
-    // Initialize particles if empty
-    if (particles.length === 0) {
-      initializeParticles();
-    }
-
-    for (const particle of particles) {
-      // Get local displacement and velocity
-      const i = Math.floor(particle.x * gridRes);
-      const j = Math.floor(particle.y * gridRes);
-      
-      if (i >= 0 && i < gridRes && j >= 0 && j < gridRes && isValidPoint(i, j)) {
-        const idx = j * gridRes + i;
-        const localVel = velocity[idx];
-        const localDisp = displacement[idx];
-        
-        // Particles move toward nodes (low vibration areas)
-        const isNode = Math.abs(localDisp) < 0.005 && Math.abs(localVel) < 0.1;
-        
-        if (isNode) {
-          // Stick to nodes
-          particle.vx *= 0.9;
-          particle.vy *= 0.9;
-          particle.onNode = true;
-        } else {
-          // Get pushed away from antinodes
-          const pushStrength = Math.abs(localDisp) * 100;
-          const pushAngle = Math.random() * 2 * Math.PI;
-          particle.vx += pushStrength * Math.cos(pushAngle) * dt;
-          particle.vy += pushStrength * Math.sin(pushAngle) * dt;
-          particle.onNode = false;
-        }
-      }
-
-      // Update position
-      particle.x += particle.vx * dt;
-      particle.y += particle.vy * dt;
-
-      // Keep within bounds
-      if (particle.x < 0 || particle.x > 1 || particle.y < 0 || particle.y > 1) {
-        particle.x = Math.max(0, Math.min(1, particle.x));
-        particle.y = Math.max(0, Math.min(1, particle.y));
-        particle.vx = 0;
-        particle.vy = 0;
-      }
-
-      // Check plate shape bounds
-      if (!isValidNormalizedPoint(particle.x, particle.y)) {
-        // Reflect or reset particle
-        particle.x = Math.random();
-        particle.y = Math.random();
-        particle.vx = 0;
-        particle.vy = 0;
-      }
-    }
-  }
-
-  function isValidNormalizedPoint(x: number, y: number): boolean {
-    const centerX = 0.5;
-    const centerY = 0.5;
-    const dx = x - centerX;
-    const dy = y - centerY;
-
-    switch (plateShape) {
-      case 0: // Square
-        return x >= 0 && x <= 1 && y >= 0 && y <= 1;
-      
-      case 1: // Circle
-        return (dx * dx + dy * dy) <= 0.25;
-      
-      case 2: // Rectangle
-        return Math.abs(dx) <= 0.4 && Math.abs(dy) <= 0.3;
-      
-      default:
-        return true;
-    }
-  }
-
-  function initializeParticles() {
-    particles = [];
+    // Initialize sand particles randomly distributed
+    const numParticles = 200;
     for (let i = 0; i < numParticles; i++) {
-      let x, y;
-      do {
-        x = Math.random();
-        y = Math.random();
-      } while (!isValidNormalizedPoint(x, y));
-      
-      particles.push({
-        x,
-        y,
+      sandParticles.push({
+        x: Math.random() * plateSize,
+        y: Math.random() * plateSize,
         vx: 0,
-        vy: 0,
-        onNode: false
+        vy: 0
       });
     }
   }
 
-  function drawPlate() {
-    const plateX = width * 0.1;
-    const plateY = height * 0.1;
-    const plateW = width * 0.6;
-    const plateH = height * 0.6;
-
-    // Draw plate background
-    ctx.fillStyle = PLATE_COLOR;
+  function updatePlateVibration() {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const plateLeft = centerX - plateSize / 2;
+    const plateTop = centerY - plateSize / 2;
     
-    switch (plateShape) {
-      case 0: // Square
-        ctx.fillRect(plateX, plateY, plateW, plateH);
-        ctx.strokeStyle = "#374151";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(plateX, plateY, plateW, plateH);
-        break;
-      
-      case 1: // Circle
-        const centerX = plateX + plateW / 2;
-        const centerY = plateY + plateH / 2;
-        const radius = Math.min(plateW, plateH) / 2;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#374151";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        break;
-      
-      case 2: // Rectangle
-        const rectW = plateW * 0.8;
-        const rectH = plateH * 0.6;
-        const rectX = plateX + (plateW - rectW) / 2;
-        const rectY = plateY + (plateH - rectH) / 2;
-        ctx.fillRect(rectX, rectY, rectW, rectH);
-        ctx.strokeStyle = "#374151";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(rectX, rectY, rectW, rectH);
-        break;
+    // Calculate standing wave pattern based on modes
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        const x = i / (gridSize - 1); // 0 to 1
+        const y = j / (gridSize - 1); // 0 to 1
+        
+        // Chladni plate modes: sin(mπx) * sin(nπy) or cos(mπx) * cos(nπy)
+        const spatialPattern = Math.sin(modeM * Math.PI * x) * Math.sin(modeN * Math.PI * y);
+        const temporalOscillation = Math.cos(2 * Math.PI * frequency * time / 1000);
+        
+        plateGrid[i][j] = spatialPattern * temporalOscillation * 0.3;
+      }
     }
   }
 
-  function drawVibrationField() {
-    const plateX = width * 0.1;
-    const plateY = height * 0.1;
-    const plateW = width * 0.6;
-    const plateH = height * 0.6;
-
-    // Draw displacement field as colored regions
-    const imageData = ctx.createImageData(plateW, plateH);
-    const data = imageData.data;
-
-    for (let j = 0; j < plateH; j++) {
-      for (let i = 0; i < plateW; i++) {
-        const gridI = Math.floor((i / plateW) * gridRes);
-        const gridJ = Math.floor((j / plateH) * gridRes);
+  function updateSandParticles() {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const plateLeft = centerX - plateSize / 2;
+    const plateTop = centerY - plateSize / 2;
+    
+    sandParticles.forEach(particle => {
+      // Convert particle position to grid coordinates
+      const gridX = Math.floor((particle.x / plateSize) * (gridSize - 1));
+      const gridY = Math.floor((particle.y / plateSize) * (gridSize - 1));
+      
+      if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
+        const vibration = plateGrid[gridX][gridY];
+        const vibrationForce = Math.abs(vibration) * 50;
         
-        if (gridI >= 0 && gridI < gridRes && gridJ >= 0 && gridJ < gridRes && 
-            isValidPoint(gridI, gridJ)) {
-          
-          const idx = gridJ * gridRes + gridI;
-          const disp = displacement[idx];
-          const maxDisp = 0.01;
-          const normalized = Math.max(-1, Math.min(1, disp / maxDisp));
-          
-          const pixelIdx = (j * plateW + i) * 4;
-          
-          if (normalized > 0) {
-            // Positive displacement - blue
-            data[pixelIdx] = Math.floor(30 + normalized * 100);     // R
-            data[pixelIdx + 1] = Math.floor(64 + normalized * 100); // G
-            data[pixelIdx + 2] = Math.floor(175 + normalized * 80); // B
-          } else {
-            // Negative displacement - red
-            data[pixelIdx] = Math.floor(220 - normalized * 80);     // R
-            data[pixelIdx + 1] = Math.floor(38 - normalized * 38);  // G
-            data[pixelIdx + 2] = Math.floor(38 - normalized * 38);  // B
-          }
-          data[pixelIdx + 3] = Math.floor(100 + Math.abs(normalized) * 155); // Alpha
+        // Sand particles accumulate at nodes (low vibration areas)
+        if (Math.abs(vibration) < 0.05) {
+          // This is a nodal line - particles tend to stay here
+          particle.vx *= 0.9;
+          particle.vy *= 0.9;
         } else {
-          // Outside plate - transparent
-          const pixelIdx = (j * plateW + i) * 4;
-          data[pixelIdx + 3] = 0;
+          // High vibration - push particles away
+          const angle = Math.random() * Math.PI * 2;
+          particle.vx += Math.cos(angle) * vibrationForce * 0.1;
+          particle.vy += Math.sin(angle) * vibrationForce * 0.1;
+        }
+        
+        // Apply damping
+        particle.vx *= dampening;
+        particle.vy *= dampening;
+        
+        // Update positions
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        
+        // Keep particles within the plate
+        particle.x = Math.max(0, Math.min(plateSize, particle.x));
+        particle.y = Math.max(0, Math.min(plateSize, particle.y));
+      }
+    });
+  }
+
+  function drawPlate() {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const plateLeft = centerX - plateSize / 2;
+    const plateTop = centerY - plateSize / 2;
+    
+    // Draw plate base
+    ctx.fillStyle = PLATE_COLOR;
+    ctx.fillRect(plateLeft, plateTop, plateSize, plateSize);
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(plateLeft, plateTop, plateSize, plateSize);
+    
+    // Draw vibration visualization
+    const cellSize = plateSize / gridSize;
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        const vibration = plateGrid[i][j];
+        const intensity = Math.abs(vibration);
+        
+        if (intensity > 0.01) {
+          const alpha = Math.min(intensity * 2, 1);
+          const color = vibration > 0 ? 
+            `rgba(59, 130, 246, ${alpha})` : 
+            `rgba(239, 68, 68, ${alpha})`;
+          
+          ctx.fillStyle = color;
+          ctx.fillRect(
+            plateLeft + i * cellSize,
+            plateTop + j * cellSize,
+            cellSize,
+            cellSize
+          );
         }
       }
     }
-
-    ctx.putImageData(imageData, plateX, plateY);
+    
+    // Draw nodal lines more prominently
+    ctx.strokeStyle = NODE_COLOR;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.7;
+    
+    for (let i = 0; i < gridSize - 1; i++) {
+      for (let j = 0; j < gridSize - 1; j++) {
+        const vibration = plateGrid[i][j];
+        if (Math.abs(vibration) < 0.02) {
+          ctx.strokeRect(
+            plateLeft + i * cellSize,
+            plateTop + j * cellSize,
+            cellSize,
+            cellSize
+          );
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 
   function drawSandParticles() {
-    const plateX = width * 0.1;
-    const plateY = height * 0.1;
-    const plateW = width * 0.6;
-    const plateH = height * 0.6;
-
-    ctx.fillStyle = SAND_COLOR;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const plateLeft = centerX - plateSize / 2;
+    const plateTop = centerY - plateSize / 2;
     
-    for (const particle of particles) {
-      const x = plateX + particle.x * plateW;
-      const y = plateY + particle.y * plateH;
+    ctx.fillStyle = SAND_COLOR;
+    sandParticles.forEach(particle => {
+      const screenX = plateLeft + particle.x;
+      const screenY = plateTop + particle.y;
       
-      if (particle.onNode) {
-        // Larger particles at nodes
-        ctx.beginPath();
-        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        // Smaller moving particles
-        ctx.beginPath();
-        ctx.arc(x, y, 0.8, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 2, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 
-  function drawExcitationPoint() {
-    const plateX = width * 0.1;
-    const plateY = height * 0.1;
-    const plateW = width * 0.6;
-    const plateH = height * 0.6;
-
-    const exciteX = plateX + excitationX * plateW;
-    const exciteY = plateY + excitationY * plateH;
-
-    // Draw excitation point
-    ctx.fillStyle = EXCITATION_COLOR;
-    ctx.beginPath();
-    ctx.arc(exciteX, exciteY, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw vibration indication
-    const vibrationRadius = 3 + 2 * Math.sin(2 * Math.PI * frequency * time * 0.001);
-    ctx.strokeStyle = EXCITATION_COLOR;
+  function drawVibrationSource() {
+    const sourceX = width / 2 + plateSize / 2 + 30;
+    const sourceY = height / 2;
+    
+    // Draw vibration source (bow or speaker)
+    ctx.fillStyle = "#64748b";
+    ctx.fillRect(sourceX, sourceY - 20, 40, 40);
+    ctx.strokeStyle = "#94a3b8";
     ctx.lineWidth = 2;
+    ctx.strokeRect(sourceX, sourceY - 20, 40, 40);
+    
+    // Vibration indicator
+    const vibrationOffset = 5 * Math.sin(2 * Math.PI * frequency * time / 1000);
+    ctx.strokeStyle = VIBRATION_COLOR;
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(exciteX, exciteY, Math.abs(vibrationRadius), 0, Math.PI * 2);
+    ctx.moveTo(sourceX, sourceY + vibrationOffset);
+    ctx.lineTo(sourceX - 15, sourceY + vibrationOffset);
     ctx.stroke();
-
+    
     // Label
-    ctx.fillStyle = EXCITATION_COLOR;
-    ctx.font = "12px monospace";
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = "11px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("Exciter", exciteX, exciteY - 15);
+    ctx.fillText("Bow/Speaker", sourceX + 20, sourceY + 50);
+  }
+
+  function drawModePattern() {
+    const patternX = 30;
+    const patternY = height - 180;
+    const patternSize = 100;
+    
+    // Background
+    ctx.fillStyle = "rgba(30, 41, 59, 0.8)";
+    ctx.fillRect(patternX, patternY, patternSize, patternSize);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(patternX, patternY, patternSize, patternSize);
+    
+    // Draw theoretical nodal pattern
+    const resolution = 20;
+    for (let i = 0; i < resolution; i++) {
+      for (let j = 0; j < resolution; j++) {
+        const x = i / (resolution - 1);
+        const y = j / (resolution - 1);
+        
+        const pattern = Math.sin(modeM * Math.PI * x) * Math.sin(modeN * Math.PI * y);
+        
+        if (Math.abs(pattern) < 0.1) {
+          ctx.fillStyle = NODE_COLOR;
+          ctx.fillRect(
+            patternX + (i / resolution) * patternSize,
+            patternY + (j / resolution) * patternSize,
+            patternSize / resolution,
+            patternSize / resolution
+          );
+        }
+      }
+    }
+    
+    // Label
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = "11px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`Mode (${modeM},${modeN})`, patternX + patternSize/2, patternY - 10);
   }
 
   function drawInfoPanel() {
-    const panelX = width * 0.75;
-    const panelY = height * 0.1;
-    const panelW = width * 0.23;
-    const panelH = height * 0.6;
-
-    ctx.fillStyle = "rgba(30, 41, 59, 0.9)";
-    ctx.fillRect(panelX, panelY, panelW, panelH);
-    ctx.strokeStyle = "rgba(100, 116, 139, 0.5)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(panelX, panelY, panelW, panelH);
-
-    const textX = panelX + 10;
-    let textY = panelY + 20;
-    const lineHeight = 16;
-
-    ctx.fillStyle = "#a855f7";
+    const panelX = width - 280;
+    const panelY = 20;
+    
+    ctx.fillStyle = "rgba(10, 10, 15, 0.9)";
+    ctx.fillRect(panelX, panelY, 260, 200);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(panelX, panelY, 260, 200);
+    
+    ctx.fillStyle = TEXT_COLOR;
     ctx.font = "14px monospace";
     ctx.textAlign = "left";
-    ctx.fillText("Chladni Patterns", textX, textY);
-    textY += lineHeight + 8;
-
-    const shapes = ["Square", "Circle", "Rectangle"];
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px monospace";
-    ctx.fillText(`Plate: ${shapes[plateShape]}`, textX, textY);
-    textY += lineHeight;
-
-    ctx.fillText(`Size: ${(plateSize * 100).toFixed(0)} cm`, textX, textY);
-    textY += lineHeight;
-
-    ctx.fillText(`Frequency: ${frequency.toFixed(0)} Hz`, textX, textY);
-    textY += lineHeight;
-
-    ctx.fillText(`Wavelength: ${(wavelength * 1000).toFixed(1)} mm`, textX, textY);
-    textY += lineHeight + 8;
-
-    ctx.fillText("Excitation Point:", textX, textY);
-    textY += lineHeight;
-    ctx.fillText(`X: ${(excitationX * 100).toFixed(0)}%`, textX, textY);
-    textY += lineHeight;
-    ctx.fillText(`Y: ${(excitationY * 100).toFixed(0)}%`, textX, textY);
-    textY += lineHeight + 8;
-
-    ctx.fillStyle = SAND_COLOR;
-    ctx.fillText("Sand Particles:", textX, textY);
-    textY += lineHeight;
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px monospace";
-    ctx.fillText("• Collect at nodes", textX, textY);
-    textY += 12;
-    ctx.fillText("• Scattered from", textX, textY);
-    textY += 12;
-    ctx.fillText("  antinodes", textX + 2, textY);
-    textY += lineHeight + 8;
-
-    // Mode information
+    ctx.fillText("Chladni Patterns", panelX + 10, panelY + 20);
+    
+    ctx.font = "11px monospace";
+    ctx.fillText("Standing waves on a 2D plate", panelX + 10, panelY + 45);
+    ctx.fillText("create nodal lines where sand", panelX + 10, panelY + 60);
+    ctx.fillText("particles accumulate.", panelX + 10, panelY + 75);
+    
+    ctx.fillText(`Frequency: ${frequency} Hz`, panelX + 10, panelY + 100);
+    ctx.fillText(`Mode: (${modeM}, ${modeN})`, panelX + 10, panelY + 115);
+    
+    ctx.fillText("Discovered by Ernst Chladni", panelX + 10, panelY + 140);
+    ctx.fillText("(1756-1827)", panelX + 10, panelY + 155);
+    
     ctx.fillStyle = NODE_COLOR;
-    ctx.font = "12px monospace";
-    ctx.fillText("Standing Wave Mode", textX, textY);
-    textY += lineHeight + 5;
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px monospace";
-    ctx.fillText("Nodes: Zero motion", textX, textY);
-    textY += 12;
-    ctx.fillText("Antinodes: Max motion", textX, textY);
-    textY += 12;
-    ctx.fillText("Pattern depends on:", textX, textY);
-    textY += 12;
-    ctx.fillText("• Frequency", textX, textY);
-    textY += 12;
-    ctx.fillText("• Plate geometry", textX, textY);
-    textY += 12;
-    ctx.fillText("• Boundary conditions", textX, textY);
+    ctx.fillText("Red areas: Nodal lines", panelX + 10, panelY + 175);
+    ctx.fillStyle = VIBRATION_COLOR;
+    ctx.fillText("Blue areas: Antinodes", panelX + 10, panelY + 190);
   }
 
-  function drawWaveEquation() {
-    const eqX = width * 0.1;
-    const eqY = height * 0.75;
-
-    ctx.fillStyle = "#a855f7";
-    ctx.font = "14px monospace";
-    ctx.textAlign = "left";
-    ctx.fillText("2D Wave Equation:", eqX, eqY);
+  function drawFrequencySpectrum() {
+    const specX = 30;
+    const specY = height - 350;
+    const specW = 150;
+    const specH = 100;
+    
+    ctx.fillStyle = "rgba(30, 41, 59, 0.8)";
+    ctx.fillRect(specX, specY, specW, specH);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(specX, specY, specW, specH);
+    
+    // Draw frequency response peaks
+    const numModes = 6;
+    for (let i = 1; i <= numModes; i++) {
+      const modeFreq = i * 200 + 300; // Simplified frequency calculation
+      const amplitude = 1 / i; // Higher modes have lower amplitude
+      
+      const x = specX + (modeFreq / 2000) * specW;
+      const barHeight = amplitude * specH * 0.8;
+      const y = specY + specH - barHeight;
+      
+      ctx.fillStyle = i === Math.floor(frequency / 200) ? VIBRATION_COLOR : "#64748b";
+      ctx.fillRect(x - 3, y, 6, barHeight);
+    }
+    
+    // Current frequency indicator
+    const currentX = specX + (frequency / 2000) * specW;
+    ctx.strokeStyle = SAND_COLOR;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(currentX, specY);
+    ctx.lineTo(currentX, specY + specH);
+    ctx.stroke();
     
     ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px monospace";
-    ctx.fillText("∂²u/∂t² = c²(∂²u/∂x² + ∂²u/∂y²) - 2γ∂u/∂t", eqX, eqY + 20);
-    
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "11px monospace";
-    ctx.fillText("where u = displacement, c = wave speed, γ = damping", eqX, eqY + 35);
-    ctx.fillText(`Wave speed in plate: c = ${waveSpeed} m/s`, eqX, eqY + 50);
-    ctx.fillText(`Damping coefficient: γ = ${dampingFactor.toFixed(3)}`, eqX, eqY + 65);
-
-    // Resonance info
-    ctx.fillStyle = "#f59e0b";
-    ctx.font = "12px monospace";
-    ctx.fillText("Resonant Modes:", eqX + 350, eqY);
-    
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "10px monospace";
-    ctx.fillText("Different frequencies create", eqX + 350, eqY + 20);
-    ctx.fillText("different standing wave patterns.", eqX + 350, eqY + 32);
-    ctx.fillText("Sand reveals the node lines", eqX + 350, eqY + 44);
-    ctx.fillText("where vibration is minimal.", eqX + 350, eqY + 56);
+    ctx.font = "9px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("Resonant Modes", specX + specW/2, specY - 5);
   }
 
   const engine: SimulationEngine = {
@@ -551,59 +337,43 @@ const ChladniPatterns: SimulationFactory = () => {
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      time = 0;
-      displacement.fill(0);
-      velocity.fill(0);
-      nodeSand.fill(0);
-      particles = [];
-      initializeParticles();
+      initializePlate();
     },
 
     update(dt: number, params: Record<string, number>) {
-      computePhysics(dt, params);
+      frequency = params.frequency ?? frequency;
+      modeM = Math.round(params.modeM ?? modeM);
+      modeN = Math.round(params.modeN ?? modeN);
+      dampening = params.dampening ?? dampening;
+
+      time += dt;
+      updatePlateVibration();
+      updateSandParticles();
     },
 
     render() {
-      ctx.fillStyle = BG;
+      ctx.fillStyle = BG_COLOR;
       ctx.fillRect(0, 0, width, height);
 
       drawPlate();
-      drawVibrationField();
       drawSandParticles();
-      drawExcitationPoint();
+      drawVibrationSource();
+      drawModePattern();
       drawInfoPanel();
-      drawWaveEquation();
+      drawFrequencySpectrum();
     },
 
     reset() {
       time = 0;
-      displacement.fill(0);
-      velocity.fill(0);
-      nodeSand.fill(0);
-      particles = [];
-      initializeParticles();
+      initializePlate();
     },
 
     destroy() {
-      // Clean up arrays
-      displacement = new Float32Array(0);
-      velocity = new Float32Array(0);
-      nodeSand = new Float32Array(0);
-      particles = [];
+      // Nothing to clean up
     },
 
     getStateDescription(): string {
-      const shapes = ["square", "circular", "rectangular"];
-      const particlesOnNodes = particles.filter(p => p.onNode).length;
-      
-      return (
-        `Chladni pattern simulation on ${shapes[plateShape]} plate: ${(plateSize * 100).toFixed(0)} cm size, ` +
-        `vibrating at ${frequency.toFixed(0)} Hz (wavelength ${(wavelength * 1000).toFixed(1)} mm). ` +
-        `Excitation point at (${(excitationX * 100).toFixed(0)}%, ${(excitationY * 100).toFixed(0)}%). ` +
-        `${particlesOnNodes}/${numParticles} sand particles collected at nodes. ` +
-        `Standing wave patterns form when the plate resonates, creating nodes (no motion) and antinodes (maximum motion). ` +
-        `Sand particles migrate to nodes where vibration is minimal, revealing the wave pattern geometry.`
-      );
+      return `Chladni patterns show standing wave modes (${modeM},${modeN}) on a vibrating plate at ${frequency} Hz. Sand particles collect at nodal lines where vibration amplitude is minimal, revealing the wave pattern geometry.`;
     },
 
     resize(w: number, h: number) {

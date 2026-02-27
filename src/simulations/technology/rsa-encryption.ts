@@ -1,81 +1,111 @@
-import type { SimulationEngine, SimulationFactory } from "../types";
-import { getSimConfig } from "../registry";
+import { SimulationEngine } from '../types';
 
-const RSAEncryption: SimulationFactory = () => {
-  const config = getSimConfig("rsa-encryption")!;
+interface RSAState {
+  primeP: number;
+  primeQ: number;
+  n: number;
+  phi: number;
+  e: number;
+  d: number;
+  message: number;
+  encrypted: number;
+  decrypted: number;
+  step: number;
+  animationTime: number;
+  steps: string[];
+  currentStep: number;
+}
 
-  let canvas: HTMLCanvasElement;
-  let ctx: CanvasRenderingContext2D;
-  let width = 800;
-  let height = 600;
+export default class RSAEncryptionSimulation implements SimulationEngine<RSAState> {
+  private canvas!: HTMLCanvasElement;
+  private ctx!: CanvasRenderingContext2D;
+  private animationFrameId?: number;
+  private state!: RSAState;
 
-  // RSA parameters
-  let p = 17; // Prime 1
-  let q = 19; // Prime 2
-  let message = 65; // ASCII 'A'
-  let time = 0;
-  let animationSpeed = 1.0;
-  let showSteps = 1;
+  // Small primes for educational demo
+  private primes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
 
-  // Calculated RSA values
-  let n = 0; // p * q
-  let phi = 0; // (p-1) * (q-1)
-  let e = 0; // Public exponent
-  let d = 0; // Private exponent
-  let encrypted = 0; // Encrypted message
-  let decrypted = 0; // Decrypted message
-
-  // Animation state
-  let currentStep = 0;
-  let stepProgress = 0;
-
-  // Colors
-  const BG = "#0f172a";
-  const PRIME_COLOR = "#10b981";
-  const PUBLIC_COLOR = "#3b82f6";
-  const PRIVATE_COLOR = "#ef4444";
-  const MESSAGE_COLOR = "#f59e0b";
-  const MATH_COLOR = "#a855f7";
-  const HIGHLIGHT_COLOR = "#fbbf24";
-  const TEXT_COLOR = "#e2e8f0";
-  const PANEL_BG = "rgba(30, 41, 59, 0.9)";
-  const STEP_BG = "rgba(59, 130, 246, 0.1)";
-
-  // Utility functions
-  function isPrime(num: number): boolean {
-    if (num < 2) return false;
-    for (let i = 2; i <= Math.sqrt(num); i++) {
-      if (num % i === 0) return false;
-    }
-    return true;
+  init(canvas: HTMLCanvasElement): void {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d')!;
+    this.reset();
   }
 
-  function gcd(a: number, b: number): number {
+  reset(): void {
+    this.state = {
+      primeP: 7,
+      primeQ: 11,
+      n: 0,
+      phi: 0,
+      e: 3,
+      d: 0,
+      message: 5,
+      encrypted: 0,
+      decrypted: 0,
+      step: 0,
+      animationTime: 0,
+      steps: [
+        '1. Choose two prime numbers p and q',
+        '2. Calculate n = p × q',
+        '3. Calculate φ(n) = (p-1) × (q-1)',
+        '4. Choose e coprime to φ(n)',
+        '5. Calculate d: e × d ≡ 1 (mod φ(n))',
+        '6. Public key: (e, n)',
+        '7. Private key: (d, n)',
+        '8. Encrypt: C = M^e mod n',
+        '9. Decrypt: M = C^d mod n'
+      ],
+      currentStep: 0
+    };
+    this.calculateRSAValues();
+  }
+
+  private calculateRSAValues(): void {
+    this.state.n = this.state.primeP * this.state.primeQ;
+    this.state.phi = (this.state.primeP - 1) * (this.state.primeQ - 1);
+    
+    // Find valid e (coprime to phi)
+    this.state.e = this.findValidE();
+    
+    // Calculate d (modular multiplicative inverse)
+    this.state.d = this.modInverse(this.state.e, this.state.phi);
+    
+    // Encrypt and decrypt
+    this.state.encrypted = this.modPow(this.state.message, this.state.e, this.state.n);
+    this.state.decrypted = this.modPow(this.state.encrypted, this.state.d, this.state.n);
+  }
+
+  private findValidE(): number {
+    for (let e = 3; e < this.state.phi; e += 2) {
+      if (this.gcd(e, this.state.phi) === 1) {
+        return e;
+      }
+    }
+    return 3;
+  }
+
+  private gcd(a: number, b: number): number {
     while (b !== 0) {
-      const temp = b;
-      b = a % b;
-      a = temp;
+      [a, b] = [b, a % b];
     }
     return a;
   }
 
-  function extendedGcd(a: number, b: number): { gcd: number; x: number; y: number } {
-    if (b === 0) {
-      return { gcd: a, x: 1, y: 0 };
+  private modInverse(a: number, m: number): number {
+    // Extended Euclidean Algorithm
+    let [oldR, r] = [a, m];
+    let [oldS, s] = [1, 0];
+    
+    while (r !== 0) {
+      const quotient = Math.floor(oldR / r);
+      [oldR, r] = [r, oldR - quotient * r];
+      [oldS, s] = [s, oldS - quotient * s];
     }
-    const result = extendedGcd(b, a % b);
-    const x = result.y;
-    const y = result.x - Math.floor(a / b) * result.y;
-    return { gcd: result.gcd, x, y };
+    
+    return oldS > 0 ? oldS : oldS + m;
   }
 
-  function modInverse(a: number, m: number): number {
-    const result = extendedGcd(a, m);
-    if (result.gcd !== 1) return -1; // No inverse exists
-    return ((result.x % m) + m) % m;
-  }
-
-  function modPow(base: number, exp: number, mod: number): number {
+  private modPow(base: number, exp: number, mod: number): number {
     let result = 1;
     base = base % mod;
     while (exp > 0) {
@@ -88,494 +118,242 @@ const RSAEncryption: SimulationFactory = () => {
     return result;
   }
 
-  function findValidE(phi: number): number {
-    // Common choices for e are 3, 65537, etc.
-    // Find smallest e > 1 such that gcd(e, phi) = 1
-    for (let e = 3; e < phi; e += 2) {
-      if (gcd(e, phi) === 1) {
-        return e;
+  update(deltaTime: number, parameters: Record<string, number>): void {
+    const pIndex = Math.floor(parameters.primeP * this.primes.length);
+    const qIndex = Math.floor(parameters.primeQ * this.primes.length);
+    const messageParam = Math.floor(parameters.message * 25) + 1;
+    
+    this.state.primeP = this.primes[Math.min(pIndex, this.primes.length - 1)];
+    this.state.primeQ = this.primes[Math.min(qIndex, this.primes.length - 1)];
+    
+    if (this.state.primeP !== this.state.primeQ) {
+      this.state.message = Math.min(messageParam, this.state.primeP * this.state.primeQ - 1);
+      this.calculateRSAValues();
+    }
+    
+    this.state.animationTime += deltaTime * (parameters.animationSpeed || 1.0);
+    
+    // Cycle through steps
+    this.state.currentStep = Math.floor((this.state.animationTime / 2000) % this.state.steps.length);
+  }
+
+  render(): void {
+    const { width, height } = this.canvas;
+    this.ctx.clearRect(0, 0, width, height);
+
+    // Draw background
+    this.ctx.fillStyle = '#0a0f1a';
+    this.ctx.fillRect(0, 0, width, height);
+
+    // Draw title
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = 'bold 24px Arial';
+    this.ctx.fillText('RSA Encryption Algorithm', 20, 40);
+
+    // Draw RSA steps
+    this.drawRSASteps();
+
+    // Draw key generation process
+    this.drawKeyGeneration();
+
+    // Draw encryption/decryption process
+    this.drawEncryption();
+
+    // Draw visual representation
+    this.drawVisualRSA();
+  }
+
+  private drawRSASteps(): void {
+    const startY = 80;
+    this.ctx.font = '16px Arial';
+    
+    this.state.steps.forEach((step, i) => {
+      if (i === this.state.currentStep) {
+        this.ctx.fillStyle = '#ffeb3b';
+        this.ctx.fillRect(15, startY + i * 25 - 2, this.canvas.width - 30, 20);
       }
-    }
-    return 65537; // Fallback
-  }
-
-  function computePhysics(dt: number, params: Record<string, number>) {
-    // Update parameters (simplified - real implementation would validate primes)
-    const primeOptions = [7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
-    const pIndex = Math.floor((params.primeP ?? 0.5) * primeOptions.length) % primeOptions.length;
-    const qIndex = Math.floor((params.primeQ ?? 0.6) * primeOptions.length) % primeOptions.length;
-    
-    p = primeOptions[pIndex];
-    q = primeOptions[qIndex];
-    
-    // Ensure p ≠ q
-    if (p === q) {
-      q = primeOptions[(qIndex + 1) % primeOptions.length];
-    }
-
-    message = Math.floor((params.message ?? 0.5) * 26) + 65; // A-Z
-    animationSpeed = params.animationSpeed ?? animationSpeed;
-    showSteps = params.showSteps ?? showSteps;
-
-    time += dt * animationSpeed;
-
-    // Calculate RSA values
-    calculateRSA();
-    
-    // Animation
-    if (showSteps) {
-      const stepsPerSecond = 0.5;
-      stepProgress = (time * stepsPerSecond) % 6;
-      currentStep = Math.floor(stepProgress);
-    }
-  }
-
-  function calculateRSA() {
-    // Step 1: Calculate n = p * q
-    n = p * q;
-    
-    // Step 2: Calculate φ(n) = (p-1)(q-1)
-    phi = (p - 1) * (q - 1);
-    
-    // Step 3: Choose e such that 1 < e < φ(n) and gcd(e, φ(n)) = 1
-    e = findValidE(phi);
-    
-    // Step 4: Calculate d = e^(-1) mod φ(n)
-    d = modInverse(e, phi);
-    if (d < 0) d = 1; // Fallback
-    
-    // Step 5: Encrypt message
-    encrypted = modPow(message, e, n);
-    
-    // Step 6: Decrypt ciphertext
-    decrypted = modPow(encrypted, d, n);
-  }
-
-  function drawRSAOverview() {
-    const overviewX = width * 0.02;
-    const overviewY = height * 0.02;
-    const overviewW = width * 0.96;
-    const overviewH = height * 0.15;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(overviewX, overviewY, overviewW, overviewH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(overviewX, overviewY, overviewW, overviewH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "16px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("RSA Public Key Cryptography", overviewX + overviewW / 2, overviewY + 25);
-
-    // Key information in three columns
-    const col1X = overviewX + 20;
-    const col2X = overviewX + overviewW / 3;
-    const col3X = overviewX + 2 * overviewW / 3;
-    const infoY = overviewY + 50;
-
-    ctx.font = "12px monospace";
-    ctx.textAlign = "left";
-
-    // Column 1: Primes
-    ctx.fillStyle = PRIME_COLOR;
-    ctx.fillText("Prime Numbers:", col1X, infoY);
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`p = ${p}`, col1X, infoY + 20);
-    ctx.fillText(`q = ${q}`, col1X, infoY + 35);
-    ctx.fillText(`n = p×q = ${n}`, col1X, infoY + 50);
-
-    // Column 2: Keys
-    ctx.fillStyle = PUBLIC_COLOR;
-    ctx.fillText("Public Key:", col2X, infoY);
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`(e, n) = (${e}, ${n})`, col2X, infoY + 20);
-    
-    ctx.fillStyle = PRIVATE_COLOR;
-    ctx.fillText("Private Key:", col2X, infoY + 35);
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`(d, n) = (${d}, ${n})`, col2X, infoY + 50);
-
-    // Column 3: Message
-    ctx.fillStyle = MESSAGE_COLOR;
-    ctx.fillText("Message:", col3X, infoY);
-    ctx.fillStyle = TEXT_COLOR;
-    const messageChar = String.fromCharCode(message);
-    ctx.fillText(`'${messageChar}' → ${message}`, col3X, infoY + 20);
-    ctx.fillText(`Encrypted: ${encrypted}`, col3X, infoY + 35);
-    ctx.fillText(`Decrypted: ${decrypted}`, col3X, infoY + 50);
-  }
-
-  function drawAlgorithmSteps() {
-    const stepsX = width * 0.02;
-    const stepsY = height * 0.2;
-    const stepsW = width * 0.48;
-    const stepsH = height * 0.75;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(stepsX, stepsY, stepsW, stepsH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(stepsX, stepsY, stepsW, stepsH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("RSA Algorithm Steps", stepsX + stepsW / 2, stepsY + 25);
-
-    const steps = [
-      {
-        title: "1. Choose Two Prime Numbers",
-        description: `Select large primes p and q`,
-        calculation: `p = ${p}, q = ${q}`,
-        color: PRIME_COLOR
-      },
-      {
-        title: "2. Compute n = p × q",
-        description: "This will be part of both keys",
-        calculation: `n = ${p} × ${q} = ${n}`,
-        color: MATH_COLOR
-      },
-      {
-        title: "3. Compute φ(n) = (p-1)(q-1)",
-        description: "Euler's totient function",
-        calculation: `φ(n) = (${p}-1)(${q}-1) = ${phi}`,
-        color: MATH_COLOR
-      },
-      {
-        title: "4. Choose Public Exponent e",
-        description: "1 < e < φ(n), gcd(e, φ(n)) = 1",
-        calculation: `e = ${e}, gcd(${e}, ${phi}) = ${gcd(e, phi)}`,
-        color: PUBLIC_COLOR
-      },
-      {
-        title: "5. Compute Private Exponent d",
-        description: "d ≡ e⁻¹ (mod φ(n))",
-        calculation: `d = ${d}, verify: ${e}×${d} ≡ ${(e * d) % phi} (mod ${phi})`,
-        color: PRIVATE_COLOR
-      },
-      {
-        title: "6. Encryption & Decryption",
-        description: "C ≡ M^e (mod n), M ≡ C^d (mod n)",
-        calculation: `${message}^${e} ≡ ${encrypted} (mod ${n})`,
-        color: MESSAGE_COLOR
-      }
-    ];
-
-    let y = stepsY + 50;
-    const stepHeight = 100;
-
-    steps.forEach((step, index) => {
-      // Highlight current step
-      const isCurrentStep = showSteps && currentStep === index;
-      if (isCurrentStep) {
-        ctx.fillStyle = STEP_BG;
-        ctx.fillRect(stepsX + 5, y - 15, stepsW - 10, stepHeight - 5);
-      }
-
-      // Step title
-      ctx.fillStyle = isCurrentStep ? HIGHLIGHT_COLOR : step.color;
-      ctx.font = "12px monospace";
-      ctx.textAlign = "left";
-      ctx.fillText(step.title, stepsX + 15, y);
-
-      // Step description
-      ctx.fillStyle = TEXT_COLOR;
-      ctx.font = "11px monospace";
-      ctx.fillText(step.description, stepsX + 15, y + 18);
-
-      // Calculation
-      ctx.fillStyle = "#9ca3af";
-      ctx.font = "10px monospace";
-      ctx.fillText(step.calculation, stepsX + 15, y + 35);
-
-      // Show work for current step
-      if (isCurrentStep) {
-        drawStepDetails(step, index, stepsX + 15, y + 50);
-      }
-
-      y += stepHeight;
-    });
-  }
-
-  function drawStepDetails(step: any, stepIndex: number, x: number, y: number) {
-    ctx.fillStyle = "#64748b";
-    ctx.font = "9px monospace";
-    ctx.textAlign = "left";
-
-    switch (stepIndex) {
-      case 0: // Prime selection
-        ctx.fillText(`Prime verification: ${p} and ${q} are both prime`, x, y);
-        ctx.fillText(`Security note: Real RSA uses 1024+ bit primes`, x, y + 12);
-        break;
-
-      case 1: // n calculation
-        ctx.fillText(`Modulus n determines key size`, x, y);
-        ctx.fillText(`All operations will be mod ${n}`, x, y + 12);
-        break;
-
-      case 2: // phi calculation
-        ctx.fillText(`φ(n) counts integers < n that are coprime to n`, x, y);
-        ctx.fillText(`For n = p×q: φ(n) = (p-1)(q-1)`, x, y + 12);
-        break;
-
-      case 3: // e selection
-        ctx.fillText(`Common choices: e = 3, 65537 (2^16 + 1)`, x, y);
-        ctx.fillText(`gcd(${e}, ${phi}) = 1 ensures e has mod inverse`, x, y + 12);
-        break;
-
-      case 4: // d calculation
-        ctx.fillText(`Extended Euclidean Algorithm finds d`, x, y);
-        ctx.fillText(`Verify: (${e} × ${d}) mod ${phi} = ${(e * d) % phi}`, x, y + 12);
-        break;
-
-      case 5: // Encryption/Decryption
-        ctx.fillText(`Encrypt: ${message}^${e} mod ${n} = ${encrypted}`, x, y);
-        ctx.fillText(`Decrypt: ${encrypted}^${d} mod ${n} = ${decrypted}`, x, y + 12);
-        break;
-    }
-  }
-
-  function drawModularArithmetic() {
-    const mathX = width * 0.52;
-    const mathY = height * 0.2;
-    const mathW = width * 0.46;
-    const mathH = height * 0.35;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(mathX, mathY, mathW, mathH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(mathX, mathY, mathW, mathH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Modular Arithmetic", mathX + mathW / 2, mathY + 25);
-
-    // Show step-by-step modular exponentiation for encryption
-    let y = mathY + 50;
-    const lineHeight = 16;
-
-    ctx.font = "11px monospace";
-    ctx.textAlign = "left";
-
-    ctx.fillStyle = MESSAGE_COLOR;
-    ctx.fillText("Encryption: M^e mod n", mathX + 10, y);
-    y += lineHeight + 5;
-
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`${message}^${e} mod ${n}`, mathX + 10, y);
-    y += lineHeight;
-
-    // Show binary exponentiation steps for e
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "10px monospace";
-    const eBinary = e.toString(2);
-    ctx.fillText(`e = ${e} = ${eBinary}₂`, mathX + 10, y);
-    y += lineHeight + 10;
-
-    // Show modular exponentiation process
-    if (e <= 16) { // Only show for small exponents
-      let base = message;
-      let exp = e;
-      let result = 1;
-      let step = 1;
-
-      ctx.fillStyle = TEXT_COLOR;
-      ctx.font = "10px monospace";
-      ctx.fillText("Fast modular exponentiation:", mathX + 10, y);
-      y += 15;
-
-      while (exp > 0) {
-        if (exp % 2 === 1) {
-          const oldResult = result;
-          result = (result * base) % n;
-          ctx.fillStyle = "#10b981";
-          ctx.fillText(`Step ${step}: result = (${oldResult} × ${base}) mod ${n} = ${result}`, mathX + 15, y);
-          y += 12;
-        }
-        if (exp > 1) {
-          const oldBase = base;
-          base = (base * base) % n;
-          ctx.fillStyle = "#64748b";
-          ctx.fillText(`       base = (${oldBase}²) mod ${n} = ${base}`, mathX + 15, y);
-          y += 12;
-        }
-        exp = Math.floor(exp / 2);
-        step++;
-        if (y > mathY + mathH - 40) break; // Don't overflow
-      }
-
-      ctx.fillStyle = HIGHLIGHT_COLOR;
-      ctx.font = "11px monospace";
-      ctx.fillText(`Final result: ${encrypted}`, mathX + 10, y + 5);
-    }
-  }
-
-  function drawSecurityAnalysis() {
-    const secX = width * 0.52;
-    const secY = height * 0.57;
-    const secW = width * 0.46;
-    const secH = height * 0.38;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(secX, secY, secW, secH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(secX, secY, secW, secH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Security Analysis", secX + secW / 2, secY + 25);
-
-    let y = secY + 50;
-    const lineHeight = 14;
-
-    ctx.font = "11px monospace";
-    ctx.textAlign = "left";
-
-    // Key strength
-    const keyBits = Math.floor(Math.log2(n));
-    ctx.fillStyle = keyBits >= 10 ? "#10b981" : "#ef4444";
-    ctx.fillText(`Key size: ${keyBits} bits (n = ${n})`, secX + 10, y);
-    y += lineHeight + 5;
-
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "10px monospace";
-    if (keyBits < 10) {
-      ctx.fillText("⚠️ Toy example - real RSA uses 2048+ bit keys", secX + 10, y);
-    } else {
-      ctx.fillText("Real RSA requires much larger primes", secX + 10, y);
-    }
-    y += lineHeight + 10;
-
-    // Security assumptions
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "11px monospace";
-    ctx.fillText("Security Assumptions:", secX + 10, y);
-    y += lineHeight + 5;
-
-    const assumptions = [
-      "• Factoring large integers is hard",
-      "• Computing discrete logs is hard",  
-      "• Primes p, q kept secret",
-      "• Private key d never exposed"
-    ];
-
-    ctx.fillStyle = "#64748b";
-    ctx.font = "10px monospace";
-    assumptions.forEach(assumption => {
-      ctx.fillText(assumption, secX + 10, y);
-      y += 12;
-    });
-
-    y += 10;
-
-    // Attacks
-    ctx.fillStyle = PRIVATE_COLOR;
-    ctx.font = "11px monospace";
-    ctx.fillText("Potential Attacks:", secX + 10, y);
-    y += lineHeight + 5;
-
-    const attacks = [
-      "• Factor n to recover p, q",
-      "• Timing attacks on implementation",
-      "• Side-channel attacks",
-      "• Quantum computers (Shor's algorithm)"
-    ];
-
-    ctx.fillStyle = "#64748b";
-    ctx.font = "10px monospace";
-    attacks.forEach(attack => {
-      ctx.fillText(attack, secX + 10, y);
-      y += 12;
-    });
-
-    // Factorization difficulty
-    y += 10;
-    ctx.fillStyle = MESSAGE_COLOR;
-    ctx.font = "11px monospace";
-    ctx.fillText("Factorization Challenge:", secX + 10, y);
-    y += lineHeight + 3;
-
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "10px monospace";
-    ctx.fillText(`To break this RSA: factor ${n} = ${p} × ${q}`, secX + 10, y);
-    y += 12;
-    
-    const trialDivSteps = Math.ceil(Math.sqrt(n));
-    ctx.fillText(`Trial division: ~${trialDivSteps} operations`, secX + 10, y);
-    y += 12;
-    ctx.fillText("Real RSA: ~2^128 operations needed", secX + 10, y);
-  }
-
-  const engine: SimulationEngine = {
-    config,
-
-    init(c: HTMLCanvasElement) {
-      canvas = c;
-      ctx = canvas.getContext("2d")!;
-      width = canvas.width;
-      height = canvas.height;
-      time = 0;
-      currentStep = 0;
-      stepProgress = 0;
-    },
-
-    update(dt: number, params: Record<string, number>) {
-      computePhysics(dt, params);
-    },
-
-    render() {
-      ctx.fillStyle = BG;
-      ctx.fillRect(0, 0, width, height);
-
-      drawRSAOverview();
-      drawAlgorithmSteps();
-      drawModularArithmetic();
-      drawSecurityAnalysis();
-    },
-
-    reset() {
-      time = 0;
-      currentStep = 0;
-      stepProgress = 0;
-    },
-
-    destroy() {
-      // No cleanup needed
-    },
-
-    getStateDescription(): string {
-      const keyBits = Math.floor(Math.log2(n));
-      const messageChar = String.fromCharCode(message);
       
-      return (
-        `RSA encryption with primes p = ${p}, q = ${q}: Key size ${keyBits} bits. ` +
-        `Public key (e,n) = (${e}, ${n}), private key (d,n) = (${d}, ${n}). ` +
-        `Message '${messageChar}' (${message}) encrypts to ${encrypted}, decrypts back to ${decrypted}. ` +
-        `Security relies on difficulty of factoring n = ${n} = ${p} × ${q}. ` +
-        `RSA enables secure communication without prior shared secrets by using mathematical trapdoor functions.`
-      );
-    },
+      this.ctx.fillStyle = i === this.state.currentStep ? '#000000' : '#ffffff';
+      this.ctx.fillText(step, 20, startY + i * 25 + 12);
+    });
+  }
 
-    resize(w: number, h: number) {
-      width = w;
-      height = h;
-    },
-  };
+  private drawKeyGeneration(): void {
+    const { width } = this.canvas;
+    const startX = width - 350;
+    const startY = 80;
+    
+    // Background for key generation
+    this.ctx.fillStyle = '#1a1a2e';
+    this.ctx.fillRect(startX - 10, startY - 10, 340, 200);
+    this.ctx.strokeStyle = '#4a4a6a';
+    this.ctx.strokeRect(startX - 10, startY - 10, 340, 200);
+    
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = 'bold 16px Arial';
+    this.ctx.fillText('Key Generation:', startX, startY + 15);
+    
+    this.ctx.font = '14px Arial';
+    const keySteps = [
+      `p = ${this.state.primeP} (prime)`,
+      `q = ${this.state.primeQ} (prime)`,
+      `n = p × q = ${this.state.n}`,
+      `φ(n) = (p-1)(q-1) = ${this.state.phi}`,
+      `e = ${this.state.e} (coprime to φ(n))`,
+      `d = ${this.state.d} (e⁻¹ mod φ(n))`,
+      '',
+      `Public Key: (${this.state.e}, ${this.state.n})`,
+      `Private Key: (${this.state.d}, ${this.state.n})`
+    ];
+    
+    keySteps.forEach((step, i) => {
+      if (i === 7) this.ctx.fillStyle = '#00ff88'; // Public key in green
+      else if (i === 8) this.ctx.fillStyle = '#ff6b6b'; // Private key in red
+      else this.ctx.fillStyle = '#ffffff';
+      
+      this.ctx.fillText(step, startX, startY + 35 + i * 18);
+    });
+  }
 
-  return engine;
-};
+  private drawEncryption(): void {
+    const { width, height } = this.canvas;
+    const startX = width - 350;
+    const startY = height - 150;
+    
+    // Background for encryption
+    this.ctx.fillStyle = '#1a2e1a';
+    this.ctx.fillRect(startX - 10, startY - 10, 340, 140);
+    this.ctx.strokeStyle = '#4a6a4a';
+    this.ctx.strokeRect(startX - 10, startY - 10, 340, 140);
+    
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = 'bold 16px Arial';
+    this.ctx.fillText('Encryption/Decryption:', startX, startY + 15);
+    
+    this.ctx.font = '14px Arial';
+    const encSteps = [
+      `Message (M): ${this.state.message}`,
+      `Encrypt: C = M^e mod n`,
+      `C = ${this.state.message}^${this.state.e} mod ${this.state.n} = ${this.state.encrypted}`,
+      '',
+      `Decrypt: M = C^d mod n`,
+      `M = ${this.state.encrypted}^${this.state.d} mod ${this.state.n} = ${this.state.decrypted}`,
+      '',
+      `✓ Original message recovered!`
+    ];
+    
+    encSteps.forEach((step, i) => {
+      if (i === 7 && this.state.message === this.state.decrypted) {
+        this.ctx.fillStyle = '#00ff88';
+      } else if (i === 2) {
+        this.ctx.fillStyle = '#ffeb3b';
+      } else if (i === 5) {
+        this.ctx.fillStyle = '#ff9800';
+      } else {
+        this.ctx.fillStyle = '#ffffff';
+      }
+      
+      this.ctx.fillText(step, startX, startY + 35 + i * 16);
+    });
+  }
 
-export default RSAEncryption;
+  private drawVisualRSA(): void {
+    const centerX = 200;
+    const centerY = 350;
+    
+    // Draw message flow
+    this.drawMessageFlow(centerX, centerY);
+    
+    // Draw key boxes
+    this.drawKeyBox(50, 450, 'Public Key', `(${this.state.e}, ${this.state.n})`, '#00ff88');
+    this.drawKeyBox(250, 450, 'Private Key', `(${this.state.d}, ${this.state.n})`, '#ff6b6b');
+  }
+
+  private drawMessageFlow(centerX: number, centerY: number): void {
+    const boxWidth = 80;
+    const boxHeight = 50;
+    
+    // Message box
+    this.drawBox(centerX - 150, centerY, boxWidth, boxHeight, `M = ${this.state.message}`, '#4fc3f7');
+    
+    // Encrypted box
+    this.drawBox(centerX, centerY, boxWidth, boxHeight, `C = ${this.state.encrypted}`, '#ffeb3b');
+    
+    // Decrypted box
+    this.drawBox(centerX + 150, centerY, boxWidth, boxHeight, `M = ${this.state.decrypted}`, '#4fc3f7');
+    
+    // Arrows
+    this.drawArrow(centerX - 110, centerY + 25, centerX - 40, centerY + 25, 'Encrypt');
+    this.drawArrow(centerX + 40, centerY + 25, centerX + 110, centerY + 25, 'Decrypt');
+  }
+
+  private drawBox(x: number, y: number, w: number, h: number, text: string, color: string): void {
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(x, y, w, h);
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.strokeRect(x, y, w, h);
+    
+    this.ctx.fillStyle = '#000000';
+    this.ctx.font = '12px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(text, x + w/2, y + h/2 + 4);
+    this.ctx.textAlign = 'start';
+  }
+
+  private drawKeyBox(x: number, y: number, title: string, key: string, color: string): void {
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(x, y, 140, 60);
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.strokeRect(x, y, 140, 60);
+    
+    this.ctx.fillStyle = '#000000';
+    this.ctx.font = 'bold 12px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(title, x + 70, y + 20);
+    this.ctx.font = '11px Arial';
+    this.ctx.fillText(key, x + 70, y + 40);
+    this.ctx.textAlign = 'start';
+  }
+
+  private drawArrow(x1: number, y1: number, x2: number, y2: number, label: string): void {
+    // Arrow line
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.lineWidth = 2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1);
+    this.ctx.lineTo(x2, y2);
+    this.ctx.stroke();
+    
+    // Arrow head
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const headlen = 10;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x2, y2);
+    this.ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI/6), y2 - headlen * Math.sin(angle - Math.PI/6));
+    this.ctx.moveTo(x2, y2);
+    this.ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI/6), y2 - headlen * Math.sin(angle + Math.PI/6));
+    this.ctx.stroke();
+    
+    // Label
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = '10px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(label, (x1 + x2) / 2, (y1 + y2) / 2 - 5);
+    this.ctx.textAlign = 'start';
+  }
+
+  getStateDescription(): string {
+    return `RSA encryption with primes p=${this.state.primeP}, q=${this.state.primeQ}. Message ${this.state.message} encrypts to ${this.state.encrypted} with public key (${this.state.e}, ${this.state.n}), then decrypts back to ${this.state.decrypted} with private key (${this.state.d}, ${this.state.n}). Security relies on the difficulty of factoring n=${this.state.n}.`;
+  }
+
+  resize(width: number, height: number): void {
+    this.canvas.width = width;
+    this.canvas.height = height;
+  }
+
+  destroy(): void {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+  }
+}

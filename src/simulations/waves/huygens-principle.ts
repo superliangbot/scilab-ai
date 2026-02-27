@@ -9,487 +9,292 @@ const HuygensPrinciple: SimulationFactory = () => {
   let width = 800;
   let height = 600;
 
-  // Physics parameters
-  let waveSpeed = 100; // pixels per second
-  let wavelength = 40; // pixels
+  // Physics state
+  let wavelength = 40;
+  let waveSpeed = 100;
   let time = 0;
-  let showWavelets = 1;
-  let showEnvelope = 1;
-  let demonstrationType = 0; // 0=plane wave, 1=circular wave, 2=refraction, 3=diffraction
+  let showWavelets = true;
+  let showEnvelope = true;
 
-  // Wave state
-  let wavefronts: { x: number; y: number; radius: number; born: number }[] = [];
-  let sourcePoints: { x: number; y: number; active: boolean }[] = [];
-
-  // Geometry
-  const sourceY = height * 0.3;
-  const barrierX = width * 0.6;
-  const slitWidth = 60;
-  const slitCenterY = height * 0.5;
-
-  // Colors
-  const BG = "#0f172a";
-  const WAVEFRONT_COLOR = "#10b981";
-  const WAVELET_COLOR = "#3b82f6";
-  const ENVELOPE_COLOR = "#f59e0b";
-  const SOURCE_COLOR = "#ef4444";
-  const BARRIER_COLOR = "#64748b";
-  const GRID_COLOR = "rgba(148, 163, 184, 0.2)";
+  // Wave sources for demonstration
+  let primarySources: { x: number; y: number; startTime: number }[] = [];
+  let secondarySources: { x: number; y: number; startTime: number }[] = [];
+  
+  // Colors and styles
+  const BG_COLOR = "#0a0a0f";
+  const PRIMARY_COLOR = "#3b82f6";
+  const SECONDARY_COLOR = "#10b981";
+  const WAVELET_COLOR = "#8b5cf6";
+  const ENVELOPE_COLOR = "#fbbf24";
   const TEXT_COLOR = "#e2e8f0";
-  const CONSTRUCTION_COLOR = "#a855f7";
 
-  function computePhysics(dt: number, params: Record<string, number>) {
-    waveSpeed = params.waveSpeed ?? waveSpeed;
-    wavelength = params.wavelength ?? wavelength;
-    showWavelets = params.showWavelets ?? showWavelets;
-    showEnvelope = params.showEnvelope ?? showEnvelope;
-    demonstrationType = Math.floor(params.demonstrationType ?? demonstrationType);
-
-    time += dt;
+  function initializeSources() {
+    primarySources = [];
+    secondarySources = [];
     
-    const frequency = waveSpeed / wavelength;
-    const period = 1 / frequency;
-
-    // Generate new wavefronts periodically
-    if (Math.floor(time / period) > Math.floor((time - dt) / period)) {
-      generateWavefront();
+    // Create a line of primary sources (plane wave)
+    const sourceY = height / 3;
+    for (let i = 0; i < 10; i++) {
+      primarySources.push({
+        x: 100 + i * 60,
+        y: sourceY,
+        startTime: 0
+      });
     }
-
-    // Update existing wavefronts
-    updateWavefronts(dt);
-
-    // Update Huygens source points
-    updateHuygensPoints();
   }
 
-  function generateWavefront() {
-    switch (demonstrationType) {
-      case 0: // Plane wave
-        for (let y = 50; y < height - 50; y += 15) {
-          wavefronts.push({
-            x: 50,
-            y: y,
-            radius: 0,
-            born: time
-          });
-        }
-        break;
-
-      case 1: // Circular wave
-        wavefronts.push({
-          x: width * 0.2,
-          y: height * 0.5,
-          radius: 0,
-          born: time
+  function updateSecondaryWavelets() {
+    // For Huygens' principle, every point on the wavefront becomes a source of secondary wavelets
+    const currentWavefront = findCurrentWavefront();
+    
+    // Create secondary sources along the wavefront
+    secondarySources = [];
+    for (let i = 0; i < currentWavefront.length; i += 20) {
+      const point = currentWavefront[i];
+      if (point) {
+        secondarySources.push({
+          x: point.x,
+          y: point.y,
+          startTime: time - 0.5 // Start slightly before current time
         });
-        break;
-
-      case 2: // Refraction demo
-        for (let y = 50; y < height - 50; y += 15) {
-          wavefronts.push({
-            x: 50,
-            y: y,
-            radius: 0,
-            born: time
-          });
-        }
-        break;
-
-      case 3: // Diffraction through slit
-        for (let y = 50; y < height - 50; y += 15) {
-          wavefronts.push({
-            x: 50,
-            y: y,
-            radius: 0,
-            born: time
-          });
-        }
-        break;
-    }
-  }
-
-  function updateWavefronts(dt: number) {
-    const fadeTime = 3; // seconds
-
-    for (let i = wavefronts.length - 1; i >= 0; i--) {
-      const wf = wavefronts[i];
-      const age = time - wf.born;
-
-      if (age > fadeTime) {
-        wavefronts.splice(i, 1);
-        continue;
-      }
-
-      // Update radius for circular waves
-      if (demonstrationType === 1) {
-        wf.radius = age * waveSpeed;
-      } else {
-        // For plane waves, move position
-        wf.x += waveSpeed * dt;
-        if (wf.x > width + 50) {
-          wavefronts.splice(i, 1);
-          continue;
-        }
       }
     }
   }
 
-  function updateHuygensPoints() {
-    sourcePoints = [];
+  function findCurrentWavefront(): { x: number; y: number }[] {
+    const wavefront: { x: number; y: number }[] = [];
+    const waveRadius = waveSpeed * time;
+    
+    // For plane wave, find points that are at the current wave position
+    if (waveRadius > 0) {
+      const waveY = primarySources[0].y + waveRadius;
+      if (waveY < height - 50) {
+        for (let x = 50; x < width - 50; x += 20) {
+          wavefront.push({ x, y: waveY });
+        }
+      }
+    }
+    
+    return wavefront;
+  }
 
-    const frequency = waveSpeed / wavelength;
-    const currentPhase = (time * frequency * 2 * Math.PI) % (2 * Math.PI);
-
-    // Find active wavefront positions for Huygens construction
-    for (const wf of wavefronts) {
-      const age = time - wf.born;
+  function drawPrimarySources() {
+    primarySources.forEach(source => {
+      // Source dot
+      ctx.fillStyle = PRIMARY_COLOR;
+      ctx.beginPath();
+      ctx.arc(source.x, source.y, 4, 0, Math.PI * 2);
+      ctx.fill();
       
-      switch (demonstrationType) {
-        case 0: // Plane wave
-          if (wf.x > barrierX - 20 && wf.x < barrierX + 20) {
-            // At barrier - check if in slit
-            if (Math.abs(wf.y - slitCenterY) < slitWidth / 2) {
-              sourcePoints.push({ x: barrierX, y: wf.y, active: true });
-            }
-          } else if (wf.x > 200 && wf.x < barrierX - 30) {
-            // Regular propagation
-            sourcePoints.push({ x: wf.x, y: wf.y, active: age % (1 / frequency) < 0.1 });
-          }
-          break;
-
-        case 1: // Circular wave
-          if (wf.radius > 50 && wf.radius < 300) {
-            const numPoints = Math.floor(wf.radius / 8);
-            for (let i = 0; i < numPoints; i++) {
-              const angle = (i / numPoints) * 2 * Math.PI;
-              const px = wf.x + wf.radius * Math.cos(angle);
-              const py = wf.y + wf.radius * Math.sin(angle);
-              if (px > 0 && px < width && py > 0 && py < height) {
-                sourcePoints.push({ 
-                  x: px, 
-                  y: py, 
-                  active: Math.sin(currentPhase - (wf.radius / wavelength) * 2 * Math.PI) > 0
-                });
-              }
-            }
-          }
-          break;
-
-        case 3: // Diffraction
-          if (wf.x > barrierX - 10 && wf.x < barrierX + 10) {
-            if (Math.abs(wf.y - slitCenterY) < slitWidth / 2) {
-              sourcePoints.push({ x: barrierX + 5, y: wf.y, active: true });
-            }
-          }
-          break;
-      }
-    }
-  }
-
-  function drawWavefronts() {
-    for (const wf of wavefronts) {
-      const age = time - wf.born;
-      const alpha = Math.max(0, 1 - age / 3);
-
-      ctx.globalAlpha = alpha;
-
-      switch (demonstrationType) {
-        case 0: // Plane wave
-        case 2: // Refraction
-        case 3: // Diffraction
-          // Skip drawing if blocked by barrier
-          if (demonstrationType === 3 && wf.x > barrierX) {
-            if (Math.abs(wf.y - slitCenterY) > slitWidth / 2) {
-              break;
-            }
-          }
-
-          ctx.strokeStyle = WAVEFRONT_COLOR;
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(wf.x, wf.y - 8);
-          ctx.lineTo(wf.x, wf.y + 8);
-          ctx.stroke();
-          break;
-
-        case 1: // Circular wave
-          if (wf.radius > 0) {
-            ctx.strokeStyle = WAVEFRONT_COLOR;
-            ctx.lineWidth = 2;
+      // Primary wave circles
+      const radius = waveSpeed * (time - source.startTime);
+      if (radius > 0 && radius < 400) {
+        ctx.strokeStyle = PRIMARY_COLOR;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.6;
+        
+        // Draw multiple wavefronts
+        for (let n = 0; n < 3; n++) {
+          const r = radius - n * wavelength;
+          if (r > 0) {
             ctx.beginPath();
-            ctx.arc(wf.x, wf.y, wf.radius, 0, Math.PI * 2);
+            ctx.arc(source.x, source.y, r, 0, Math.PI * 2);
             ctx.stroke();
           }
-          break;
-      }
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawHuygensWavelets() {
-    if (!showWavelets) return;
-
-    const currentTime = time;
-    const frequency = waveSpeed / wavelength;
-    const maxRadius = wavelength * 2;
-
-    ctx.strokeStyle = WAVELET_COLOR;
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.6;
-
-    for (const point of sourcePoints) {
-      if (!point.active) continue;
-
-      // Draw expanding circular wavelets from each point
-      for (let n = 0; n < 3; n++) {
-        const radius = (currentTime * waveSpeed) % maxRadius + n * (maxRadius / 3);
-        if (radius > 0 && radius < maxRadius) {
-          ctx.beginPath();
-          ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-          ctx.stroke();
         }
+        ctx.globalAlpha = 1;
       }
-    }
-
-    ctx.globalAlpha = 1;
+    });
   }
 
-  function drawEnvelope() {
-    if (!showEnvelope || sourcePoints.length === 0) return;
+  function drawSecondaryWavelets() {
+    if (!showWavelets) return;
+    
+    secondarySources.forEach(source => {
+      const radius = waveSpeed * (time - source.startTime);
+      if (radius > 0 && radius < 150) {
+        // Secondary source dot
+        ctx.fillStyle = SECONDARY_COLOR;
+        ctx.beginPath();
+        ctx.arc(source.x, source.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Secondary wavelet circles
+        ctx.strokeStyle = WAVELET_COLOR;
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.4;
+        ctx.setLineDash([3, 3]);
+        
+        ctx.beginPath();
+        ctx.arc(source.x, source.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
 
-    // Calculate envelope by finding tangent to all wavelets
-    ctx.strokeStyle = ENVELOPE_COLOR;
-    ctx.lineWidth = 3;
-    ctx.globalAlpha = 0.8;
-
-    const currentTime = time;
-    const envelopePoints: { x: number; y: number }[] = [];
-
-    switch (demonstrationType) {
-      case 0: // Plane wave envelope
-        for (let y = 50; y < height - 50; y += 5) {
-          // Find the most advanced wavelet position
-          let maxX = 0;
-          for (const point of sourcePoints) {
-            if (Math.abs(point.y - y) < 10) {
-              const radius = (currentTime * waveSpeed) % (wavelength * 2);
-              maxX = Math.max(maxX, point.x + radius);
+  function drawWaveEnvelope() {
+    if (!showEnvelope || secondarySources.length === 0) return;
+    
+    // Find the envelope of all secondary wavelets
+    const envelope: { x: number; y: number }[] = [];
+    
+    // Sample points across the width
+    for (let x = 50; x < width - 50; x += 5) {
+      let maxY = 0;
+      
+      // Check each secondary source
+      secondarySources.forEach(source => {
+        const radius = waveSpeed * (time - source.startTime);
+        if (radius > 0) {
+          // Find intersection of circle with vertical line at x
+          const dx = x - source.x;
+          if (Math.abs(dx) <= radius) {
+            const dy = Math.sqrt(radius * radius - dx * dx);
+            const y = source.y + dy;
+            if (y > maxY && y < height - 50) {
+              maxY = y;
             }
           }
-          if (maxX > 0) {
-            envelopePoints.push({ x: maxX, y });
-          }
         }
-        break;
-
-      case 1: // Circular wave envelope
-        // The envelope IS the circular wavefront
-        break;
-
-      case 3: // Diffraction envelope
-        // Envelope after slit - more complex calculation
-        const slitSources = sourcePoints.filter(p => 
-          p.x > barrierX && Math.abs(p.y - slitCenterY) < slitWidth / 2
-        );
-        
-        for (let angle = -Math.PI / 2; angle <= Math.PI / 2; angle += 0.1) {
-          let envelopeX = barrierX;
-          let envelopeY = slitCenterY;
-          
-          // Find envelope point in this direction
-          const distance = currentTime * waveSpeed * 0.5;
-          envelopeX += distance * Math.cos(angle);
-          envelopeY += distance * Math.sin(angle);
-          
-          if (envelopeX < width && envelopeY > 0 && envelopeY < height) {
-            envelopePoints.push({ x: envelopeX, y: envelopeY });
-          }
-        }
-        break;
-    }
-
-    // Draw envelope curve
-    if (envelopePoints.length > 1) {
-      ctx.beginPath();
-      ctx.moveTo(envelopePoints[0].x, envelopePoints[0].y);
-      for (let i = 1; i < envelopePoints.length; i++) {
-        ctx.lineTo(envelopePoints[i].x, envelopePoints[i].y);
+      });
+      
+      if (maxY > 0) {
+        envelope.push({ x, y: maxY });
       }
+    }
+    
+    // Draw the envelope
+    if (envelope.length > 1) {
+      ctx.strokeStyle = ENVELOPE_COLOR;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      envelope.forEach((point, i) => {
+        if (i === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
       ctx.stroke();
     }
-
-    ctx.globalAlpha = 1;
   }
 
-  function drawHuygensPoints() {
-    // Draw Huygens point sources
-    ctx.fillStyle = SOURCE_COLOR;
+  function drawObstacle() {
+    // Draw a simple obstacle to show diffraction
+    const obstacleX = width / 2 - 50;
+    const obstacleY = height / 2;
+    const obstacleWidth = 100;
+    const obstacleHeight = 20;
     
-    for (const point of sourcePoints) {
-      ctx.globalAlpha = point.active ? 1.0 : 0.3;
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, point.active ? 3 : 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawBarrier() {
-    if (demonstrationType !== 3) return;
-
-    // Draw barrier with slit
-    ctx.fillStyle = BARRIER_COLOR;
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
     
-    // Top part of barrier
-    ctx.fillRect(barrierX - 5, 0, 10, slitCenterY - slitWidth / 2);
-    
-    // Bottom part of barrier
-    ctx.fillRect(barrierX - 5, slitCenterY + slitWidth / 2, 10, height - (slitCenterY + slitWidth / 2));
-
-    // Labels
+    // Label
     ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px monospace";
+    ctx.font = "11px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("Barrier", barrierX, 30);
-    ctx.fillText("Slit", barrierX, slitCenterY + slitWidth / 2 + 20);
+    ctx.fillText("Obstacle", obstacleX + obstacleWidth/2, obstacleY - 5);
   }
 
   function drawInfoPanel() {
-    const panelX = 20;
-    const panelY = height - 150;
-    const panelW = width - 40;
-    const panelH = 130;
-
-    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-    ctx.fillRect(panelX, panelY, panelW, panelH);
-    ctx.strokeStyle = "rgba(100, 116, 139, 0.5)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(panelX, panelY, panelW, panelH);
-
-    const textX = panelX + 15;
-    let textY = panelY + 18;
-    const lineHeight = 14;
-
-    ctx.fillStyle = "#a855f7";
+    const panelX = 10;
+    const panelY = 10;
+    
+    ctx.fillStyle = "rgba(10, 10, 15, 0.9)";
+    ctx.fillRect(panelX, panelY, 300, 160);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(panelX, panelY, 300, 160);
+    
+    ctx.fillStyle = TEXT_COLOR;
     ctx.font = "14px monospace";
     ctx.textAlign = "left";
-    ctx.fillText("Huygens' Principle", textX, textY);
-    textY += lineHeight + 5;
-
-    const demonstrations = [
-      "Plane Wave Propagation",
-      "Circular Wave Propagation", 
-      "Refraction at Interface",
-      "Diffraction through Slit"
-    ];
-
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px monospace";
-    ctx.fillText(`Demo: ${demonstrations[demonstrationType]}`, textX, textY);
-    textY += lineHeight + 5;
-
-    const descriptions = [
-      "Every point on a wavefront acts as a new source of spherical wavelets. The envelope of all wavelets forms the new wavefront.",
-      "Secondary wavelets from each point on a circular wavefront combine to form the propagating wave.",
-      "Wavelets bend at the interface, creating refraction according to different wave speeds in each medium.",
-      "Wavelets from slit opening spread out, creating diffraction pattern beyond the barrier."
-    ];
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "11px monospace";
-    const words = descriptions[demonstrationType].split(' ');
-    let line = '';
-    let maxLineLength = 90;
+    ctx.fillText("Huygens' Principle", panelX + 10, panelY + 20);
     
-    for (const word of words) {
-      if ((line + word).length > maxLineLength) {
-        ctx.fillText(line.trim(), textX, textY);
-        textY += 12;
-        line = word + ' ';
-      } else {
-        line += word + ' ';
-      }
-    }
-    if (line.trim()) {
-      ctx.fillText(line.trim(), textX, textY);
-    }
-    textY += lineHeight;
-
-    // Parameters
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "10px monospace";
-    ctx.fillText(`Wave speed: ${waveSpeed} px/s | Wavelength: ${wavelength} px | Frequency: ${(waveSpeed/wavelength).toFixed(1)} Hz`, textX, textY + 8);
+    ctx.font = "11px monospace";
+    ctx.fillText("Every point on a wavefront acts as a", panelX + 10, panelY + 45);
+    ctx.fillText("source of secondary wavelets.", panelX + 10, panelY + 60);
+    
+    ctx.fillText("The new wavefront is the envelope", panelX + 10, panelY + 80);
+    ctx.fillText("of all secondary wavelets.", panelX + 10, panelY + 95);
+    
+    ctx.fillText(`λ = ${wavelength}px, v = ${waveSpeed}px/s`, panelX + 10, panelY + 115);
+    ctx.fillText(`f = ${(waveSpeed / wavelength).toFixed(1)} Hz`, panelX + 10, panelY + 130);
+    
+    ctx.fillText("Explains: reflection, refraction,", panelX + 10, panelY + 145);
   }
 
   function drawLegend() {
     const legendX = width - 200;
-    const legendY = 20;
-
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px monospace";
+    const legendY = height - 140;
+    
+    ctx.fillStyle = "rgba(10, 10, 15, 0.8)";
+    ctx.fillRect(legendX, legendY, 180, 120);
+    ctx.strokeStyle = "#475569";
+    ctx.strokeRect(legendX, legendY, 180, 120);
+    
+    ctx.font = "11px monospace";
     ctx.textAlign = "left";
-    ctx.fillText("Legend:", legendX, legendY);
-
-    const items = [
-      { color: WAVEFRONT_COLOR, label: "Wavefronts" },
-      { color: WAVELET_COLOR, label: "Huygens Wavelets" },
-      { color: ENVELOPE_COLOR, label: "Envelope" },
-      { color: SOURCE_COLOR, label: "Point Sources" },
-    ];
-
-    let y = legendY + 20;
-    items.forEach(item => {
-      ctx.strokeStyle = item.color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(legendX, y);
-      ctx.lineTo(legendX + 20, y);
-      ctx.stroke();
-
-      ctx.fillStyle = item.color;
-      ctx.font = "10px monospace";
-      ctx.fillText(item.label, legendX + 25, y + 4);
-      y += 16;
-    });
+    
+    // Primary waves
+    ctx.strokeStyle = PRIMARY_COLOR;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(legendX + 15, legendY + 20, 8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = PRIMARY_COLOR;
+    ctx.fillText("Primary Sources", legendX + 30, legendY + 25);
+    
+    // Secondary wavelets
+    ctx.strokeStyle = WAVELET_COLOR;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.arc(legendX + 15, legendY + 45, 8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = WAVELET_COLOR;
+    ctx.fillText("Secondary Wavelets", legendX + 30, legendY + 50);
+    
+    // Envelope
+    ctx.strokeStyle = ENVELOPE_COLOR;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(legendX + 10, legendY + 70);
+    ctx.lineTo(legendX + 20, legendY + 70);
+    ctx.stroke();
+    ctx.fillStyle = ENVELOPE_COLOR;
+    ctx.fillText("New Wavefront", legendX + 30, legendY + 75);
+    
+    // Toggle buttons
+    ctx.fillStyle = showWavelets ? SECONDARY_COLOR : "#64748b";
+    ctx.fillText("W: Toggle Wavelets", legendX + 10, legendY + 95);
+    ctx.fillStyle = showEnvelope ? ENVELOPE_COLOR : "#64748b";
+    ctx.fillText("E: Toggle Envelope", legendX + 10, legendY + 110);
   }
 
-  function drawConstruction() {
-    // Show geometric construction for current demonstration
-    if (demonstrationType === 0 && sourcePoints.length > 3) {
-      // Show how plane wave envelope is constructed
-      ctx.strokeStyle = CONSTRUCTION_COLOR;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 4]);
-      ctx.globalAlpha = 0.5;
-
-      const samplePoints = sourcePoints.filter((_, i) => i % 3 === 0);
-      for (const point of samplePoints) {
-        const radius = wavelength * 0.8;
+  function drawDiffractionDemo() {
+    // Show how wavelets bend around corners
+    if (time > 3) {
+      const cornerX = width / 2 + 50;
+      const cornerY = height / 2;
+      
+      // Draw wavelets emanating from the corner
+      ctx.strokeStyle = SECONDARY_COLOR;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      
+      const diffractedRadius = waveSpeed * (time - 3);
+      if (diffractedRadius > 0 && diffractedRadius < 200) {
         ctx.beginPath();
-        ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+        ctx.arc(cornerX, cornerY, diffractedRadius, 0, Math.PI * 2);
         ctx.stroke();
       }
-
-      ctx.setLineDash([]);
+      
       ctx.globalAlpha = 1;
     }
-  }
-
-  function drawEquation() {
-    const eqX = 20;
-    const eqY = 50;
-
-    ctx.fillStyle = "#a855f7";
-    ctx.font = "14px monospace";
-    ctx.textAlign = "left";
-    ctx.fillText("Huygens' Principle:", eqX, eqY);
-    
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px monospace";
-    ctx.fillText("Every point on a wavefront is the source of", eqX, eqY + 20);
-    ctx.fillText("secondary spherical wavelets that spread out", eqX, eqY + 35);
-    ctx.fillText("with the wave speed c. The new wavefront", eqX, eqY + 50);
-    ctx.fillText("is the envelope of these wavelets.", eqX, eqY + 65);
   }
 
   const engine: SimulationEngine = {
@@ -500,63 +305,54 @@ const HuygensPrinciple: SimulationFactory = () => {
       ctx = canvas.getContext("2d")!;
       width = canvas.width;
       height = canvas.height;
-      time = 0;
-      wavefronts = [];
-      sourcePoints = [];
+      initializeSources();
     },
 
     update(dt: number, params: Record<string, number>) {
-      computePhysics(dt, params);
+      wavelength = params.wavelength ?? wavelength;
+      waveSpeed = params.waveSpeed ?? waveSpeed;
+      showWavelets = (params.showWavelets ?? 1) > 0.5;
+      showEnvelope = (params.showEnvelope ?? 1) > 0.5;
+
+      time += dt;
+      
+      // Update secondary wavelets periodically
+      if (Math.floor(time * 10) % 3 === 0) {
+        updateSecondaryWavelets();
+      }
     },
 
     render() {
-      ctx.fillStyle = BG;
+      ctx.fillStyle = BG_COLOR;
       ctx.fillRect(0, 0, width, height);
 
-      drawBarrier();
-      drawConstruction();
-      drawWavefronts();
-      drawHuygensWavelets();
-      drawEnvelope();
-      drawHuygensPoints();
-      drawEquation();
-      drawLegend();
+      drawPrimarySources();
+      drawObstacle();
+      drawSecondaryWavelets();
+      drawWaveEnvelope();
+      drawDiffractionDemo();
       drawInfoPanel();
+      drawLegend();
     },
 
     reset() {
       time = 0;
-      wavefronts = [];
-      sourcePoints = [];
+      initializeSources();
+      secondarySources = [];
     },
 
     destroy() {
-      // No cleanup needed
+      // Nothing to clean up
     },
 
     getStateDescription(): string {
-      const demonstrations = [
-        "plane wave propagation",
-        "circular wave propagation", 
-        "refraction at interface",
-        "diffraction through slit"
-      ];
-
-      const frequency = waveSpeed / wavelength;
-      
-      return (
-        `Huygens' principle demonstration: ${demonstrations[demonstrationType]}. ` +
-        `Wave speed = ${waveSpeed} px/s, wavelength = ${wavelength} px, frequency = ${frequency.toFixed(1)} Hz. ` +
-        `${showWavelets ? "Showing secondary wavelets from each point on the wavefront. " : ""}` +
-        `${showEnvelope ? "Envelope of all wavelets forms the new wavefront position. " : ""}` +
-        `Huygens' principle explains wave propagation, diffraction, refraction, and interference by treating ` +
-        `every point on a wavefront as a source of secondary spherical wavelets.`
-      );
+      return `Huygens' Principle demonstration: Each point on a wavefront acts as a source of secondary wavelets. The envelope of these wavelets forms the new wavefront, explaining wave propagation, reflection, refraction, and diffraction.`;
     },
 
     resize(w: number, h: number) {
       width = w;
       height = h;
+      initializeSources();
     },
   };
 

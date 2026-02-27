@@ -1,646 +1,546 @@
-import type { SimulationEngine, SimulationFactory } from "../types";
+import type {
+  SimulationEngine,
+  SimulationFactory,
+  SimulationConfig,
+} from "../types";
 import { getSimConfig } from "../registry";
 
+// ─── Huffman tree node ──────────────────────────────────────────
 interface HuffmanNode {
   char: string | null;
-  freq: number;
+  frequency: number;
   left: HuffmanNode | null;
   right: HuffmanNode | null;
+  isLeaf: boolean;
   code?: string;
+  x?: number;
+  y?: number;
   id: number;
 }
 
-const HuffmanCoding: SimulationFactory = () => {
-  const config = getSimConfig("huffman-coding")!;
+// ─── Character frequency ──────────────────────────────────────────
+interface CharFrequency {
+  char: string;
+  frequency: number;
+}
+
+// ─── Factory ────────────────────────────────────────────────────
+const HuffmanCodingFactory: SimulationFactory = (): SimulationEngine => {
+  const config = getSimConfig("huffman-coding") as SimulationConfig;
 
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let width = 800;
-  let height = 600;
+  let W = 800;
+  let H = 600;
 
-  // Input parameters
+  // State
   let inputText = "HELLO WORLD";
-  let animationSpeed = 1.0;
-  let showBuildProcess = 1;
-  let time = 0;
-
-  // Huffman tree state
-  let charFrequencies: Map<string, number> = new Map();
+  let charFrequencies: CharFrequency[] = [];
   let huffmanTree: HuffmanNode | null = null;
   let huffmanCodes: Map<string, string> = new Map();
-  let originalBits = 0;
-  let compressedBits = 0;
-  let compressionRatio = 0;
-
-  // Animation state
+  let encodedText = "";
+  let isBuilding = false;
   let buildStep = 0;
   let buildNodes: HuffmanNode[] = [];
-  let nodeIdCounter = 0;
+  let stepDelay = 0;
+  let nextNodeId = 0;
 
-  // Tree visualization
-  let treePositions: Map<number, { x: number; y: number }> = new Map();
+  // Parameters
+  let animationSpeed = 3;
+  let textInput = 0; // 0=HELLO WORLD, 1=ABRACADABRA, 2=Custom
+  let showCodes = 1;
 
-  // Colors
-  const BG = "#0f172a";
-  const NODE_COLOR = "#3b82f6";
-  const LEAF_COLOR = "#10b981";
-  const TEXT_COLOR = "#e2e8f0";
-  const HIGHLIGHT_COLOR = "#f59e0b";
-  const FREQ_COLOR = "#a855f7";
-  const CODE_COLOR = "#ef4444";
-  const TREE_LINE = "#64748b";
-  const PANEL_BG = "rgba(30, 41, 59, 0.9)";
+  const NODE_RADIUS = 20;
+  const LEVEL_HEIGHT = 80;
 
-  function computePhysics(dt: number, params: Record<string, number>) {
-    // Update parameters from UI
-    showBuildProcess = params.showBuildProcess ?? showBuildProcess;
-    animationSpeed = params.animationSpeed ?? animationSpeed;
+  const presetTexts = [
+    "HELLO WORLD",
+    "ABRACADABRA", 
+    "COMPRESSION"
+  ];
+
+  function init(canvasElement: HTMLCanvasElement): void {
+    canvas = canvasElement;
+    ctx = canvas.getContext("2d")!;
+    resize(canvas.width, canvas.height);
     
-    // Handle text input (simplified - in real implementation would come from UI)
-    const textOptions = [
-      "HELLO WORLD",
-      "ABRACADABRA", 
-      "COMPRESSION",
-      "AAAAABBBBCCCD",
-      "THE QUICK BROWN FOX"
-    ];
-    const textIndex = Math.floor((params.inputText ?? 0) * textOptions.length) % textOptions.length;
-    inputText = textOptions[textIndex];
-
-    time += dt * animationSpeed;
-
-    // Build Huffman tree
     buildHuffmanTree();
-    
-    // Calculate compression stats
-    calculateCompressionStats();
-
-    // Animate tree building process
-    if (showBuildProcess) {
-      animateBuildProcess();
-    }
   }
 
-  function buildHuffmanTree() {
-    // Count character frequencies
-    charFrequencies.clear();
+  function resize(width: number, height: number): void {
+    W = width;
+    H = height;
+  }
+
+  function countFrequencies(): void {
+    const freqMap = new Map<string, number>();
+    
     for (const char of inputText) {
-      charFrequencies.set(char, (charFrequencies.get(char) || 0) + 1);
+      freqMap.set(char, (freqMap.get(char) || 0) + 1);
     }
-
-    // Create leaf nodes
-    const nodes: HuffmanNode[] = [];
-    nodeIdCounter = 0;
     
-    for (const [char, freq] of charFrequencies) {
-      nodes.push({
-        char,
-        freq,
-        left: null,
-        right: null,
-        id: nodeIdCounter++
-      });
-    }
-
-    // Store initial nodes for animation
-    buildNodes = [...nodes];
-
-    // Build Huffman tree
-    const queue = [...nodes].sort((a, b) => a.freq - b.freq);
-
-    while (queue.length > 1) {
-      const left = queue.shift()!;
-      const right = queue.shift()!;
-
-      const merged: HuffmanNode = {
-        char: null,
-        freq: left.freq + right.freq,
-        left,
-        right,
-        id: nodeIdCounter++
-      };
-
-      // Insert in correct position to maintain sorted order
-      let inserted = false;
-      for (let i = 0; i < queue.length; i++) {
-        if (merged.freq <= queue[i].freq) {
-          queue.splice(i, 0, merged);
-          inserted = true;
-          break;
-        }
-      }
-      if (!inserted) {
-        queue.push(merged);
-      }
-
-      buildNodes.push(merged);
-    }
-
-    huffmanTree = queue[0] || null;
-    
-    // Generate codes
-    huffmanCodes.clear();
-    if (huffmanTree) {
-      generateCodes(huffmanTree, "");
-    }
-
-    // Calculate tree positions for visualization
-    calculateTreePositions();
+    charFrequencies = Array.from(freqMap.entries()).map(([char, freq]) => ({
+      char,
+      frequency: freq
+    })).sort((a, b) => a.frequency - b.frequency);
   }
 
-  function generateCodes(node: HuffmanNode, code: string) {
-    if (node.char !== null) {
-      // Leaf node
-      huffmanCodes.set(node.char, code || "0"); // Handle single character case
+  function buildHuffmanTree(): void {
+    nextNodeId = 0;
+    countFrequencies();
+    
+    if (charFrequencies.length === 0) return;
+    if (charFrequencies.length === 1) {
+      // Special case: single character
+      huffmanTree = createNode(charFrequencies[0].char, charFrequencies[0].frequency, true);
+      huffmanCodes.set(charFrequencies[0].char, "0");
+      calculatePositions();
+      return;
+    }
+    
+    // Create initial leaf nodes
+    buildNodes = charFrequencies.map(cf => 
+      createNode(cf.char, cf.frequency, true)
+    );
+    
+    // Start building animation
+    isBuilding = true;
+    buildStep = 0;
+  }
+
+  function createNode(char: string | null, freq: number, isLeaf: boolean): HuffmanNode {
+    return {
+      char,
+      frequency: freq,
+      left: null,
+      right: null,
+      isLeaf,
+      id: nextNodeId++,
+      x: 0,
+      y: 0
+    };
+  }
+
+  function stepBuild(): void {
+    if (buildNodes.length <= 1) {
+      huffmanTree = buildNodes[0] || null;
+      isBuilding = false;
+      generateCodes();
+      calculatePositions();
+      return;
+    }
+    
+    // Sort by frequency
+    buildNodes.sort((a, b) => a.frequency - b.frequency);
+    
+    // Take two nodes with lowest frequency
+    const left = buildNodes.shift()!;
+    const right = buildNodes.shift()!;
+    
+    // Create new internal node
+    const merged = createNode(
+      null, 
+      left.frequency + right.frequency, 
+      false
+    );
+    merged.left = left;
+    merged.right = right;
+    
+    // Insert back into array
+    buildNodes.push(merged);
+  }
+
+  function generateCodes(): void {
+    huffmanCodes.clear();
+    if (!huffmanTree) return;
+    
+    if (huffmanTree.isLeaf) {
+      // Single character case
+      huffmanCodes.set(huffmanTree.char!, "0");
+      huffmanTree.code = "0";
+    } else {
+      generateCodesRecursive(huffmanTree, "");
+    }
+    
+    // Generate encoded text
+    encodedText = "";
+    for (const char of inputText) {
+      encodedText += huffmanCodes.get(char) || "";
+    }
+  }
+
+  function generateCodesRecursive(node: HuffmanNode, code: string): void {
+    if (node.isLeaf && node.char) {
+      huffmanCodes.set(node.char, code || "0");
       node.code = code || "0";
     } else {
-      // Internal node
-      if (node.left) generateCodes(node.left, code + "0");
-      if (node.right) generateCodes(node.right, code + "1");
-    }
-  }
-
-  function calculateCompressionStats() {
-    // Original size (assuming 8 bits per character)
-    originalBits = inputText.length * 8;
-
-    // Compressed size
-    compressedBits = 0;
-    for (const char of inputText) {
-      const code = huffmanCodes.get(char) || "";
-      compressedBits += code.length;
-    }
-
-    compressionRatio = originalBits > 0 ? compressedBits / originalBits : 1;
-  }
-
-  function animateBuildProcess() {
-    const stepsPerSecond = 0.5; // Slow animation
-    buildStep = Math.floor(time * stepsPerSecond) % buildNodes.length;
-  }
-
-  function calculateTreePositions() {
-    treePositions.clear();
-    if (!huffmanTree) return;
-
-    const treeX = width * 0.05;
-    const treeY = height * 0.15;
-    const treeW = width * 0.45;
-    const treeH = height * 0.4;
-
-    // Calculate tree depth
-    const depth = calculateTreeDepth(huffmanTree);
-    const levelHeight = treeH / Math.max(depth, 1);
-
-    // Position nodes using recursive layout
-    positionNode(huffmanTree, treeX + treeW / 2, treeY, treeW, levelHeight, 0);
-  }
-
-  function calculateTreeDepth(node: HuffmanNode | null): number {
-    if (!node) return 0;
-    return 1 + Math.max(
-      calculateTreeDepth(node.left), 
-      calculateTreeDepth(node.right)
-    );
-  }
-
-  function positionNode(node: HuffmanNode, x: number, y: number, width: number, levelHeight: number, level: number) {
-    treePositions.set(node.id, { x, y });
-
-    if (node.left || node.right) {
-      const childY = y + levelHeight;
-      const childWidth = width / 2;
-      
       if (node.left) {
-        positionNode(node.left, x - childWidth / 2, childY, childWidth, levelHeight, level + 1);
+        generateCodesRecursive(node.left, code + "0");
       }
       if (node.right) {
-        positionNode(node.right, x + childWidth / 2, childY, childWidth, levelHeight, level + 1);
+        generateCodesRecursive(node.right, code + "1");
       }
     }
   }
 
-  function drawFrequencyTable() {
-    const tableX = width * 0.52;
-    const tableY = height * 0.15;
-    const tableW = width * 0.22;
-    const tableH = height * 0.4;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(tableX, tableY, tableW, tableH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(tableX, tableY, tableW, tableH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Character Frequencies", tableX + tableW / 2, tableY + 20);
-
-    // Headers
-    ctx.font = "12px monospace";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillText("Char", tableX + 10, tableY + 45);
-    ctx.fillText("Freq", tableX + 50, tableY + 45);
-    ctx.fillText("Code", tableX + 90, tableY + 45);
-    ctx.fillText("Bits", tableX + 140, tableY + 45);
-
-    // Draw line under headers
-    ctx.strokeStyle = "#4b5563";
-    ctx.beginPath();
-    ctx.moveTo(tableX + 5, tableY + 50);
-    ctx.lineTo(tableX + tableW - 5, tableY + 50);
-    ctx.stroke();
-
-    // Character data
-    let y = tableY + 70;
-    const lineHeight = 20;
+  function calculatePositions(): void {
+    if (!huffmanTree) return;
     
-    for (const [char, freq] of charFrequencies) {
-      const code = huffmanCodes.get(char) || "";
+    // Calculate tree dimensions
+    const depth = getTreeDepth(huffmanTree);
+    const leaves = getLeafCount(huffmanTree);
+    
+    // Position root
+    huffmanTree.x = W / 2;
+    huffmanTree.y = 80;
+    
+    // Position all nodes
+    positionNode(huffmanTree, W / 2, 80, W / 4, 0, depth);
+  }
+
+  function getTreeDepth(node: HuffmanNode | null): number {
+    if (!node) return 0;
+    return 1 + Math.max(getTreeDepth(node.left), getTreeDepth(node.right));
+  }
+
+  function getLeafCount(node: HuffmanNode | null): number {
+    if (!node) return 0;
+    if (node.isLeaf) return 1;
+    return getLeafCount(node.left) + getLeafCount(node.right);
+  }
+
+  function positionNode(
+    node: HuffmanNode, 
+    x: number, 
+    y: number, 
+    xOffset: number, 
+    level: number,
+    maxDepth: number
+  ): void {
+    node.x = x;
+    node.y = y;
+    
+    if (node.left) {
+      positionNode(
+        node.left, 
+        x - xOffset, 
+        y + LEVEL_HEIGHT, 
+        xOffset / 2, 
+        level + 1,
+        maxDepth
+      );
+    }
+    
+    if (node.right) {
+      positionNode(
+        node.right, 
+        x + xOffset, 
+        y + LEVEL_HEIGHT, 
+        xOffset / 2, 
+        level + 1,
+        maxDepth
+      );
+    }
+  }
+
+  function update(dt: number, params: Record<string, number>): void {
+    const newSpeed = params.animationSpeed ?? 3;
+    const newTextInput = params.textInput ?? 0;
+    const newShowCodes = params.showCodes ?? 1;
+    
+    animationSpeed = newSpeed;
+    showCodes = newShowCodes;
+    
+    if (newTextInput !== textInput) {
+      textInput = newTextInput;
+      inputText = presetTexts[textInput] || "HELLO WORLD";
+      buildHuffmanTree();
+    }
+
+    if (isBuilding) {
+      stepDelay += dt;
+      if (stepDelay >= 1000 / animationSpeed) {
+        stepBuild();
+        stepDelay = 0;
+      }
+    }
+  }
+
+  function render(): void {
+    ctx.fillStyle = "#f8f9fa";
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw frequency table
+    drawFrequencyTable();
+    
+    // Draw Huffman tree
+    if (huffmanTree && !isBuilding) {
+      drawTree(huffmanTree);
+    }
+    
+    // Draw building animation
+    if (isBuilding) {
+      drawBuildingAnimation();
+    }
+    
+    // Draw encoding info
+    drawEncodingInfo();
+  }
+
+  function drawFrequencyTable(): void {
+    const tableX = 20;
+    const tableY = 20;
+    const cellW = 35;
+    const cellH = 25;
+    
+    // Title
+    ctx.fillStyle = "#2d3748";
+    ctx.font = "14px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`Input: "${inputText}"`, tableX, tableY - 5);
+    
+    // Table headers
+    ctx.fillStyle = "#4a5568";
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "center";
+    
+    for (let i = 0; i < charFrequencies.length; i++) {
+      const x = tableX + i * cellW;
+      const y = tableY + 20;
       
-      ctx.fillStyle = TEXT_COLOR;
-      ctx.font = "11px monospace";
+      // Character
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fillRect(x, y, cellW, cellH);
+      ctx.strokeStyle = "#cbd5e0";
+      ctx.strokeRect(x, y, cellW, cellH);
       
-      // Character (show space as ·)
-      const displayChar = char === ' ' ? '·' : char;
-      ctx.fillText(displayChar, tableX + 10, y);
+      ctx.fillStyle = "#2d3748";
+      const char = charFrequencies[i].char === ' ' ? '␣' : charFrequencies[i].char;
+      ctx.fillText(char, x + cellW/2, y + 16);
       
       // Frequency
-      ctx.fillStyle = FREQ_COLOR;
-      ctx.fillText(freq.toString(), tableX + 50, y);
+      ctx.fillStyle = "#f7fafc";
+      ctx.fillRect(x, y + cellH, cellW, cellH);
+      ctx.strokeStyle = "#cbd5e0";
+      ctx.strokeRect(x, y + cellH, cellW, cellH);
       
-      // Code
-      ctx.fillStyle = CODE_COLOR;
-      ctx.fillText(code, tableX + 90, y);
+      ctx.fillStyle = "#2d3748";
+      ctx.fillText(charFrequencies[i].frequency.toString(), x + cellW/2, y + cellH + 16);
       
-      // Bit count
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText((code.length * freq).toString(), tableX + 140, y);
-      
-      y += lineHeight;
-      
-      if (y > tableY + tableH - 20) break; // Don't overflow panel
+      // Huffman code (if available)
+      if (showCodes && huffmanCodes.has(charFrequencies[i].char)) {
+        ctx.fillStyle = "#e6fffa";
+        ctx.fillRect(x, y + 2*cellH, cellW, cellH);
+        ctx.strokeStyle = "#cbd5e0";
+        ctx.strokeRect(x, y + 2*cellH, cellW, cellH);
+        
+        ctx.fillStyle = "#2d3748";
+        ctx.font = "10px monospace";
+        const code = huffmanCodes.get(charFrequencies[i].char) || "";
+        ctx.fillText(code, x + cellW/2, y + 2*cellH + 16);
+        ctx.font = "12px sans-serif";
+      }
     }
-  }
-
-  function drawHuffmanTree() {
-    if (!huffmanTree) return;
-
-    // Draw tree connections first
-    drawTreeConnections(huffmanTree);
     
-    // Draw nodes
-    drawTreeNodes(huffmanTree);
-  }
-
-  function drawTreeConnections(node: HuffmanNode) {
-    const pos = treePositions.get(node.id);
-    if (!pos) return;
-
-    ctx.strokeStyle = TREE_LINE;
-    ctx.lineWidth = 2;
-
-    if (node.left) {
-      const leftPos = treePositions.get(node.left.id);
-      if (leftPos) {
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y + 15);
-        ctx.lineTo(leftPos.x, leftPos.y - 15);
-        ctx.stroke();
-
-        // Draw "0" label
-        const midX = (pos.x + leftPos.x) / 2 - 10;
-        const midY = (pos.y + leftPos.y) / 2;
-        ctx.fillStyle = CODE_COLOR;
-        ctx.font = "10px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("0", midX, midY);
-      }
-      drawTreeConnections(node.left);
-    }
-
-    if (node.right) {
-      const rightPos = treePositions.get(node.right.id);
-      if (rightPos) {
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y + 15);
-        ctx.lineTo(rightPos.x, rightPos.y - 15);
-        ctx.stroke();
-
-        // Draw "1" label
-        const midX = (pos.x + rightPos.x) / 2 + 10;
-        const midY = (pos.y + rightPos.y) / 2;
-        ctx.fillStyle = CODE_COLOR;
-        ctx.font = "10px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("1", midX, midY);
-      }
-      drawTreeConnections(node.right);
+    // Labels
+    ctx.fillStyle = "#4a5568";
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText("Char:", tableX - 5, tableY + 20 + 16);
+    ctx.fillText("Freq:", tableX - 5, tableY + 20 + cellH + 16);
+    if (showCodes) {
+      ctx.fillText("Code:", tableX - 5, tableY + 20 + 2*cellH + 16);
     }
   }
 
-  function drawTreeNodes(node: HuffmanNode) {
-    const pos = treePositions.get(node.id);
-    if (!pos) return;
-
-    // Highlight current node in build process
-    const isCurrentlyBuilding = showBuildProcess && node.id <= buildStep && node.id >= buildNodes.length - 5;
-    const nodeColor = isCurrentlyBuilding ? HIGHLIGHT_COLOR : 
-                     (node.char !== null ? LEAF_COLOR : NODE_COLOR);
-
-    // Draw node circle
-    ctx.fillStyle = nodeColor;
+  function drawTree(node: HuffmanNode): void {
+    if (!node.x || !node.y) return;
+    
+    // Draw connections to children
+    if (node.left && node.left.x && node.left.y) {
+      ctx.strokeStyle = "#4a5568";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(node.x, node.y);
+      ctx.lineTo(node.left.x, node.left.y);
+      ctx.stroke();
+      
+      // Label with "0"
+      const midX = (node.x + node.left.x) / 2;
+      const midY = (node.y + node.left.y) / 2;
+      ctx.fillStyle = "#e53e3e";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("0", midX - 10, midY);
+    }
+    
+    if (node.right && node.right.x && node.right.y) {
+      ctx.strokeStyle = "#4a5568";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(node.x, node.y);
+      ctx.lineTo(node.right.x, node.right.y);
+      ctx.stroke();
+      
+      // Label with "1"
+      const midX = (node.x + node.right.x) / 2;
+      const midY = (node.y + node.right.y) / 2;
+      ctx.fillStyle = "#38a169";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("1", midX + 10, midY);
+    }
+    
+    // Draw node
+    ctx.fillStyle = node.isLeaf ? "#bee3f8" : "#fed7d7";
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 15, 0, Math.PI * 2);
+    ctx.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI);
     ctx.fill();
     
-    ctx.strokeStyle = "#1e293b";
+    ctx.strokeStyle = "#2d3748";
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    // Draw node content
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "10px monospace";
+    
+    // Node label
+    ctx.fillStyle = "#2d3748";
+    ctx.font = "12px sans-serif";
     ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    if (node.char !== null) {
-      // Leaf node - show character
-      const displayChar = node.char === ' ' ? '·' : node.char;
-      ctx.fillText(displayChar, pos.x, pos.y - 3);
-      ctx.font = "8px monospace";
-      ctx.fillText(node.freq.toString(), pos.x, pos.y + 6);
+    
+    if (node.isLeaf && node.char) {
+      const char = node.char === ' ' ? '␣' : node.char;
+      ctx.fillText(char, node.x, node.y - 2);
+      ctx.font = "10px sans-serif";
+      ctx.fillText(node.frequency.toString(), node.x, node.y + 10);
     } else {
-      // Internal node - show frequency
-      ctx.fillText(node.freq.toString(), pos.x, pos.y);
+      ctx.fillText(node.frequency.toString(), node.x, node.y + 3);
     }
+    
+    // Draw children recursively
+    if (node.left) drawTree(node.left);
+    if (node.right) drawTree(node.right);
+  }
 
-    // Draw code above leaf nodes
-    if (node.char !== null && node.code) {
-      ctx.fillStyle = CODE_COLOR;
-      ctx.font = "9px monospace";
+  function drawBuildingAnimation(): void {
+    // Draw current nodes being processed
+    const startX = 50;
+    const startY = 300;
+    const nodeSpacing = 60;
+    
+    ctx.fillStyle = "#2d3748";
+    ctx.font = "14px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Building Huffman Tree...", startX, startY - 20);
+    
+    for (let i = 0; i < buildNodes.length; i++) {
+      const x = startX + i * nodeSpacing;
+      const y = startY;
+      
+      // Highlight first two nodes (being merged)
+      if (i < 2) {
+        ctx.strokeStyle = "#f56565";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, NODE_RADIUS + 3, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+      
+      // Draw node
+      ctx.fillStyle = buildNodes[i].isLeaf ? "#bee3f8" : "#fed7d7";
+      ctx.beginPath();
+      ctx.arc(x, y, NODE_RADIUS, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      ctx.strokeStyle = "#2d3748";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Node label
+      ctx.fillStyle = "#2d3748";
+      ctx.font = "10px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(node.code, pos.x, pos.y - 25);
+      
+      if (buildNodes[i].isLeaf && buildNodes[i].char) {
+        const char = buildNodes[i].char === ' ' ? '␣' : buildNodes[i].char;
+        ctx.fillText(char, x, y - 2);
+        ctx.fillText(buildNodes[i].frequency.toString(), x, y + 10);
+      } else {
+        ctx.fillText(buildNodes[i].frequency.toString(), x, y + 3);
+      }
     }
-
-    // Recursively draw children
-    if (node.left) drawTreeNodes(node.left);
-    if (node.right) drawTreeNodes(node.right);
   }
 
-  function drawEncodingExample() {
-    const exampleX = width * 0.76;
-    const exampleY = height * 0.15;
-    const exampleW = width * 0.22;
-    const exampleH = height * 0.4;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(exampleX, exampleY, exampleW, exampleH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(exampleX, exampleY, exampleW, exampleH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Encoding Example", exampleX + exampleW / 2, exampleY + 20);
-
-    // Show original vs encoded
-    const sampleText = inputText.substring(0, 8); // First 8 chars
-    let y = exampleY + 45;
-
-    ctx.font = "11px monospace";
+  function drawEncodingInfo(): void {
+    if (!huffmanTree || isBuilding) return;
+    
+    const infoX = 20;
+    const infoY = H - 120;
+    
+    // Original vs compressed
+    const originalBits = inputText.length * 8; // ASCII
+    const compressedBits = encodedText.length;
+    const compressionRatio = originalBits > 0 ? (compressedBits / originalBits) : 0;
+    const savings = Math.max(0, 100 * (1 - compressionRatio));
+    
+    ctx.fillStyle = "#2d3748";
+    ctx.font = "14px sans-serif";
     ctx.textAlign = "left";
     
-    // Original
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillText("Original:", exampleX + 10, y);
-    y += 20;
-
-    for (let i = 0; i < sampleText.length; i++) {
-      const char = sampleText[i];
-      const displayChar = char === ' ' ? '·' : char;
-      
-      ctx.fillStyle = TEXT_COLOR;
-      ctx.fillText(displayChar, exampleX + 10 + i * 15, y);
-      
-      ctx.fillStyle = "#6b7280";
-      ctx.font = "8px monospace";
-      ctx.fillText("8 bits", exampleX + 10 + i * 15 - 4, y + 12);
-      ctx.font = "11px monospace";
-    }
-    y += 35;
-
-    // Huffman encoded
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillText("Huffman:", exampleX + 10, y);
-    y += 20;
-
-    let bitX = exampleX + 10;
-    for (let i = 0; i < sampleText.length; i++) {
-      const char = sampleText[i];
-      const code = huffmanCodes.get(char) || "";
-      
-      ctx.fillStyle = CODE_COLOR;
-      ctx.fillText(code, bitX, y);
-      
-      ctx.fillStyle = "#6b7280";
-      ctx.font = "8px monospace";
-      ctx.fillText(`${code.length}b`, bitX, y + 12);
-      ctx.font = "11px monospace";
-      
-      bitX += code.length * 8 + 10;
-      if (bitX > exampleX + exampleW - 20) break;
-    }
-  }
-
-  function drawCompressionStats() {
-    const statsX = width * 0.05;
-    const statsY = height * 0.58;
-    const statsW = width * 0.9;
-    const statsH = height * 0.15;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(statsX, statsY, statsW, statsH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(statsX, statsY, statsW, statsH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Compression Statistics", statsX + statsW / 2, statsY + 20);
-
-    // Stats in columns
-    const col1X = statsX + 20;
-    const col2X = statsX + statsW / 3;
-    const col3X = statsX + 2 * statsW / 3;
-    const statsTop = statsY + 45;
-
+    ctx.fillText(`Original (ASCII): ${originalBits} bits`, infoX, infoY);
+    ctx.fillText(`Huffman coded: ${compressedBits} bits`, infoX, infoY + 20);
+    ctx.fillText(`Compression: ${savings.toFixed(1)}% savings`, infoX, infoY + 40);
+    
+    // Show encoded text (truncated if too long)
     ctx.font = "12px monospace";
-    ctx.textAlign = "left";
-
-    // Input text
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillText("Input Text:", col1X, statsTop);
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`"${inputText}"`, col1X, statsTop + 20);
-    ctx.fillText(`${inputText.length} characters`, col1X, statsTop + 40);
-
-    // Original encoding
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillText("Original (ASCII):", col2X, statsTop);
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`${originalBits} bits`, col2X, statsTop + 20);
-    ctx.fillText(`8 bits/char`, col2X, statsTop + 40);
-
-    // Huffman encoding
-    ctx.fillStyle = "#9ca3af";
-    ctx.fillText("Huffman Encoded:", col3X, statsTop);
-    ctx.fillStyle = HIGHLIGHT_COLOR;
-    ctx.fillText(`${compressedBits} bits`, col3X, statsTop + 20);
-    ctx.fillStyle = compressionRatio < 1 ? "#10b981" : "#ef4444";
-    ctx.fillText(`${(compressionRatio * 100).toFixed(1)}% of original`, col3X, statsTop + 40);
+    let displayEncoded = encodedText;
+    if (displayEncoded.length > 60) {
+      displayEncoded = displayEncoded.substring(0, 60) + "...";
+    }
+    ctx.fillText(`Encoded: ${displayEncoded}`, infoX, infoY + 70);
     
-    const spaceSaved = originalBits - compressedBits;
-    if (spaceSaved > 0) {
-      ctx.fillStyle = "#10b981";
-      ctx.fillText(`Saved: ${spaceSaved} bits (${(100 - compressionRatio * 100).toFixed(1)}%)`, col3X, statsTop + 60);
+    // Average code length
+    let totalCodeLength = 0;
+    for (const char of inputText) {
+      totalCodeLength += huffmanCodes.get(char)?.length || 0;
+    }
+    const avgCodeLength = inputText.length > 0 ? (totalCodeLength / inputText.length) : 0;
+    
+    ctx.font = "14px sans-serif";
+    ctx.fillText(`Avg code length: ${avgCodeLength.toFixed(2)} bits/char`, infoX + 300, infoY);
+  }
+
+  function getStateDescription(): string {
+    if (isBuilding) {
+      return `Building Huffman tree for "${inputText}". Processing ${buildNodes.length} nodes remaining. ` +
+             `Character frequencies calculated from input text.`;
+    } else {
+      const originalBits = inputText.length * 8;
+      const compressedBits = encodedText.length;
+      const savings = originalBits > 0 ? (100 * (1 - compressedBits / originalBits)) : 0;
+      
+      return `Huffman coding complete for "${inputText}". ` +
+             `Original: ${originalBits} bits, Compressed: ${compressedBits} bits. ` +
+             `${savings.toFixed(1)}% compression achieved. Tree depth: ${huffmanTree ? getTreeDepth(huffmanTree) : 0}`;
     }
   }
 
-  function drawAlgorithmSteps() {
-    const stepsX = width * 0.05;
-    const stepsY = height * 0.75;
-    const stepsW = width * 0.9;
-    const stepsH = height * 0.22;
-
-    // Panel background
-    ctx.fillStyle = PANEL_BG;
-    ctx.fillRect(stepsX, stepsY, stepsW, stepsH);
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(stepsX, stepsY, stepsW, stepsH);
-
-    // Title
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Huffman Algorithm Steps", stepsX + stepsW / 2, stepsY + 20);
-
-    const steps = [
-      "1. Count frequency of each character",
-      "2. Create leaf node for each character",
-      "3. Build min-heap ordered by frequency", 
-      "4. Repeatedly merge two lowest-frequency nodes",
-      "5. Assign codes: 0 for left, 1 for right",
-      "6. Encode text using generated codes"
-    ];
-
-    ctx.font = "11px monospace";
-    ctx.textAlign = "left";
-    
-    const stepY = stepsY + 40;
-    const stepHeight = 15;
-    const colWidth = stepsW / 3;
-
-    steps.forEach((step, index) => {
-      const x = stepsX + 20 + (index % 3) * colWidth;
-      const y = stepY + Math.floor(index / 3) * stepHeight * 2;
-      
-      // Highlight current step if showing build process
-      const isCurrentStep = showBuildProcess && index === Math.floor(buildStep / (buildNodes.length / 6));
-      ctx.fillStyle = isCurrentStep ? HIGHLIGHT_COLOR : TEXT_COLOR;
-      
-      ctx.fillText(step, x, y);
-    });
-
-    // Properties box
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "10px monospace";
-    ctx.textAlign = "left";
-    
-    const propsY = stepY + 60;
-    ctx.fillText("Properties: • Prefix-free codes (no code is prefix of another)", stepsX + 20, propsY);
-    ctx.fillText("           • Optimal for given character frequencies", stepsX + 20, propsY + 12);
-    ctx.fillText("           • Greedy algorithm - locally optimal choices lead to global optimum", stepsX + 20, propsY + 24);
+  function reset(): void {
+    buildHuffmanTree();
   }
 
-  const engine: SimulationEngine = {
+  function destroy(): void {
+    // Cleanup if needed
+  }
+
+  return {
     config,
-
-    init(c: HTMLCanvasElement) {
-      canvas = c;
-      ctx = canvas.getContext("2d")!;
-      width = canvas.width;
-      height = canvas.height;
-      time = 0;
-      buildStep = 0;
-      charFrequencies.clear();
-      huffmanCodes.clear();
-      treePositions.clear();
-      buildNodes = [];
-    },
-
-    update(dt: number, params: Record<string, number>) {
-      computePhysics(dt, params);
-    },
-
-    render() {
-      ctx.fillStyle = BG;
-      ctx.fillRect(0, 0, width, height);
-
-      drawFrequencyTable();
-      drawHuffmanTree();
-      drawEncodingExample();
-      drawCompressionStats();
-      drawAlgorithmSteps();
-    },
-
-    reset() {
-      time = 0;
-      buildStep = 0;
-      charFrequencies.clear();
-      huffmanCodes.clear();
-      treePositions.clear();
-      buildNodes = [];
-    },
-
-    destroy() {
-      charFrequencies.clear();
-      huffmanCodes.clear();
-      treePositions.clear();
-      buildNodes = [];
-    },
-
-    getStateDescription(): string {
-      const uniqueChars = charFrequencies.size;
-      const avgCodeLength = compressedBits > 0 ? compressedBits / inputText.length : 0;
-      
-      return (
-        `Huffman coding compression of "${inputText}": ${inputText.length} characters, ${uniqueChars} unique symbols. ` +
-        `Original: ${originalBits} bits (8 bits/char), Compressed: ${compressedBits} bits ` +
-        `(avg ${avgCodeLength.toFixed(2)} bits/char). Compression ratio: ${(compressionRatio * 100).toFixed(1)}%. ` +
-        `${compressionRatio < 1 ? `Space saved: ${originalBits - compressedBits} bits (${(100 - compressionRatio * 100).toFixed(1)}%).` : 'No compression achieved.'} ` +
-        `Huffman coding creates optimal prefix-free codes by building binary tree where frequent characters get shorter codes.`
-      );
-    },
-
-    resize(w: number, h: number) {
-      width = w;
-      height = h;
-    },
+    init,
+    update,
+    render,
+    reset,
+    destroy,
+    getStateDescription,
+    resize,
   };
-
-  return engine;
 };
 
-export default HuffmanCoding;
+export default HuffmanCodingFactory;

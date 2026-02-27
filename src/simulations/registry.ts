@@ -5799,9 +5799,63 @@ export const simulationConfigs: SimulationConfig[] = [
     description: "The 12 zodiac constellations along the ecliptic as Earth orbits the Sun.",
     longDescription: "The zodiac is a belt of 12 constellations along the ecliptic — the Sun's apparent annual path through the sky. As Earth orbits the Sun, different constellations appear behind the Sun each month. The simulation shows Earth orbiting with the 12 zodiac signs arranged around the ecliptic, tracking which constellation the Sun currently appears in.",
     parameters: [
-      { key: "timeScale", label: "Time Scale", min: 0.1, max: 5, step: 0.1, defaultValue: 1, unit: "×" },
-      { key: "showLabels", label: "Show Labels (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
-      { key: "showEcliptic", label: "Show Ecliptic (0/1)", min: 0, max: 1, step: 1, defaultValue: 1 },
+      { key: "halfLife", label: "Half Life", min: 1, max: 100, step: 1, defaultValue: 10, unit: "s" },
+    ],
+    thumbnailColor: "#f97316", 
+    icon: "☢️",
+  },
+  {
+    slug: "reaction-kinetics",
+    title: "Reaction Kinetics",
+    category: "chemistry",
+    description: "Chemical reaction rates with molecular collisions.",
+    longDescription: "Reaction kinetics showing how temperature and concentration affect reaction rates.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 250, max: 500, step: 10, defaultValue: 300, unit: "K" },
+    ],
+    thumbnailColor: "#84cc16",
+    icon: "⚗️", 
+  },
+  {
+    slug: "phase-diagram",
+    title: "Phase Diagrams",
+    category: "chemistry", 
+    description: "States of matter with phase transitions.",
+    longDescription: "Phase diagrams showing solid, liquid, and gas phases with critical and triple points.",
+    parameters: [
+      { key: "temperature", label: "Temperature", min: 50, max: 800, step: 5, defaultValue: 273, unit: "K" },
+    ],
+    thumbnailColor: "#0ea5e9",
+    icon: "🧊",
+  },
+  // NEW BATCH: Underrepresented categories
+  {
+    slug: "standing-waves",
+    title: "Standing Waves",
+    category: "waves",
+    description: "Visualize standing wave patterns with nodes and antinodes from wave reflection.",
+    longDescription:
+      "Standing waves form when two waves of equal frequency and amplitude traveling in opposite directions interfere. The resulting pattern has stationary nodes (zero amplitude) and antinodes (maximum amplitude). Common in musical instruments and organ pipes, standing waves follow y = 2A·sin(kx)·cos(ωt) where nodes occur at distances nλ/2 from the boundary. Observe how wavelength affects the node spacing.",
+    parameters: [
+      { key: "wavelength", label: "Wavelength", min: 30, max: 150, step: 5, defaultValue: 80, unit: "px" },
+      { key: "amplitude", label: "Amplitude", min: 10, max: 80, step: 5, defaultValue: 40, unit: "px" },
+      { key: "frequency", label: "Frequency", min: 0.5, max: 3, step: 0.1, defaultValue: 1.5, unit: "Hz" },
+      { key: "damping", label: "Damping", min: 0, max: 0.1, step: 0.005, defaultValue: 0.02 },
+    ],
+    thumbnailColor: "#06b6d4",
+    icon: "〰️",
+  },
+  {
+    slug: "doppler-effect",
+    title: "Doppler Effect",
+    category: "waves",
+    description: "Moving wave source creates frequency shift for stationary observers.",
+    longDescription:
+      "The Doppler effect describes the frequency change when a wave source moves relative to an observer. For sound waves, f' = f × v/(v ± vs) where v is wave speed and vs is source speed. When the source approaches, frequency increases (blue shift); when receding, frequency decreases (red shift). This effect explains why ambulance sirens change pitch and enables radar speed detection.",
+    parameters: [
+      { key: "sourceVelocity", label: "Source Velocity", min: 20, max: 200, step: 10, defaultValue: 100, unit: "px/s" },
+      { key: "waveSpeed", label: "Wave Speed", min: 200, max: 500, step: 20, defaultValue: 300, unit: "px/s" },
+      { key: "frequency", label: "Source Frequency", min: 1, max: 5, step: 0.2, defaultValue: 2, unit: "Hz" },
     ],
     thumbnailColor: "#f59e0b",
   },
@@ -6153,6 +6207,37 @@ export const simulationConfigs: SimulationConfig[] = [
     thumbnailColor: "#ec4899",
     icon: "〰️",
   },
+  {
+    slug: "beat-frequency",
+    title: "Beat Frequency",
+    category: "waves",
+    description: "Two waves with slightly different frequencies creating beats through interference.",
+    longDescription: "Beat frequency demonstrates the interference of two waves with close frequencies. The resulting amplitude oscillates at the beat frequency |f₁ - f₂|, creating the familiar periodic volume variation heard when tuning musical instruments. The simulation shows wave superposition, phasor diagrams, and frequency spectrum analysis.",
+    parameters: [
+      { key: "freq1", label: "Frequency 1", min: 400, max: 500, step: 1, defaultValue: 440, unit: "Hz" },
+      { key: "freq2", label: "Frequency 2", min: 400, max: 500, step: 1, defaultValue: 442, unit: "Hz" },
+      { key: "amplitude1", label: "Amplitude 1", min: 0.1, max: 2.0, step: 0.1, defaultValue: 1.0 },
+      { key: "amplitude2", label: "Amplitude 2", min: 0.1, max: 2.0, step: 0.1, defaultValue: 1.0 },
+    ],
+    thumbnailColor: "#f59e0b",
+    icon: "🎵",
+  },
+  {
+    slug: "rsa-encryption",
+    title: "RSA Encryption",
+    category: "technology",
+    description: "Public key cryptography using modular arithmetic and prime factorization.",
+    longDescription: "RSA encryption enables secure communication without shared secrets. Based on the difficulty of factoring large integers, RSA uses public key (e,n) for encryption and private key (d,n) for decryption. Security relies on keeping prime factors p,q of n secret while publishing the public key.",
+    parameters: [
+      { key: "primeP", label: "Prime P", min: 0, max: 1, step: 0.1, defaultValue: 0.5 },
+      { key: "primeQ", label: "Prime Q", min: 0, max: 1, step: 0.1, defaultValue: 0.6 },
+      { key: "message", label: "Message", min: 0, max: 1, step: 0.04, defaultValue: 0.5 },
+      { key: "animationSpeed", label: "Animation Speed", min: 0.1, max: 3.0, step: 0.1, defaultValue: 1.0 },
+      { key: "showSteps", label: "Show Steps", min: 0, max: 1, step: 1, defaultValue: 1 },
+    ],
+    thumbnailColor: "#ef4444",
+    icon: "🔐",
+  },
 ];
 
 // Lazy-loaded simulation factories
@@ -6400,21 +6485,8 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "photosynthesis": () => import("./biology/photosynthesis").then((m) => m.default),
   "dna-replication": () => import("./biology/dna-replication").then((m) => m.default),
   "stellar-lifecycle": () => import("./astronomy/stellar-lifecycle").then((m) => m.default),
-  "electromagnetic-induction": () => import("./electricity/electromagnetic-induction").then((m) => m.default),
-  "lenz-law": () => import("./electricity/lenz-law").then((m) => m.default),
-  "eddy-currents": () => import("./electricity/eddy-currents").then((m) => m.default),
-  "rlc-circuits": () => import("./electricity/rlc-circuits").then((m) => m.default),
-  "half-wave-rectifier": () => import("./electricity/half-wave-rectifier").then((m) => m.default),
-  "wheatstone-bridge": () => import("./electricity/wheatstone-bridge").then((m) => m.default),
-  "transistor-switch": () => import("./electricity/transistor-switch").then((m) => m.default),
-  "solenoid-magnetic-field": () => import("./electricity/solenoid-magnetic-field").then((m) => m.default),
-  "equipotential-surfaces": () => import("./electricity/equipotential-surfaces").then((m) => m.default),
-  "prime-sieve": () => import("./math/prime-sieve").then((m) => m.default),
-  "golden-ratio-spiral": () => import("./math/golden-ratio-spiral").then((m) => m.default),
-  "pi-monte-carlo": () => import("./math/pi-monte-carlo").then((m) => m.default),
-  "euler-formula": () => import("./math/euler-formula").then((m) => m.default),
-  "taylor-series": () => import("./math/taylor-series").then((m) => m.default),
-  "lissajous-curves": () => import("./math/lissajous-curves").then((m) => m.default),
+  "beat-frequency": () => import("./waves/beat-frequency").then((m) => m.default),
+  "rsa-encryption": () => import("./technology/rsa-encryption").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
