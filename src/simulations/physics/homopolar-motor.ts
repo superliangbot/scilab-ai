@@ -251,6 +251,7 @@ const HomopolarMotorFactory: SimulationFactory = (): SimulationEngine => {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const len = Math.hypot(dx, dy);
+    if (len < 0.001) return;
     const nx = dx / len;
     const ny = dy / len;
 

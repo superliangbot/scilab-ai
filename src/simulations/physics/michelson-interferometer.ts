@@ -298,6 +298,7 @@ const MichelsonInterferometerFactory: SimulationFactory = (): SimulationEngine =
     ctx.stroke();
 
     // Animated wave dots along beam
+    if (len === 0) return;
     const numDots = Math.floor(len / 12);
     const nx = dx / len;
     const ny = dy / len;

@@ -183,8 +183,9 @@ const EntropyStatisticalMechanicsFactory: SimulationFactory = (): SimulationEngi
           
           // Separate particles
           const overlap = 8 - distance;
-          const separationX = dx / distance * overlap * 0.5;
-          const separationY = dy / distance * overlap * 0.5;
+          const safeDist = Math.max(distance, 0.001);
+          const separationX = dx / safeDist * overlap * 0.5;
+          const separationY = dy / safeDist * overlap * 0.5;
           
           p.x += separationX;
           p.y += separationY;

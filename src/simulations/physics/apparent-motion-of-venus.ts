@@ -139,7 +139,7 @@ const ApparentMotionOfVenusFactory: SimulationFactory = (): SimulationEngine => 
 
   function drawSightLine(ex: number, ey: number, vx: number, vy: number): void {
     const dx = vx - ex, dy = vy - ey;
-    const mag = Math.sqrt(dx * dx + dy * dy);
+    const mag = Math.sqrt(dx * dx + dy * dy) || 1;
     const nx = dx / mag, ny = dy / mag;
     const ext = Math.max(W, H);
     // Extended dashed line

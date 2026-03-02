@@ -157,7 +157,7 @@ const AbsorptionEmissionLightFactory: SimulationFactory = (): SimulationEngine =
 
     const dx = targetX - startX;
     const dy = targetY - startY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
     const vx = (dx / dist) * PHOTON_SPEED;
     const vy = (dy / dist) * PHOTON_SPEED;
 
@@ -509,7 +509,7 @@ const AbsorptionEmissionLightFactory: SimulationFactory = (): SimulationEngine =
     const b = parseInt(p.color.slice(5, 7), 16);
 
     // Direction of travel
-    const speed2 = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    const speed2 = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
     const dirX = p.vx / speed2;
     const dirY = p.vy / speed2;
     // Perpendicular direction for wave oscillation

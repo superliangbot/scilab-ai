@@ -246,7 +246,7 @@ const GraphOfCharlesLawFactory: SimulationFactory = (): SimulationEngine => {
 
     update(dt: number, params: Record<string, number>) {
       zoom = params.zoom ?? 1;
-      pressure = params.pressure ?? 1;
+      pressure = Math.max(params.pressure ?? 1, 0.1);
       showExtrapolation = params.showExtrapolation ?? 1;
       gasType = Math.round(params.gasType ?? 0);
       time += dt;

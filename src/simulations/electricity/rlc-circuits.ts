@@ -69,7 +69,7 @@ const RLCCircuits: SimulationFactory = (): SimulationEngine => {
     const X_net = X_L - X_C; // Net reactance
     
     // Calculate impedance and phase
-    impedance = Math.sqrt(resistance * resistance + X_net * X_net);
+    impedance = Math.sqrt(resistance * resistance + X_net * X_net) || 0.01;
     const phase = Math.atan2(X_net, resistance);
     
     // Supply voltage (RMS = 120V)

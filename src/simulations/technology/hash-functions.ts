@@ -416,7 +416,7 @@ const HashFunctions: SimulationFactory = () => {
         }
       }
 
-      const total = ones + zeros;
+      const total = Math.max(ones + zeros, 1);
       const barY = distY + 20;
       const barHeight = 20;
       const barWidth = vizW - 40;

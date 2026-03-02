@@ -51,7 +51,7 @@ const HookesLawFactory: SimulationFactory = (): SimulationEngine => {
 
   function update(dt: number, params: Record<string, number>): void {
     springConstant = params.springConstant ?? 50;
-    mass = params.mass ?? 1.0;
+    mass = Math.max(params.mass ?? 1.0, 0.01);
     damping = params.damping ?? 0.05;
     showVectors = params.showVectors ?? 1;
 

@@ -109,7 +109,7 @@ const NormalDistributionFactory: SimulationFactory = (): SimulationEngine => {
           const dy = ball.y - pegY;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < pegRadius + ballRadius) {
+          if (dist < pegRadius + ballRadius && dist > 0) {
             // Bounce off peg
             const nx = dx / dist;
             const ny = dy / dist;

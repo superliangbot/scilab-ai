@@ -275,7 +275,7 @@ const CircuitBuilder: SimulationFactory = () => {
   function drawResistorZigzag(x1: number, y1: number, x2: number, y2: number, label: string, value: string) {
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const len = Math.sqrt(dx * dx + dy * dy);
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
     const ux = dx / len;
     const uy = dy / len;
     // Perpendicular

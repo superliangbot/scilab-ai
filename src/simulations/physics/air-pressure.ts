@@ -788,7 +788,7 @@ const AirPressureFactory: SimulationFactory = (): SimulationEngine => {
 
     const dx = lowCenter.x - highCenter.x;
     const dy = lowCenter.y - highCenter.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
     const nx = dx / dist;
     const ny = dy / dist;
 

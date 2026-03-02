@@ -231,7 +231,7 @@ const HeartRateCounterFactory: SimulationFactory = (): SimulationEngine => {
     },
 
     update(dt: number, params: Record<string, number>) {
-      bpm = params.bpm ?? 72;
+      bpm = Math.max(params.bpm ?? 72, 1);
       amplitude = params.amplitude ?? 1.0;
       noiseLevel = params.noiseLevel ?? 0.1;
 

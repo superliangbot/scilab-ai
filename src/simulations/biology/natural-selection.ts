@@ -178,8 +178,8 @@ const NaturalSelectionFactory: SimulationFactory = () => {
         const dx = org.x - nearestPredator.x;
         const dy = org.y - nearestPredator.y;
         const fleeSpeed = org.traits.speed * 80;
-        org.vx = (dx / minPredDist) * fleeSpeed;
-        org.vy = (dy / minPredDist) * fleeSpeed;
+        org.vx = (dx / Math.max(minPredDist, 0.1)) * fleeSpeed;
+        org.vy = (dy / Math.max(minPredDist, 0.1)) * fleeSpeed;
         
         // Energy cost of fleeing
         org.energy -= org.traits.size * 5 * dt;
@@ -188,8 +188,8 @@ const NaturalSelectionFactory: SimulationFactory = () => {
         const dx = nearestFood.x - org.x;
         const dy = nearestFood.y - org.y;
         const seekSpeed = org.traits.speed * 40;
-        org.vx = (dx / minFoodDist) * seekSpeed;
-        org.vy = (dy / minFoodDist) * seekSpeed;
+        org.vx = (dx / Math.max(minFoodDist, 0.1)) * seekSpeed;
+        org.vy = (dy / Math.max(minFoodDist, 0.1)) * seekSpeed;
       } else {
         // Random movement
         org.vx += (Math.random() - 0.5) * 20 * dt;
@@ -258,8 +258,8 @@ const NaturalSelectionFactory: SimulationFactory = () => {
         const dx = nearest.x - predator.x;
         const dy = nearest.y - predator.y;
         const speed = 50;
-        predator.vx = (dx / minDist) * speed;
-        predator.vy = (dy / minDist) * speed;
+        predator.vx = (dx / Math.max(minDist, 0.1)) * speed;
+        predator.vy = (dy / Math.max(minDist, 0.1)) * speed;
       }
 
       predator.x += predator.vx * dt;

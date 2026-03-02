@@ -178,6 +178,7 @@ const EarthsGravityFactory: SimulationFactory = (): SimulationEngine => {
         const dx = earthCX - v.x;
         const dy = earthCY - v.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) continue;
         const nx = dx / dist;
         const ny = dy / dist;
 

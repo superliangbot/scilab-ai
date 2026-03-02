@@ -299,7 +299,7 @@ const MomentOfInertiaFactory: SimulationFactory = (): SimulationEngine => {
     // Apply rotational dynamics: τ = Iα
     if (currentObject && appliedTorque !== 0) {
       const I = calculateMomentOfInertia();
-      const alpha = appliedTorque / I; // angular acceleration
+      const alpha = I > 0 ? appliedTorque / I : 0; // angular acceleration
       
       currentObject.velocity.angular += alpha * dt;
       currentObject.position.angle += currentObject.velocity.angular * dt;
@@ -558,7 +558,7 @@ const MomentOfInertiaFactory: SimulationFactory = (): SimulationEngine => {
     ctx.fillText("Rotational Dynamics", dynX + width * 0.2, dynY + 20);
 
     const I = calculateMomentOfInertia();
-    const alpha = appliedTorque / I;
+    const alpha = I > 0 ? appliedTorque / I : 0;
     const omega = currentObject.velocity.angular;
     const kineticEnergy = 0.5 * I * omega * omega;
 
@@ -691,7 +691,7 @@ const MomentOfInertiaFactory: SimulationFactory = (): SimulationEngine => {
     
     const I = calculateMomentOfInertia();
     const omega = currentObject.velocity.angular;
-    const alpha = appliedTorque / I;
+    const alpha = I > 0 ? appliedTorque / I : 0;
     const KE = 0.5 * I * omega * omega;
 
     return (

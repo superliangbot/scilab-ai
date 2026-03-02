@@ -102,7 +102,7 @@ const PrismFactory: SimulationFactory = (): SimulationEngine => {
     const leftFace = { ax: verts[1].x, ay: verts[1].y, bx: verts[0].x, by: verts[0].y };
     const leftNx = -(leftFace.by - leftFace.ay);
     const leftNy = leftFace.bx - leftFace.ax;
-    const leftNLen = Math.sqrt(leftNx * leftNx + leftNy * leftNy);
+    const leftNLen = Math.sqrt(leftNx * leftNx + leftNy * leftNy) || 1;
     const lnx = leftNx / leftNLen, lny = leftNy / leftNLen;
 
     // Incident ray direction
@@ -163,7 +163,7 @@ const PrismFactory: SimulationFactory = (): SimulationEngine => {
     const rightFace = { ax: verts[0].x, ay: verts[0].y, bx: verts[2].x, by: verts[2].y };
     const rNx = -(rightFace.by - rightFace.ay);
     const rNy = rightFace.bx - rightFace.ax;
-    const rNLen = Math.sqrt(rNx * rNx + rNy * rNy);
+    const rNLen = Math.sqrt(rNx * rNx + rNy * rNy) || 1;
     const rnx = rNx / rNLen, rny = rNy / rNLen;
 
     // Refract through prism and disperse
@@ -184,7 +184,7 @@ const PrismFactory: SimulationFactory = (): SimulationEngine => {
       const sinRatio = Math.sin(theta1) > 0 ? Math.sin(theta2) / Math.sin(theta1) : 0;
       const refDx = rayDx * sinRatio + lnx * sign * (cosT2 - dotIn * sinRatio);
       const refDy = rayDy * sinRatio + lny * sign * (cosT2 - dotIn * sinRatio);
-      const refLen = Math.sqrt(refDx * refDx + refDy * refDy);
+      const refLen = Math.sqrt(refDx * refDx + refDy * refDy) || 1;
       const nRefDx = refDx / refLen, nRefDy = refDy / refLen;
 
       // Find intersection with right face

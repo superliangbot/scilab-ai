@@ -248,7 +248,7 @@ const ElectricPotential2Factory: SimulationFactory = (): SimulationEngine => {
 
   function update(dt: number, params: Record<string, number>): void {
     voltage = params.voltage ?? 50;
-    plateSep = params.plateSeparation ?? 5;
+    plateSep = Math.max(params.plateSeparation ?? 5, 0.1);
     showField = Math.round(params.showFieldLines ?? 1);
     chargePos = params.testChargePos ?? 50;
     time += dt; layout(); physics();

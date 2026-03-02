@@ -282,7 +282,7 @@ const EsterFactory: SimulationFactory = (): SimulationEngine => {
       if (bond.order === 2) {
         const dx = pb.sx - pa.sx;
         const dy = pb.sy - pa.sy;
-        const len = Math.sqrt(dx * dx + dy * dy);
+        const len = Math.max(Math.sqrt(dx * dx + dy * dy), 0.001);
         const nx = (-dy / len) * 3;
         const ny = (dx / len) * 3;
 

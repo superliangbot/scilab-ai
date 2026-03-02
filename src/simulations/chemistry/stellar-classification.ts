@@ -322,7 +322,7 @@ const StellarClassificationFactory: SimulationFactory = (): SimulationEngine => 
     // Compute peak intensity for normalization
     // Wien's law: lambda_max = 2898000 / T (in nm)
     const wienPeak = 2898000 / temp;
-    const peakIntensity = planck(Math.max(lamMin, Math.min(lamMax, wienPeak)), temp);
+    const peakIntensity = planck(Math.max(lamMin, Math.min(lamMax, wienPeak)), temp) || 1;
 
     // Draw visible light band
     const visMin = 380;

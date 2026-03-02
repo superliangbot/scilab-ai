@@ -259,7 +259,7 @@ const MoleculeFactory: SimulationFactory = (): SimulationEngine => {
         } else if (bond.order === 2) {
           const dx = a2.px - a1.px;
           const dy = a2.py - a1.py;
-          const len = Math.sqrt(dx * dx + dy * dy);
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
           const nx = (-dy / len) * 3;
           const ny = (dx / len) * 3;
 
@@ -277,7 +277,7 @@ const MoleculeFactory: SimulationFactory = (): SimulationEngine => {
         } else if (bond.order === 3) {
           const dx = a2.px - a1.px;
           const dy = a2.py - a1.py;
-          const len = Math.sqrt(dx * dx + dy * dy);
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
           const nx = (-dy / len) * 4;
           const ny = (dx / len) * 4;
 

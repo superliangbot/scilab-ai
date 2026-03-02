@@ -73,7 +73,7 @@ const ThermometerFactory: SimulationFactory = (): SimulationEngine => {
 
     if (showMolecules) {
       for (const mol of molecules) {
-        const dist = Math.sqrt(mol.x * mol.x + mol.y * mol.y);
+        const dist = Math.sqrt(mol.x * mol.x + mol.y * mol.y) || 1;
         if (dist > bulbR - 8) { mol.x *= 0.9 * (bulbR - 8) / dist; mol.y *= 0.9 * (bulbR - 8) / dist; mol.vx *= -0.8; mol.vy *= -0.8; }
         const speed = Math.sqrt(mol.vx * mol.vx + mol.vy * mol.vy);
         ctx.beginPath(); ctx.arc(tx + mol.x, bulbCY + mol.y, mol.radius, 0, Math.PI * 2);

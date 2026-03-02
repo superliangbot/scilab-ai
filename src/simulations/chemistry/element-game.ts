@@ -367,7 +367,7 @@ const ElementGameFactory: SimulationFactory = () => {
     update(dt: number, params: Record<string, number>) {
       difficulty = Math.round(params.difficulty ?? 1);
       elementRange = Math.round(params.elementRange ?? 1);
-      speed = params.speed ?? 1;
+      speed = Math.max(params.speed ?? 1, 0.1);
       showNames = Math.round(params.showNames ?? 1);
 
       const dtClamped = Math.min(dt, 0.05);

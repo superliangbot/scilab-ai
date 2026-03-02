@@ -390,7 +390,7 @@ const ApparentMotionMarsFactory: SimulationFactory = (): SimulationEngine => {
     // Draw current sight line from Earth through Mars, extended to the "star field arc"
     const dx = marsPos.x - earthPos.x;
     const dy = marsPos.y - earthPos.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
     const nx = dx / dist;
     const ny = dy / dist;
     const extensionLength = orbitScale * 2.5;

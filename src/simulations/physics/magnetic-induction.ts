@@ -57,7 +57,7 @@ const MagneticInductionFactory: SimulationFactory = (): SimulationEngine => {
     coilTurns = Math.round(params.coilTurns ?? 5);
     coilArea = params.coilArea ?? 0.01;
 
-    const dtClamped = Math.min(dt, 0.05);
+    const dtClamped = Math.max(Math.min(dt, 0.05), 1e-6);
     time += dtClamped;
 
     // Magnet oscillates sinusoidally

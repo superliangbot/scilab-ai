@@ -131,9 +131,10 @@ const PopulationDynamicsFactory: SimulationFactory = () => {
         // Flee from predator
         const dx = prey.x - nearestPredator.x;
         const dy = prey.y - nearestPredator.y;
+        const safeDist = Math.max(minPredDist, 1);
         const fleeForce = 100 / Math.max(minPredDist, 10);
-        prey.vx += (dx / minPredDist) * fleeForce * dt;
-        prey.vy += (dy / minPredDist) * fleeForce * dt;
+        prey.vx += (dx / safeDist) * fleeForce * dt;
+        prey.vy += (dy / safeDist) * fleeForce * dt;
       } else {
         // Random browsing behavior
         prey.vx += (Math.random() - 0.5) * 20 * dt;
