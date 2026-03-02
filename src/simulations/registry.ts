@@ -6475,6 +6475,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "rainbow-colors": () => import("./physics/rainbow-colors").then((m) => m.default),
   "rainbow-formation": () => import("./physics/rainbow-formation").then((m) => m.default),
   // Batch 25
+  "rgb": () => import("./physics/rgb").then((m) => m.default),
   "rgb-decomposer": () => import("./physics/rgb-decomposer").then((m) => m.default),
   "rgb-filter": () => import("./physics/rgb-filter").then((m) => m.default),
   // Batch 25
@@ -6498,6 +6499,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "scale-of-solar-system": () => import("./astronomy/scale-of-solar-system").then((m) => m.default),
   "sea-breeze": () => import("./physics/sea-breeze").then((m) => m.default),
   "seeing-the-light": () => import("./physics/seeing-the-light").then((m) => m.default),
+  "seismic-wave": () => import("./physics/seismic-wave").then((m) => m.default),
   "seismometer-and-inertia": () => import("./physics/seismometer-and-inertia").then((m) => m.default),
   "separation-of-iron-and-aluminum": () => import("./chemistry/separation-of-iron-and-aluminum").then((m) => m.default),
   "serial-parallel-circuit": () => import("./electricity/serial-parallel-circuit").then((m) => m.default),
@@ -6510,6 +6512,7 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "solar-wind": () => import("./astronomy/solar-wind").then((m) => m.default),
   "sound-analyzing": () => import("./physics/sound-analyzing").then((m) => m.default),
   "sound-fft": () => import("./physics/sound-fft").then((m) => m.default),
+  "sound-wave": () => import("./physics/sound-wave").then((m) => m.default),
   // Batch 27
   "speaker": () => import("./physics/speaker").then((m) => m.default),
   "specific-heat": () => import("./physics/specific-heat").then((m) => m.default),
