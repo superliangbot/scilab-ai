@@ -4278,7 +4278,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "reproduction",
     title: "Cell Reproduction (Mitosis)",
-    category: "chemistry",
+    category: "biology",
     description: "Simulates the phases of mitosis: interphase, prophase, metaphase, anaphase, and telophase.",
     longDescription: "Watch a cell go through mitotic division stages. DNA replicates in interphase, chromosomes condense in prophase, align in metaphase, separate in anaphase, and the cell divides in telophase forming two identical daughter cells.",
     parameters: [
@@ -4292,7 +4292,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "resistance-connection",
     title: "Resistance Connection",
-    category: "chemistry",
+    category: "electricity",
     description: "Simulates series and parallel resistance connections with Ohm's law (V = IR).",
     longDescription: "Explore how resistors behave in series (R_total = R1 + R2, same current) and parallel (1/R_total = 1/R1 + 1/R2, same voltage) configurations. Animated current dots flow through the circuit with voltage drops calculated using Ohm's Law.",
     parameters: [
@@ -4581,7 +4581,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "room-convection",
     title: "Room Convection",
-    category: "chemistry",
+    category: "physics",
     description: "Simulates thermal convection currents in a room with a heat source.",
     longDescription: "A heater warms air near the floor; hot air rises by buoyancy, spreads across the ceiling, cools, and sinks on the opposite side forming a convection cell. Color-coded particles (blue=cold, red=hot) and flow arrows reveal the circular convection pattern. Same mechanism drives weather and ocean circulation.",
     parameters: [
@@ -4721,7 +4721,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "sierpinski-curve",
     title: "Sierpinski Curve",
-    category: "physics",
+    category: "math",
     description: "The Sierpinski arrowhead curve — a fractal space-filling curve.",
     longDescription: "The Sierpinski arrowhead curve is a fractal that converges to the Sierpinski triangle as recursion depth increases. Unlike the triangle constructed by removing middle sections, this is a single continuous path that fills the triangular shape. It is generated using an L-system with two production rules, creating a curve of length 3ⁿ segments at depth n.",
     parameters: [
@@ -5175,7 +5175,7 @@ export const simulationConfigs: SimulationConfig[] = [
   {
     slug: "stellar-classification",
     title: "Stellar Classification",
-    category: "chemistry",
+    category: "astronomy",
     description: "Hertzsprung-Russell diagram and stellar spectral classification (O, B, A, F, G, K, M types).",
     longDescription: "Stars are classified by their surface temperature into spectral types O, B, A, F, G, K, M (from hottest to coolest). The Hertzsprung-Russell (H-R) diagram plots luminosity vs temperature, revealing distinct populations: the main sequence (where most stars reside), red giants, white dwarfs, and supergiants. Our Sun is a G-type main sequence star. Each spectral class has characteristic absorption lines in its spectrum, used to determine composition and temperature.",
     parameters: [
@@ -6600,6 +6600,20 @@ const simulationFactories: Record<string, () => Promise<SimulationFactory>> = {
   "coupled-oscillators": () => import("./physics/coupled-oscillators").then((m) => m.default),
   "memory-hierarchy": () => import("./technology/memory-hierarchy").then((m) => m.default),
   "neural-network-perceptron": () => import("./technology/neural-network-perceptron").then((m) => m.default),
+  "eddy-currents": () => import("./electricity/eddy-currents").then((m) => m.default),
+  "electromagnetic-induction": () => import("./electricity/electromagnetic-induction").then((m) => m.default),
+  "equipotential-surfaces": () => import("./electricity/equipotential-surfaces").then((m) => m.default),
+  "euler-formula": () => import("./math/euler-formula").then((m) => m.default),
+  "golden-ratio-spiral": () => import("./math/golden-ratio-spiral").then((m) => m.default),
+  "half-wave-rectifier": () => import("./electricity/half-wave-rectifier").then((m) => m.default),
+  "lenz-law": () => import("./electricity/lenz-law").then((m) => m.default),
+  "lissajous-curves": () => import("./math/lissajous-curves").then((m) => m.default),
+  "pi-monte-carlo": () => import("./math/pi-monte-carlo").then((m) => m.default),
+  "prime-sieve": () => import("./math/prime-sieve").then((m) => m.default),
+  "rlc-circuits": () => import("./electricity/rlc-circuits").then((m) => m.default),
+  "solenoid-magnetic-field": () => import("./electricity/solenoid-magnetic-field").then((m) => m.default),
+  "taylor-series": () => import("./math/taylor-series").then((m) => m.default),
+  "transistor-switch": () => import("./electricity/transistor-switch").then((m) => m.default),
 };
 
 export function getSimConfig(slug: string): SimulationConfig | undefined {
